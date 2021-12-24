@@ -16,6 +16,8 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 ## Usage
 Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode.
 
+![Settings](screenshot.png?raw=true)  
+
 * **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
 * **Save**: Saves the *currently loaded* layout to file. You start with a blank layout each time you enter the house, and will need to either import a layout or load the current house layout. 
 * **Load**: Loads the layout from the specified file. The plugin will attempt to match the layout furniture to the current furniture in the house. It tries to match dye colors too, if possible. All layout furniture with no match will be grayed out.
@@ -25,15 +27,25 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 ###
 
 ## FAQ
-### How do I update the plugin?
-When an update is available, simply return to the plugins window and click on the "Update Plugins" button.
+### Help! I can't get the plugin to work.
+Create a github issue or post on the [discord channel](https://discord.gg/YuvcPzCuhq) for help with troubleshooting.
 
 ### Can I use this to copy layouts from other houses?
 No. You can only load layouts when in furniture layout mode, in your own house.
 
+### Is it safe to use the plugin?
+Since all third-party plugins are not in line with the game's terms of service, there is always an inherent risk. The plugin's automated furniture placement may also be detectable by the server since there is a very short interval between placing each furniture. (If there is enough demand, I can include an option to customize the time interval between each furniture placement.)
+
+That said, I believe that the risks are low since SE focuses more on ToS violations that upset the game-balance (e.g. RMT). You can also reduce your risk by keeping a low profile and not mentioning the use of the plugin within the game. 
+
+### How do I update the plugin?
+When an update is available, simply return to the plugins window and click on the "Update Plugins" button.
+
+### Why does the plugin look similar to HousingPos?
+This plugin builds upon the foundation laid by 3 other great plugins: [HousingPos](https://github.com/Bluefissure/HousingPos), [BDTH](https://github.com/LeonBlade/BDTHPlugin) and [HouseMate](https://github.com/lmcintyre/Housemate). I did additional reverse-engineering work to figure out how to automate the saving of furniture positions.
 
 ## Donate
-If you enjoy my work and wish to support me, you can use the below links. Every bit helps!
+Thank you for using the plugin. If you enjoy my work and wish to support me, you can use the below links:
 
 Ko-fi: [https://ko-fi.com/jawslouis](https://ko-fi.com/jawslouis)
 
