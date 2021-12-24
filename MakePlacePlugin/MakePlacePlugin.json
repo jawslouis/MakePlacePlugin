@@ -15,8 +15,8 @@
   "DalamudApiLevel": 5,
   "LoadPriority": 0,
   "IconUrl": "https://raw.githubusercontent.com/jawslouis/MakePlacePlugin/master/icon.png",
-  "DownloadLinkInstall": "https://github.com/jawslouis/MakePlacePlugin/releases/download/1.0/MakePlacePlugin.zip",
-  "DownloadLinkTesting": "https://github.com/jawslouis/MakePlacePlugin/releases/download/1.0/MakePlacePlugin.zip",
-  "DownloadLinkUpdate": "https://github.com/jawslouis/MakePlacePlugin/releases/download/1.0/MakePlacePlugin.zip"
+  "DownloadLinkInstall": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v1.0/MakePlacePlugin.zip",
+  "DownloadLinkTesting": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v1.0/MakePlacePlugin.zip",
+  "DownloadLinkUpdate": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v1.0/MakePlacePlugin.zip"
 
 }
