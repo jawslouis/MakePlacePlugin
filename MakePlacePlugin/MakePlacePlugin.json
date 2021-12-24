@@ -1,4 +1,4 @@
-{
+[{
   "Author": "Jawslouis",
   "Name": "MakePlace Plugin",
   "InternalName": "MakePlacePlugin",
@@ -18,5 +18,4 @@
   "DownloadLinkInstall": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v1.0/MakePlacePlugin.zip",
   "DownloadLinkTesting": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v1.0/MakePlacePlugin.zip",
   "DownloadLinkUpdate": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v1.0/MakePlacePlugin.zip"
-
-}
+}]
