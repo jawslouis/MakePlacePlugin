@@ -34,9 +34,9 @@ Create a github issue or post on the [discord channel](https://discord.gg/YuvcPz
 No. You can only load layouts when in furniture layout mode, in your own house.
 
 ### Is it safe to use the plugin?
-Since all third-party plugins are not in line with the game's terms of service, there is always an inherent risk. The plugin's automated furniture placement may also be detectable by the server since there is a very short interval between placing each furniture. (If there is enough demand, I can include an option to customize the time interval between each furniture placement.)
+Since all third-party plugins are not in line with the game's terms of service, there is always an inherent risk. The plugin's automated furniture placement may also be detectable by the server as there is a very short interval between placing each furniture. You can increase the time interval between each furniture placement to reduce this risk.
 
-That said, I believe that the risks are low since SE focuses more on ToS violations that upset the game-balance (e.g. RMT). You can also reduce your risk by keeping a low profile and not mentioning the use of the plugin within the game. 
+Overall, I believe that the danger is low since SE focuses more on ToS violations that upset the game-balance (e.g. RMT). You can also reduce your risk by keeping a low profile and not mentioning the use of the plugin within the game. 
 
 ### How do I update the plugin?
 When an update is available, simply return to the plugins window and click on the "Update Plugins" button.

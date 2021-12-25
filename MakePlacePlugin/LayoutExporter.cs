@@ -41,19 +41,19 @@ namespace MakePlacePlugin
 
     class Furniture
     {
-        public string name { get; set; }        
+        public string name { get; set; }
 
         public Transform transform { get; set; } = new Transform();
 
         public List<SaveProperty> properties { get; set; } = new List<SaveProperty>();
 
         public Color GetColor()
-        {            
+        {
             foreach (var prop in properties)
             {
                 if (prop.key.Equals("Color"))
                 {
-                    return System.Drawing.ColorTranslator.FromHtml("#" + prop.value.Substring(0,6));                    
+                    return System.Drawing.ColorTranslator.FromHtml("#" + prop.value.Substring(0, 6));
                 }
             }
 
@@ -111,7 +111,7 @@ namespace MakePlacePlugin
 
         private float scale(float i)
         {
-            
+
             return checkZero(i);
         }
 
@@ -135,14 +135,14 @@ namespace MakePlacePlugin
 
         public static List<HousingItem> ImportLayout(string path)
         {
-            
+
             string jsonString = File.ReadAllText(path);
 
             Layout layout = JsonSerializer.Deserialize<Layout>(jsonString);
 
             List<HousingItem> houseItems = new List<HousingItem>();
 
-            
+
             var ItemList = Data.GetExcelSheet<Item>();
             var StainList = Data.GetExcelSheet<Stain>();
 
@@ -151,7 +151,7 @@ namespace MakePlacePlugin
             foreach (var stain in StainList)
             {
                 var color = Utils.StainToVector4(stain.Color);
-                colorList.Add((Color.FromArgb((int)stain.Color) , stain.RowId));
+                colorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
             }
 
             layoutScale = 1;
@@ -166,7 +166,7 @@ namespace MakePlacePlugin
 
 
             foreach (Furniture furniture in layout.furniture)
-            {                
+            {
                 var itemRow = ItemList.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
 
                 if (itemRow == null) continue;
@@ -179,7 +179,7 @@ namespace MakePlacePlugin
                     (byte)furniture.GetClosestStain(colorList),
                     descale(furniture.transform.location[0]),
                     descale(furniture.transform.location[2]), // switch Y & Z axis
-                    descale(furniture.transform.location[1]),                    
+                    descale(furniture.transform.location[1]),
                     -QuaternionExtensions.ComputeZAngle(quat),
                     furniture.name);
 
@@ -226,7 +226,7 @@ namespace MakePlacePlugin
                 }
             }
 
-            var territoryId = Memory.Instance.GetTerritoryTypeId();            
+            var territoryId = Memory.Instance.GetTerritoryTypeId();
             var row = MakePlacePlugin.Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
             if (row != null)
@@ -249,14 +249,14 @@ namespace MakePlacePlugin
                     default:
                         break;
                 }
-                
+
                 save.houseSize = sizeString;
 
-                save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));                
+                save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
             }
 
 
-            save.fixture.Add(new SaveProperty("Scale","1"));
+            save.fixture.Add(new SaveProperty("Scale", "1"));
 
 
             foreach (HousingItem gameObject in HousingItemList)

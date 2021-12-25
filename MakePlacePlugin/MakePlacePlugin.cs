@@ -67,8 +67,8 @@ namespace MakePlacePlugin
 
 
         // Function for selecting an item, usually used when clicking on one in game.        
-        public delegate void SelectItemDelegate(IntPtr housingStruct, IntPtr item);        
-        private static  HookWrapper<SelectItemDelegate> SelectItemHook;
+        public delegate void SelectItemDelegate(IntPtr housingStruct, IntPtr item);
+        private static HookWrapper<SelectItemDelegate> SelectItemHook;
 
 
 
@@ -92,7 +92,7 @@ namespace MakePlacePlugin
             Gui?.Dispose();
             Interface?.Dispose();
 
-            
+
 
         }
 
@@ -115,7 +115,7 @@ namespace MakePlacePlugin
             });
             Gui = new PluginUi(this);
             ClientState.TerritoryChanged += TerritoryChanged;
-            
+
 
             HousingData.Init(Data, this);
             Memory.Init(Scanner);
@@ -131,7 +131,7 @@ namespace MakePlacePlugin
             LoadHousingFuncHook = HookManager.Hook<LoadHousingFuncDelegate>("48 8B 41 08 48 85 C0 74 09 48 8D 48 10", LoadHousingFuncDetour);
 
             IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d d8 a4 8c 01 e8 bb 3c b0 ff 33 d2 48 8b c8 e8 41 d6 f2 ff", IsSaveLayoutDetour);
-            
+
             SelectItemHook = HookManager.Hook<SelectItemDelegate>("E8 ?? ?? ?? ?? 48 8B CE E8 ?? ?? ?? ?? 48 8B 6C 24 40 48 8B CE", SelectItemDetour);
 
         }
@@ -178,7 +178,11 @@ namespace MakePlacePlugin
 
                 SetItemPosition(item);
 
-                Thread.Sleep(400);
+                if (Config.LoadInterval > 0)
+                {
+                    Thread.Sleep(Config.LoadInterval);
+                }
+                
             }
 
             if (ItemsToPlace.Count == 0)
@@ -332,7 +336,7 @@ namespace MakePlacePlugin
 
             if (ApplyChange)
             {
-                ApplyChange = false;               
+                ApplyChange = false;
                 return true;
             }
 

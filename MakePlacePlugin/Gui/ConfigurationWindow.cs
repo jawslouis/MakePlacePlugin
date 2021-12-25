@@ -193,7 +193,7 @@ namespace MakePlacePlugin.Gui
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Apply"))
+            if (ImGui.Button("Apply Layout"))
             {
                 if (IsDecorMode() && MakePlacePlugin.IsRotateMode())
                 {
@@ -206,47 +206,18 @@ namespace MakePlacePlugin.Gui
                 }
             }
 
-            if (ImGui.Button("Test"))
+            ImGui.SameLine();
+
+            ImGui.PushItemWidth(100);
+            if (ImGui.InputInt("Placement Interval (ms)", ref Config.LoadInterval))
             {
-                var territoryId = Memory.Instance.GetTerritoryTypeId();
-                Log("Territory id:" + Memory.Instance.GetTerritoryTypeId());
-
-                var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
-
-                if (row != null)
-                {
-                    Log("PlaceName: " + row.PlaceName.Value.Name);
-
-                    var names = row.PlaceName.Value.Name.ToString().Split('-');
-
-                    string sizeString = "Apartment";
-
-                    switch (names[0].Trim())
-                    {
-                        case "Private Cottage":
-                            sizeString = "Small";
-                            break;
-                        case "Private House":
-                            sizeString = "Medium";
-                            break;
-                        case "Private Mansion":
-                            sizeString = "Large";
-                            break;
-                        default:
-                            break;
-                    }
-
-                    Log("Size: " + sizeString);
-                    Log("District: " + names[1].Replace("The", "").Trim());
-                }
-
+                Config.Save();
             }
+            ImGui.PopItemWidth();
+            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Time interval between furniture placements when applying a layout. If this is too low (e.g. 200 ms), some placements may be skipped over.");
 
-            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Use the current layout. Only works while in rotate mode.");
 
-            ImGui.SameLine();
-            ImGui.Dummy(new Vector2(10, 0));
-            ImGui.SameLine();
+
             ImGui.Text("Note: Missing items and incorrect dyes are grayed out");
 
             Config.Save();
