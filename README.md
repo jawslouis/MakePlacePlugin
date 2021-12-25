@@ -41,8 +41,8 @@ Overall, I believe that the danger is low since SE focuses more on ToS violation
 ### How do I update the plugin?
 When an update is available, simply return to the plugins window and click on the "Update Plugins" button.
 
-### Why does the plugin look similar to HousingPos?
-This plugin builds upon the foundation laid by 3 other great plugins: [HousingPos](https://github.com/Bluefissure/HousingPos), [BDTH](https://github.com/LeonBlade/BDTHPlugin) and [HouseMate](https://github.com/lmcintyre/Housemate). I did additional reverse-engineering work to figure out how to automate the saving of furniture positions.
+### Why does this plugin look familiar?
+This plugin builds upon the foundation laid by 3 other great plugins: [HousingPos](https://github.com/Bluefissure/HousingPos), [BDTH](https://github.com/LeonBlade/BDTHPlugin) and [HouseMate](https://github.com/lmcintyre/Housemate). The UI in particular borrows heavily from HousingPos.
 
 ## Donate
 Thank you for using the plugin. If you enjoy my work and wish to support me, you can use the below links:
