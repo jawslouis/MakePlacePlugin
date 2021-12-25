@@ -149,7 +149,6 @@ namespace MakePlacePlugin
         }
 
 
-
         public static bool IsDecorMode()
         {
             var addon = GameGui.GetAddonByName("HousingGoods", 1);
@@ -179,7 +178,7 @@ namespace MakePlacePlugin
 
                 SetItemPosition(item);
 
-                Thread.Sleep(300);
+                Thread.Sleep(400);
             }
 
             if (ItemsToPlace.Count == 0)

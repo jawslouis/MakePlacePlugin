@@ -72,10 +72,10 @@ namespace MakePlacePlugin
         {
             return Size switch
             {
-                0 => "small",
-                1 => "medium",
-                2 => "large",
-                _ => "unknown"
+                0 => "Small",
+                1 => "Medium",
+                2 => "Large",
+                _ => "Apartment"
             };
         }
     }

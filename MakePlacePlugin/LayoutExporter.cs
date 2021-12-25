@@ -89,6 +89,9 @@ namespace MakePlacePlugin
     class Layout
     {
         public Transform playerTransform { get; set; } = new Transform();
+
+        public string houseSize { get; set; }
+
         public List<SaveProperty> fixture { get; set; } = new List<SaveProperty>();
         public List<Furniture> furniture { get; set; } = new List<Furniture>();
     }
@@ -103,17 +106,18 @@ namespace MakePlacePlugin
             chat = chatGui;
         }
 
+        public static float layoutScale = 1;
+
 
         private float scale(float i)
         {
-            var result = i * 64;
-
-            return checkZero(i * 64f);
+            
+            return checkZero(i);
         }
 
         private static float descale(float i)
         {
-            return i / 64;
+            return i / layoutScale;
         }
 
         private float checkZero(float i)
@@ -150,6 +154,15 @@ namespace MakePlacePlugin
                 colorList.Add((Color.FromArgb((int)stain.Color) , stain.RowId));
             }
 
+            layoutScale = 1;
+            foreach (var prop in layout.fixture)
+            {
+                if (prop.key.Equals("Scale"))
+                {
+                    layoutScale = float.Parse(prop.value);
+
+                }
+            }
 
 
             foreach (Furniture furniture in layout.furniture)
@@ -187,6 +200,11 @@ namespace MakePlacePlugin
             save.playerTransform.location = new List<float> { 0, 0, 0 };
             save.playerTransform.rotation = RotationToQuat(0);
 
+            if (Data.TryGetLandSetDict(Mem.GetTerritoryTypeId(), out var landSets))
+            {
+
+            }
+
 
             for (var i = 0; i < IndoorAreaData.FloorMax; i++)
             {
@@ -207,6 +225,39 @@ namespace MakePlacePlugin
                     save.fixture.Add(prop);
                 }
             }
+
+            var territoryId = Memory.Instance.GetTerritoryTypeId();            
+            var row = MakePlacePlugin.Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+
+            if (row != null)
+            {
+                var names = row.PlaceName.Value.Name.ToString().Split('-');
+
+                string sizeString = "Apartment";
+
+                switch (names[0].Trim())
+                {
+                    case "Private Cottage":
+                        sizeString = "Small";
+                        break;
+                    case "Private House":
+                        sizeString = "Medium";
+                        break;
+                    case "Private Mansion":
+                        sizeString = "Large";
+                        break;
+                    default:
+                        break;
+                }
+                
+                save.houseSize = sizeString;
+
+                save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));                
+            }
+
+
+            save.fixture.Add(new SaveProperty("Scale","1"));
+
 
             foreach (HousingItem gameObject in HousingItemList)
             {

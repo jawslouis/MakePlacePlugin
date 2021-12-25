@@ -205,6 +205,43 @@ namespace MakePlacePlugin.Gui
                     LogError("Unable to apply layouts outside of Rotate Layout mode");
                 }
             }
+
+            if (ImGui.Button("Test"))
+            {
+                var territoryId = Memory.Instance.GetTerritoryTypeId();
+                Log("Territory id:" + Memory.Instance.GetTerritoryTypeId());
+
+                var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+
+                if (row != null)
+                {
+                    Log("PlaceName: " + row.PlaceName.Value.Name);
+
+                    var names = row.PlaceName.Value.Name.ToString().Split('-');
+
+                    string sizeString = "Apartment";
+
+                    switch (names[0].Trim())
+                    {
+                        case "Private Cottage":
+                            sizeString = "Small";
+                            break;
+                        case "Private House":
+                            sizeString = "Medium";
+                            break;
+                        case "Private Mansion":
+                            sizeString = "Large";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    Log("Size: " + sizeString);
+                    Log("District: " + names[1].Replace("The", "").Trim());
+                }
+
+            }
+
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Use the current layout. Only works while in rotate mode.");
 
             ImGui.SameLine();
@@ -331,7 +368,7 @@ namespace MakePlacePlugin.Gui
 
                 if (housingItem.ItemStruct == IntPtr.Zero) continue;
 
-                var itemStruct = (HousingItemStruct*) housingItem.ItemStruct;
+                var itemStruct = (HousingItemStruct*)housingItem.ItemStruct;
 
                 var itemPos = new Vector3(itemStruct->Position.X, itemStruct->Position.Y, itemStruct->Position.Z);
                 if (Config.HiddenScreenItemHistory.IndexOf(i) >= 0) continue;
