@@ -20,9 +20,10 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 
 * **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
 * **Save**: Saves the *currently loaded* layout to file. You start with a blank layout each time you enter the house, and will need to either import a layout or load the current house layout. 
-* **Load**: Loads the layout from the specified file. The plugin will attempt to match the layout furniture to the current furniture in the house. It tries to match dye colors too, if possible. All layout furniture with no match will be grayed out.
+* **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
 * **House Layout**: Loads the current furniture layout in the house
-* **Apply**: Applies the layout position to all applicable items (those that are not grayed out). 
+* **Apply**: Applies the layout position to all applicable furniture (those that are not grayed out). 
+* **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
 
 ###
 
