@@ -16,7 +16,6 @@ namespace MakePlacePlugin.Gui
     {
 
         public Configuration Config => Plugin.Config;
-        private readonly string[] _languageList;
 
         private string CustomTag = string.Empty;
         private readonly Dictionary<uint, uint> iconToFurniture = new() { };
@@ -140,7 +139,7 @@ namespace MakePlacePlugin.Gui
                 }
                 catch (Exception e)
                 {
-                    LogError($"Import Error: {e.Message}", e.StackTrace);
+                    LogError($"Load Error: {e.Message}", e.StackTrace);
                 }
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from file");
@@ -182,7 +181,13 @@ namespace MakePlacePlugin.Gui
             {
                 if (IsDecorMode())
                 {
-                    Plugin.LoadLayout();
+                    try
+                    {
+                        Plugin.LoadLayout();
+                    } catch (Exception e)
+                    {
+                        LogError($"Error: {e.Message}", e.StackTrace);
+                    }
                 }
                 else
                 {

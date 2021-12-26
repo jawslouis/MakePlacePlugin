@@ -200,12 +200,6 @@ namespace MakePlacePlugin
             save.playerTransform.location = new List<float> { 0, 0, 0 };
             save.playerTransform.rotation = RotationToQuat(0);
 
-            if (Data.TryGetLandSetDict(Mem.GetTerritoryTypeId(), out var landSets))
-            {
-
-            }
-
-
             for (var i = 0; i < IndoorAreaData.FloorMax; i++)
             {
                 var fixtures = Mem.GetInteriorCommonFixtures(i);
@@ -216,7 +210,6 @@ namespace MakePlacePlugin
                 {
                     if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
                     var fixtureName = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
-
 
                     var prop = new SaveProperty();
 
@@ -231,28 +224,64 @@ namespace MakePlacePlugin
 
             if (row != null)
             {
-                var names = row.PlaceName.Value.Name.ToString().Split('-');
+                Log("Name: " + row.PlaceName.Value.Name.ToString());
 
-                string sizeString = "Apartment";
 
-                switch (names[0].Trim())
+                var placeName = row.PlaceName.Value.Name.ToString();
+
+
+                if (placeName.Contains("Apartment"))
                 {
-                    case "Private Cottage":
-                        sizeString = "Small";
-                        break;
-                    case "Private House":
-                        sizeString = "Medium";
-                        break;
-                    case "Private Mansion":
-                        sizeString = "Large";
-                        break;
-                    default:
-                        break;
+                    save.houseSize = "Apartment";
+
+                    var area = placeName.Replace("Apartment", "");
+
+                    switch (area.Trim())
+                    {
+                        case "Sultana's Breath":
+                            area = "Goblet";
+                            break;
+                        case "Topmast":
+                            area = "Mist";
+                            break;
+                        case "Lily Hills":
+                            area = "Lavender Beds";
+                            break;
+                        case "Kobai Goten":
+                            area = "Shirogane";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    save.fixture.Add(new SaveProperty("District", area));
+
                 }
+                else
+                {
+                    var names = placeName.Split('-');
 
-                save.houseSize = sizeString;
+                    string sizeString = "";
 
-                save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
+                    switch (names[0].Trim())
+                    {
+                        case "Private Cottage":
+                            sizeString = "Small";
+                            break;
+                        case "Private House":
+                            sizeString = "Medium";
+                            break;
+                        case "Private Mansion":
+                            sizeString = "Large";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    save.houseSize = sizeString;
+
+                    save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
+                }
             }
 
 

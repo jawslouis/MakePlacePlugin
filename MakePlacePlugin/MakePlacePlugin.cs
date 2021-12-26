@@ -169,25 +169,36 @@ namespace MakePlacePlugin
                 return;
             }
 
-            while (ItemsToPlace.Count > 0)
+            try
             {
-                var item = ItemsToPlace.First();
-                ItemsToPlace.RemoveAt(0);
 
-                if (item.ItemStruct == IntPtr.Zero) continue;
-
-                SetItemPosition(item);
-
-                if (Config.LoadInterval > 0)
+                while (ItemsToPlace.Count > 0)
                 {
-                    Thread.Sleep(Config.LoadInterval);
-                }
-                
-            }
+                    var item = ItemsToPlace.First();
+                    ItemsToPlace.RemoveAt(0);
 
-            if (ItemsToPlace.Count == 0)
+                    if (item.ItemStruct == IntPtr.Zero) continue;
+
+                    SetItemPosition(item);
+
+                    if (Config.LoadInterval > 0)
+                    {
+                        Thread.Sleep(Config.LoadInterval);
+                    }
+
+                }
+
+
+
+                if (ItemsToPlace.Count == 0)
+                {
+                    Log("Finished applying layout");
+                }
+
+            }
+            catch (Exception e)
             {
-                Log("Finished applying layout");
+                LogError($"Error: {e.Message}", e.StackTrace);
             }
         }
 
