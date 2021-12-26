@@ -13,6 +13,7 @@ using System.Text.Unicode;
 using System.Linq;
 using static MakePlacePlugin.MakePlacePlugin;
 using System.Drawing;
+using System.Globalization;
 
 namespace MakePlacePlugin
 {
@@ -109,6 +110,13 @@ namespace MakePlacePlugin
         public static float layoutScale = 1;
 
 
+        private static float ParseFloat(string floatString)
+        {
+            var updatedString = floatString.Replace(",", CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator);
+
+            return float.Parse(updatedString, NumberStyles.Any, CultureInfo.InvariantCulture);
+        }
+
         private float scale(float i)
         {
 
@@ -159,7 +167,7 @@ namespace MakePlacePlugin
             {
                 if (prop.key.Equals("Scale"))
                 {
-                    layoutScale = float.Parse(prop.value);
+                    layoutScale = ParseFloat(prop.value);
 
                 }
             }
