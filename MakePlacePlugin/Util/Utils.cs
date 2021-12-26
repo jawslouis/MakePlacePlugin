@@ -29,7 +29,7 @@ namespace MakePlacePlugin
             return partsType switch
             {
                 InteriorPartsType.Walls => "Wall",
-                InteriorPartsType.Windows => "Windows",
+                InteriorPartsType.Windows => "Window",
                 InteriorPartsType.Door => "Door",
                 InteriorPartsType.Floor => "Floor",
                 InteriorPartsType.Light => "Light",
@@ -43,7 +43,7 @@ namespace MakePlacePlugin
             {
                 InteriorFloor.Ground => "GroundFloor",
                 InteriorFloor.Basement => "Basement",
-                InteriorFloor.Upstairs => "2nd Floor",
+                InteriorFloor.Upstairs => "UpperFloor",
                 InteriorFloor.External => "Main",
                 _ => "Unknown"
             };

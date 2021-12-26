@@ -121,7 +121,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             HousePrinter = new LayoutExporter(ChatGui);
 
-
+            PluginLog.Log("MakePlace Plugin v1.3 initialized");
         }
         public void Initialize()
         {

@@ -212,17 +212,19 @@ namespace MakePlacePlugin
             {
                 var fixtures = Mem.GetInteriorCommonFixtures(i);
                 if (fixtures.Length == 0) continue;
-                var isCurrentFloor = Mem.CurrentFloor() == (InteriorFloor)i;
 
                 for (var j = 0; j < IndoorFloorData.PartsMax; j++)
                 {
                     if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
+                    if (fixtures[j].Item == null) continue;
+
                     var fixtureName = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
 
                     var prop = new SaveProperty();
 
                     prop.key = $"{Utils.GetFloorDescriptor((InteriorFloor)i)}:{fixtureName}".Replace(" ", "");
                     prop.value = fixtures[j].Item.Name.ToString();
+
                     save.fixture.Add(prop);
                 }
             }

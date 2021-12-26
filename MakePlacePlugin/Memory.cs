@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Dalamud.Game;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin
 {
@@ -22,10 +23,10 @@ namespace MakePlacePlugin
                 LayoutWorldPtr =
                     scanner.GetStaticAddressFromSig(
                         "48 8B 05 ?? ?? ?? ?? 48 8B 48 20 48 85 C9 74 31 83 B9 ?? ?? ?? ?? ?? 74 28 80 B9 ?? ?? ?? ?? ?? 75 1F 80 B9 ?? ?? ?? ?? ?? 74 03 B0 01 C3", 2);
-              
+
                 HousingModulePtr = Marshal.ReadIntPtr(HousingModulePtr);
                 LayoutWorldPtr = Marshal.ReadIntPtr(LayoutWorldPtr);
-                
+
             }
             catch (Exception e)
             {
@@ -38,8 +39,8 @@ namespace MakePlacePlugin
         private IntPtr HousingModulePtr { get; }
         private IntPtr LayoutWorldPtr { get; }
 
-        public unsafe HousingModule* HousingModule => (HousingModule*) HousingModulePtr;
-        public unsafe LayoutWorld* LayoutWorld => (LayoutWorld*) LayoutWorldPtr;
+        public unsafe HousingModule* HousingModule => (HousingModule*)HousingModulePtr;
+        public unsafe LayoutWorld* LayoutWorld => (LayoutWorld*)LayoutWorldPtr;
         public unsafe HousingObjectManager* CurrentManager => HousingModule->currentTerritory;
         public unsafe HousingStructure* HousingStructure => LayoutWorld->HousingStruct;
 
@@ -81,8 +82,8 @@ namespace MakePlacePlugin
             for (var i = 0; i < IndoorFloorData.PartsMax; i++)
             {
                 var key = floor.GetPart(i);
-                if (!HousingData.Instance.TryGetItem(unchecked((uint) key), out var item))
-                    HousingData.Instance.IsUnitedExteriorPart(unchecked((uint) key), out item);
+                if (!HousingData.Instance.TryGetItem(unchecked((uint)key), out var item))
+                    HousingData.Instance.IsUnitedExteriorPart(unchecked((uint)key), out item);
 
                 ret[i] = new CommonFixture(
                     false,
@@ -133,7 +134,7 @@ namespace MakePlacePlugin
             if (HousingModule->GetCurrentManager()->Objects[index] == 0)
                 return false;
 
-            gameObject = *(HousingGameObject*) HousingModule->GetCurrentManager()->Objects[index];
+            gameObject = *(HousingGameObject*)HousingModule->GetCurrentManager()->Objects[index];
 
             return true;
         }
@@ -153,7 +154,7 @@ namespace MakePlacePlugin
                 var oPtr = HousingModule->GetCurrentManager()->Objects[i];
                 if (oPtr == 0)
                     continue;
-                var o = *(HousingGameObject*) oPtr;
+                var o = *(HousingGameObject*)oPtr;
                 tmpObjects.Add((o, Utils.DistanceFromPlayer(o, playerPos)));
             }
 
@@ -176,7 +177,7 @@ namespace MakePlacePlugin
                 var oPtr = HousingModule->GetCurrentManager()->Objects[i];
                 if (oPtr == 0)
                     continue;
-                var o = *(HousingGameObject*) oPtr;
+                var o = *(HousingGameObject*)oPtr;
                 objects.Add(o);
             }
 
@@ -212,7 +213,7 @@ namespace MakePlacePlugin
                 var oPtr = HousingModule->GetCurrentManager()->Objects[i];
                 if (oPtr == 0)
                     continue;
-                var o = *(HousingGameObject*) oPtr;
+                var o = *(HousingGameObject*)oPtr;
                 objects.Add(o);
             }
 

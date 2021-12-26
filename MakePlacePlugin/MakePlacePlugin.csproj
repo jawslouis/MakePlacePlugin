@@ -3,7 +3,6 @@
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<LangVersion>preview</LangVersion>
 		<AssemblyTitle>MakePlacePlugin</AssemblyTitle>
-		<AssemblyVersion>1.1</AssemblyVersion>
 		<Product>MakePlacePlugin</Product>
 		<Description>Displays information about housing fixtures and objects.</Description>
 		<OutputPath>$(AppData)\XIVLauncher\devPlugins\MakePlacePlugin\</OutputPath>
