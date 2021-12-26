@@ -224,11 +224,7 @@ namespace MakePlacePlugin
 
             if (row != null)
             {
-                Log("Name: " + row.PlaceName.Value.Name.ToString());
-
-
                 var placeName = row.PlaceName.Value.Name.ToString();
-
 
                 if (placeName.Contains("Apartment"))
                 {
@@ -254,6 +250,7 @@ namespace MakePlacePlugin
                             break;
                     }
 
+
                     save.fixture.Add(new SaveProperty("District", area));
 
                 }
@@ -273,6 +270,9 @@ namespace MakePlacePlugin
                             break;
                         case "Private Mansion":
                             sizeString = "Large";
+                            break;
+                        case "Private Chambers":
+                            sizeString = "Apartment";
                             break;
                         default:
                             break;
