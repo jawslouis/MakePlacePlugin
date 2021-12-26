@@ -33,6 +33,9 @@ Create a github issue or post on the [discord channel](https://discord.gg/YuvcPz
 ### Can I use this to copy layouts from other houses?
 No. You can only load layouts when in furniture layout mode, in your own house.
 
+### Does the plugin use furniture from my inventory or storage?
+It uses the furniture that is already placed in the house. It won't touch your inventory or storage, so there's no worries about messing up inventory management. Also, since placing furniture binds it and makes it untradeable, it's best that the player does it directly.
+
 ### Is it safe to use the plugin?
 Since all third-party plugins are not in line with the game's terms of service, there is always an inherent risk. The plugin's automated furniture placement may also be detectable by the server as there is a very short interval between placing each furniture. You can increase the time interval between each furniture placement to reduce this risk.
 
