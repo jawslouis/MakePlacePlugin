@@ -290,7 +290,8 @@ namespace MakePlacePlugin
 
                     save.houseSize = sizeString;
 
-                    save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
+                    if (names.Length > 1)
+                        save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
                 }
             }
 
