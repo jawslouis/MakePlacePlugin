@@ -57,3 +57,5 @@ Thank you for using the plugin. If you enjoy my work and wish to support me, you
 Ko-fi: [https://ko-fi.com/jawslouis](https://ko-fi.com/jawslouis)
 
 Patreon: [https://www.patreon.com/jawslouis](https://www.patreon.com/jawslouis)
+
+Monthly supporters get the special Patron role on Discord, which allows you to view the list of upcoming features and vote on feature prioritization
