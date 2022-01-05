@@ -34,7 +34,7 @@ namespace MakePlacePlugin
         public float PlaceRotate = 0;
         public DateTime lastPosPackageTime = DateTime.Now;
 
-        public string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace('\\', '/') + "MakePlace/save.txt";
+        public string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace('\\', '/') + "/MakePlace/save.json";
 
         #region Init and Save
 
