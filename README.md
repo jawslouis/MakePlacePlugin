@@ -31,6 +31,9 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 ### Help! I can't get the plugin to work.
 Create a github issue or post on the [discord channel](https://discord.gg/YuvcPzCuhq) for help with troubleshooting.
 
+### Does the plugin work if the game is not in English?
+Saving and loading layouts will work in all languages. However, the MakePlace program only recognizes English furniture names. Please reload the client in English and save/load the layout if you want to transfer layouts to/from the MakePlace program.
+
 ### Can I use this to copy layouts from other houses?
 No. You can only load layouts when in furniture layout mode, in your own house.
 
@@ -54,3 +57,5 @@ Thank you for using the plugin. If you enjoy my work and wish to support me, you
 Ko-fi: [https://ko-fi.com/jawslouis](https://ko-fi.com/jawslouis)
 
 Patreon: [https://www.patreon.com/jawslouis](https://www.patreon.com/jawslouis)
+
+Monthly supporters get the special Patron role on Discord, which allows you to view the list of upcoming features and vote on feature prioritization
