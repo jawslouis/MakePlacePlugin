@@ -121,7 +121,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             HousePrinter = new LayoutExporter(ChatGui);
 
-            PluginLog.Log("MakePlace Plugin v1.3 initialized");
+            PluginLog.Log("MakePlace Plugin v1.5 initialized");
         }
         public void Initialize()
         {
@@ -130,7 +130,7 @@ namespace MakePlacePlugin
 
             LoadHousingFuncHook = HookManager.Hook<LoadHousingFuncDelegate>("48 8B 41 08 48 85 C0 74 09 48 8D 48 10", LoadHousingFuncDetour);
 
-            IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d d8 a4 8c 01 e8 bb 3c b0 ff 33 d2 48 8b c8 e8 41 d6 f2 ff", IsSaveLayoutDetour);
+            IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 76 01 00 00", IsSaveLayoutDetour);
 
             SelectItemHook = HookManager.Hook<SelectItemDelegate>("E8 ?? ?? ?? ?? 48 8B CE E8 ?? ?? ?? ?? 48 8B 6C 24 40 48 8B CE", SelectItemDetour);
 
