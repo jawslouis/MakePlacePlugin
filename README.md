@@ -14,7 +14,7 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 * Search for "MakePlace Plugin" and click "Install"
 
 ## Usage
-Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode.
+Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode (Housing -> Indoor Furnishings. Click on the Rotate button).
 
 ![Settings](screenshot.png?raw=true)  
 
