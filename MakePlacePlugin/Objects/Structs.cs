@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.GeneratedSheets;
+using static FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using static MakePlacePlugin.Utils;
 
 namespace MakePlacePlugin
@@ -124,7 +126,16 @@ namespace MakePlacePlugin
         // [FieldOffset(0x90)] public HousingItemUnknown1* unknown;
     }
 
-
+    [StructLayout(LayoutKind.Explicit, Size = 0x30)]
+    public unsafe struct HousingItemInfo
+    {
+        [FieldOffset(0x0)] public ushort modelId;
+        [FieldOffset(0x10)] public float X;
+        [FieldOffset(0x14)] public float Y;
+        [FieldOffset(0x18)] public float Z;
+        [FieldOffset(0x20)] public float Rotation;
+        [FieldOffset(0x24)] public uint ObjectIndex;
+    }
 
 
     [StructLayout(LayoutKind.Explicit)]
@@ -146,6 +157,7 @@ namespace MakePlacePlugin
     {
         [FieldOffset(0x030)] public fixed byte name[64];
         [FieldOffset(0x080)] public uint housingRowId;
+        [FieldOffset(0x84)] public uint OwnerID;
         [FieldOffset(0x0A0)] public float X;
         [FieldOffset(0x0A4)] public float Y;
         [FieldOffset(0x0A8)] public float Z;
@@ -158,6 +170,7 @@ namespace MakePlacePlugin
     [StructLayout(LayoutKind.Explicit)]
     public unsafe struct HousingObjectManager
     {
+        [FieldOffset(0x0010)] public IntPtr ObjectList;
         [FieldOffset(0x8980)] public fixed ulong Objects[400];
         [FieldOffset(0x96E8)] public HousingGameObject* IndoorActiveObject2;
         [FieldOffset(0x96F0)] public HousingGameObject* IndoorHoverObject;
@@ -165,6 +178,7 @@ namespace MakePlacePlugin
         [FieldOffset(0x9AB8)] public HousingGameObject* OutdoorActiveObject2;
         [FieldOffset(0x9AC0)] public HousingGameObject* OutdoorHoverObject;
         [FieldOffset(0x9AC8)] public HousingGameObject* OutdoorActiveObject;
+
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -294,7 +308,7 @@ namespace MakePlacePlugin
 
         // returns key in sheet
         public int GetPart(int index)
-        {            
+        {
 
             return *(int*)(byte*)(_thisPtr + index * 4);
         }
@@ -369,6 +383,5 @@ namespace MakePlacePlugin
         [FieldOffset(0x0C)] private readonly int Unknown2;
         [FieldOffset(0x10)] private readonly void* Unknown3;
     }
-
 
 }

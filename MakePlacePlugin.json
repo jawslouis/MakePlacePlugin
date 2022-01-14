@@ -2,7 +2,7 @@
   "Author": "Jawslouis",
   "Name": "MakePlace Plugin",
   "InternalName": "MakePlacePlugin",
-  "AssemblyVersion": "1.5",
+  "AssemblyVersion": "2.0",
   "Description": "Automatically save & load the positions of house furniture. Import/export layouts from the MakePlace program.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/jawslouis/MakePlacePlugin",

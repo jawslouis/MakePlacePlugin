@@ -4,11 +4,14 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
+using Dalamud.Game.Network;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiScene;
 using Lumina.Excel.GeneratedSheets;
+using Lumina.Text;
 using MakePlacePlugin.Gui;
 using MakePlacePlugin.Objects;
 using System;
@@ -48,18 +51,13 @@ namespace MakePlacePlugin
         [PluginService]
         public static TargetManager TargetMgr { get; private set; }
 
+        [PluginService] public static GameNetwork GameNetwork { get; private set; }
+
 
         // Texture dictionary for the housing item icons.
         public readonly Dictionary<ushort, TextureWrap> TextureDictionary = new Dictionary<ushort, TextureWrap>();
 
-        public List<HousingItem> HousingItemList = new List<HousingItem>();
-
         public static List<HousingItem> ItemsToPlace = new List<HousingItem>();
-
-        public int PreviewTerritory = 0;
-
-        private delegate IntPtr LoadHousingFuncDelegate(IntPtr a1, IntPtr a2);
-        private HookWrapper<LoadHousingFuncDelegate> LoadHousingFuncHook;
 
 
         private delegate bool UpdateLayoutDelegate(IntPtr a1);
@@ -96,11 +94,10 @@ namespace MakePlacePlugin
 
         }
 
-
         public MakePlacePlugin(
-                [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-                [RequiredVersion("1.0")] CommandManager commandManager
-            )
+            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
+            [RequiredVersion("1.0")] CommandManager commandManager
+        )
         {
             Config = Interface.GetPluginConfig() as Configuration ?? new Configuration();
             Config.Initialize(Interface);
@@ -121,21 +118,51 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             HousePrinter = new LayoutExporter(ChatGui);
 
-            PluginLog.Log("MakePlace Plugin v1.5 initialized");
+            PluginLog.Log("MakePlace Plugin v2.0 initialized");
         }
         public void Initialize()
         {
 
             HookManager.Init(Scanner);
 
-            LoadHousingFuncHook = HookManager.Hook<LoadHousingFuncDelegate>("48 8B 41 08 48 85 C0 74 09 48 8D 48 10", LoadHousingFuncDetour);
-
             IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 76 01 00 00", IsSaveLayoutDetour);
 
             SelectItemHook = HookManager.Hook<SelectItemDelegate>("E8 ?? ?? ?? ?? 48 8B CE E8 ?? ?? ?? ?? 48 8B 6C 24 40 48 8B CE", SelectItemDetour);
 
+            UpdateYardObjHook = HookManager.Hook<UpdateYardDelegate>("48 89 74 24 18 57 48 83 ec 20 b8 dc 02 00 00 0f b7 f2 48 8b f9 66 3b d0 0f", UpdateYardObj);
+
+            GetGameObjectHook = HookManager.Hook<GetObjectDelegate>("48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 0f b7 f2 33 db 0f 1f 40 00 0f 1f 84 00 00 00 00 00", GetGameObject);
+
+            GetObjectFromIndexHook = HookManager.Hook<GetActiveObjectDelegate>("81 fa 90 01 00 00 75 08 48 8b 81 88 0c 00 00 c3 0f b7 81 90 0c 00 00 3b d0 72 03 33 c0 c3", GetObjectFromIndex);
+
+
         }
 
+        internal delegate IntPtr GetActiveObjectDelegate(IntPtr ObjList, uint index);
+
+        internal IntPtr GetObjectFromIndex(IntPtr ObjList, uint index)
+        {
+
+            var result = GetObjectFromIndexHook.Original(ObjList, index);
+            return result;
+        }
+
+        internal delegate IntPtr GetObjectDelegate(IntPtr ObjList, ushort index);
+        internal static HookWrapper<GetObjectDelegate> GetGameObjectHook;
+        internal static HookWrapper<GetActiveObjectDelegate> GetObjectFromIndexHook;
+
+        internal IntPtr GetGameObject(IntPtr ObjList, ushort index)
+        {
+            return GetGameObjectHook.Original(ObjList, index);
+        }
+
+        public delegate void UpdateYardDelegate(IntPtr housingStruct, ushort index);
+        private static HookWrapper<UpdateYardDelegate> UpdateYardObjHook;
+
+        private void UpdateYardObj(IntPtr objectList, ushort index)
+        {
+            UpdateYardObjHook.Original(objectList, index);
+        }
 
         unsafe static public void SelectItemDetour(IntPtr housing, IntPtr item)
         {
@@ -234,7 +261,7 @@ namespace MakePlacePlugin
         public void ApplyLayout()
         {
             Log("Applying layout");
-            ItemsToPlace = new List<HousingItem>(Config.HousingItemList);
+            ItemsToPlace = new List<HousingItem>(Config.InteriorItemList);
 
             var thread = new Thread(PlaceNextItem);
             thread.Start();
@@ -246,7 +273,16 @@ namespace MakePlacePlugin
 
             List<HousingGameObject> allObjects;
             Memory Mem = Memory.Instance;
-            bool dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out allObjects);
+
+            if (Mem.IsIndoors())
+            {
+                bool dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out allObjects);
+            }
+            else
+            {
+                allObjects = Mem.GetExteriorPlacedObjects();
+            }
+
 
             List<HousingGameObject> unmatched = new List<HousingGameObject>();
 
@@ -258,7 +294,7 @@ namespace MakePlacePlugin
                 var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                 var itemKey = furniture.Item.Value.RowId;
 
-                var houseItem = Config.HousingItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                var houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
                 if (houseItem == null)
                 {
                     unmatched.Add(gameObject);
@@ -276,7 +312,7 @@ namespace MakePlacePlugin
                 var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                 var itemKey = furniture.Item.Value.RowId;
 
-                var houseItem = Config.HousingItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                var houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
                 if (houseItem == null)
                 {
                     continue;
@@ -287,26 +323,75 @@ namespace MakePlacePlugin
             }
 
         }
-        unsafe public void LoadLayout()
+
+
+        public unsafe void LoadExterior()
         {
 
-            if (Config.HousingItemList.Count > 0)
+
+            var outdoorMgrAddr = (IntPtr)Memory.Instance.HousingModule->outdoorTerritory;
+            var objectListAddr = outdoorMgrAddr + 0x10;
+
+            var activeObjList = objectListAddr + 0x8968;
+
+            var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
+
+            for (int i = 0; i < exteriorItems->Size; i++)
             {
-                Config.HousingItemList.Clear();
+                var item = exteriorItems->GetInventorySlot(i);
+                if (item == null || item->ItemID == 0) continue;
+
+                var itemRow = Data.GetExcelSheet<Item>().GetRow(item->ItemID);
+
+
+                var itemPosAddr = objectListAddr + (0x30 * (i + 20));
+                var itemInfo = (HousingItemInfo*)itemPosAddr;
+
+
+                var housingItem = new HousingItem(
+                    itemRow.RowId,
+                    item->Stain,
+                    itemInfo->X,
+                    itemInfo->Y,
+                    itemInfo->Z,
+                    itemInfo->Rotation,
+                    itemRow.Name
+                );
+
+
+                var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, itemInfo->ObjectIndex);
+
+                if (gameObj == null)
+                {
+                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, (ushort)(i + 20));
+                }
+
+                housingItem.ItemStruct = (IntPtr)gameObj->Item;
+
+                var gameObjPtr = gameObj != null ? (IntPtr)gameObj->Item : IntPtr.Zero;
+
+                Config.ExteriorItemList.Add(housingItem);
             }
 
-            List<HousingGameObject> dObjects;
-            Memory Mem = Memory.Instance;
-            bool dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out dObjects);
+        }
 
-            HousingItemList.Clear();
+        public unsafe void LoadInterior()
+        {
+            List<HousingGameObject> dObjects;
+
+            bool dObjectsLoaded = Memory.Instance.TryGetNameSortedHousingGameObjectList(out dObjects);
+
 
             foreach (var gameObject in dObjects)
             {
+                //Log($"Processing item #{count++}");
+
                 uint furnitureKey = gameObject.housingRowId;
 
                 var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
-                var item = furniture.Item.Value;
+                Item item = furniture?.Item?.Value;
+
+                if (item == null) continue;
                 if (item.RowId == 0) continue;
 
                 byte stain = gameObject.color;
@@ -327,12 +412,32 @@ namespace MakePlacePlugin
 
                 housingItem.ItemStruct = (IntPtr)gameObject.Item;
 
-                HousingItemList.Add(housingItem);
+                Config.InteriorItemList.Add(housingItem);
+            }
+        }
+
+        public void LoadLayout()
+        {
+            if (Config.InteriorItemList.Count > 0)
+            {
+                Config.InteriorItemList.Clear();
             }
 
-            Log(String.Format("Loaded {0} furniture items", HousingItemList.Count));
+            Memory Mem = Memory.Instance;
 
-            Config.HousingItemList = HousingItemList.ToList();
+            var itemList = Mem.IsOutdoors() ? Config.ExteriorItemList : Config.InteriorItemList;
+            itemList.Clear();
+
+            if (Mem.IsOutdoors())
+            {
+                LoadExterior();
+            }
+            else
+            {
+                LoadInterior();
+            }
+
+            Log(String.Format("Loaded {0} furniture items", itemList.Count));
 
             Config.HiddenScreenItemHistory = new List<int>();
             var territoryTypeId = ClientState.TerritoryType;
@@ -355,43 +460,42 @@ namespace MakePlacePlugin
         }
 
 
-        private IntPtr LoadHousingFuncDetour(IntPtr a1, IntPtr dataPtr)
-        {
-
-            HousingItemList.Clear();
-            Config.HousingItemList.Clear();
-            Config.Save();
-
-            return this.LoadHousingFuncHook.Original(a1, dataPtr);
-        }
         private void TerritoryChanged(object sender, ushort e)
         {
             Config.DrawScreen = false;
             Config.Save();
         }
-        public void CommandHandler(string command, string arguments)
+
+        public unsafe void CommandHandler(string command, string arguments)
         {
             var args = arguments.Trim().Replace("\"", string.Empty);
 
-            if (string.IsNullOrEmpty(args) || args.Equals("config", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                Gui.ConfigWindow.Visible = !Gui.ConfigWindow.Visible;
-                return;
+                if (string.IsNullOrEmpty(args) || args.Equals("config", StringComparison.OrdinalIgnoreCase))
+                {
+                    Gui.ConfigWindow.Visible = !Gui.ConfigWindow.Visible;
+                }
+            }
+            catch (Exception e)
+            {
+                LogError(e.Message, e.StackTrace);
             }
         }
 
         public static void Log(string message, string detail_message = "")
         {
-            //if (!Config.PrintMessage) return;
             var msg = $"{message}";
             PluginLog.Log(detail_message == "" ? msg : detail_message);
             ChatGui.Print(msg);
         }
         public static void LogError(string message, string detail_message = "")
         {
-            //if (!Config.PrintError) return;
             var msg = $"{message}";
-            PluginLog.LogError(detail_message == "" ? msg : detail_message);
+            PluginLog.LogError(msg);
+
+            if (detail_message.Length > 0) PluginLog.LogError(detail_message);
+
             ChatGui.PrintError(msg);
         }
 

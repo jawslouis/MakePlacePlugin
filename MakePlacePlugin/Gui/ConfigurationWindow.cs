@@ -20,6 +20,8 @@ namespace MakePlacePlugin.Gui
         private string CustomTag = string.Empty;
         private readonly Dictionary<uint, uint> iconToFurniture = new() { };
 
+        private readonly Vector4 PURPLE = new(0.26275f, 0.21569f, 0.56863f, 1f);
+        private readonly Vector4 PURPLE_ALPHA = new(0.26275f, 0.21569f, 0.56863f, 0.5f);
 
         public ConfigurationWindow(MakePlacePlugin plugin) : base(plugin)
         {
@@ -28,6 +30,9 @@ namespace MakePlacePlugin.Gui
 
         protected override void DrawUi()
         {
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, PURPLE);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, PURPLE_ALPHA);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, PURPLE_ALPHA);
             ImGui.SetNextWindowSize(new Vector2(530, 450), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin($"{Plugin.Name}", ref WindowVisible, ImGuiWindowFlags.NoScrollWithMouse))
             {
@@ -39,11 +44,35 @@ namespace MakePlacePlugin.Gui
                 DrawGeneralSettings();
                 if (ImGui.BeginChild("##ItemListRegion"))
                 {
-                    DrawItemList();
+                    ImGui.PushStyleColor(ImGuiCol.Header, PURPLE_ALPHA);
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, PURPLE);
+                    ImGui.PushStyleColor(ImGuiCol.HeaderActive, PURPLE);
+
+                    if (ImGui.CollapsingHeader("Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+
+                    }
+                    if (ImGui.CollapsingHeader("Interior Furniture", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("interior");
+                        DrawItemList(Config.InteriorItemList);
+                        ImGui.PopID();
+                    }
+                    if (ImGui.CollapsingHeader("Exterior Furniture", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("exterior");
+                        DrawItemList(Config.ExteriorItemList);
+                        ImGui.PopID();
+                    }
+
+
                     ImGui.EndChild();
                 }
                 ImGui.EndChild();
             }
+
+            ImGui.PopStyleColor(3);
+
             ImGui.End();
         }
 
@@ -118,7 +147,7 @@ namespace MakePlacePlugin.Gui
             {
                 try
                 {
-                    MakePlacePlugin.HousePrinter.ExportLayout(Config.HousingItemList, Config);
+                    MakePlacePlugin.HousePrinter.ExportLayout(Config.InteriorItemList, Config);
                 }
                 catch (Exception e)
                 {
@@ -132,10 +161,10 @@ namespace MakePlacePlugin.Gui
             {
                 try
                 {
-                    Config.HousingItemList = LayoutExporter.ImportLayout(Config.SaveLocation);
+                    Config.InteriorItemList = LayoutExporter.ImportLayout(Config.SaveLocation);
                     Plugin.MatchLayout();
                     Config.ResetRecord();
-                    Log(String.Format("Imported {0} items", Config.HousingItemList.Count));
+                    Log(String.Format("Imported {0} items", Config.InteriorItemList.Count));
                 }
                 catch (Exception e)
                 {
@@ -149,42 +178,17 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Text("Layout Actions");
 
-            if (ImGui.Button("Clear"))
-            {
-                Config.HousingItemList.Clear();
-                Config.Save();
-            }
-            ImGui.SameLine();
-            if (ImGui.Button("Sort"))
-            {
-                Config.SelectedItemIndex = -1;
-                Config.HousingItemList.Sort((x, y) =>
-                {
-                    if (x.Name.CompareTo(y.Name) != 0)
-                        return x.Name.CompareTo(y.Name);
-                    if (x.X.CompareTo(y.X) != 0)
-                        return x.X.CompareTo(y.X);
-                    if (x.Y.CompareTo(y.Y) != 0)
-                        return x.Y.CompareTo(y.Y);
-                    if (x.Z.CompareTo(y.Z) != 0)
-                        return x.Z.CompareTo(y.Z);
-                    if (x.Rotate.CompareTo(y.Rotate) != 0)
-                        return x.Rotate.CompareTo(y.Rotate);
-                    return 0;
-                });
-                Config.Save();
-            }
+            var inOut = Memory.Instance.IsOutdoors() ? "Exterior" : "Interior";
 
-            ImGui.SameLine();
-
-            if (ImGui.Button("House Layout"))
+            if (ImGui.Button($"Get {inOut} Layout"))
             {
-                if (IsDecorMode())
+                if (true || IsDecorMode())
                 {
                     try
                     {
                         Plugin.LoadLayout();
-                    } catch (Exception e)
+                    }
+                    catch (Exception e)
                     {
                         LogError($"Error: {e.Message}", e.StackTrace);
                     }
@@ -194,11 +198,10 @@ namespace MakePlacePlugin.Gui
                     LogError("Unable to load layouts outside of Layout mode");
                 }
             }
-            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Get the house layout");
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Apply Layout"))
+            if (ImGui.Button($"Apply {inOut} Layout"))
             {
                 if (IsDecorMode() && MakePlacePlugin.IsRotateMode())
                 {
@@ -221,10 +224,7 @@ namespace MakePlacePlugin.Gui
             ImGui.PopItemWidth();
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Time interval between furniture placements when applying a layout. If this is too low (e.g. 200 ms), some placements may be skipped over.");
 
-
-
-            ImGui.Text("Note: Missing items and incorrect dyes are grayed out");
-
+            ImGui.Dummy(new Vector2(0, 15));
             Config.Save();
 
         }
@@ -272,8 +272,38 @@ namespace MakePlacePlugin.Gui
 
 
         }
-        private void DrawItemList()
+        private void DrawItemList(List<HousingItem> itemList)
         {
+
+
+
+            if (ImGui.Button("Sort"))
+            {
+                itemList.Sort((x, y) =>
+                {
+                    if (x.Name.CompareTo(y.Name) != 0)
+                        return x.Name.CompareTo(y.Name);
+                    if (x.X.CompareTo(y.X) != 0)
+                        return x.X.CompareTo(y.X);
+                    if (x.Y.CompareTo(y.Y) != 0)
+                        return x.Y.CompareTo(y.Y);
+                    if (x.Z.CompareTo(y.Z) != 0)
+                        return x.Z.CompareTo(y.Z);
+                    if (x.Rotate.CompareTo(y.Rotate) != 0)
+                        return x.Rotate.CompareTo(y.Rotate);
+                    return 0;
+                });
+                Config.Save();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Clear"))
+            {
+                itemList.Clear();
+                Config.Save();
+            }
+            ImGui.SameLine();
+            ImGui.Text("Note: Missing items and incorrect dyes are grayed out");
+
             // name, position, r, color, set
             int columns = 5;
 
@@ -289,9 +319,9 @@ namespace MakePlacePlugin.Gui
 
 
             ImGui.Separator();
-            for (int i = 0; i < Config.HousingItemList.Count(); i++)
+            for (int i = 0; i < itemList.Count(); i++)
             {
-                var housingItem = Config.HousingItemList[i];
+                var housingItem = itemList[i];
                 var displayName = housingItem.Name;
 
                 var item = MakePlacePlugin.Data.GetExcelSheet<Item>().GetRow(housingItem.ItemKey);
@@ -321,6 +351,8 @@ namespace MakePlacePlugin.Gui
                 ImGui.Separator();
             }
 
+            ImGui.Columns(1);
+
         }
 
         #endregion
@@ -337,10 +369,15 @@ namespace MakePlacePlugin.Gui
 
         private unsafe void DrawItemOnScreen()
         {
-            for (int i = 0; i < Config.HousingItemList.Count(); i++)
+
+            if (Memory.Instance == null) return;
+
+            var itemList = Memory.Instance.IsOutdoors() ? Config.ExteriorItemList : Config.InteriorItemList;
+
+            for (int i = 0; i < itemList.Count(); i++)
             {
                 var playerPos = MakePlacePlugin.ClientState.LocalPlayer.Position;
-                var housingItem = Config.HousingItemList[i];
+                var housingItem = itemList[i];
 
                 if (housingItem.ItemStruct == IntPtr.Zero) continue;
 

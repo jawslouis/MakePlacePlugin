@@ -18,16 +18,17 @@ namespace MakePlacePlugin
         public List<int> GroupingList = new List<int>();
         public bool PlaceAnywhere = false;
 
-        public List<HousingItem> HousingItemList = new List<HousingItem>();
+        internal Layout Layout = new Layout();
+        public List<HousingItem> InteriorItemList = new List<HousingItem>();
+        public List<HousingItem> ExteriorItemList = new List<HousingItem>();
+
+
         public List<string> Tags = new List<string>();
         public List<bool> TagsSelectList = new List<bool>();
         public int LocationId = 0;
-        public List<HousingItem> UploadItems = new List<HousingItem>();
         public int LoadInterval = 400;
 
 
-        public bool SyncPos = false;
-        public int SelectedItemIndex = -1;
         public float PlaceX = 0;
         public float PlaceY = 0;
         public float PlaceZ = 0;
@@ -56,7 +57,6 @@ namespace MakePlacePlugin
             PlaceY = 0;
             PlaceZ = 0;
             PlaceRotate = 0;
-            SelectedItemIndex = -1;
             HiddenScreenItemHistory.Clear();
             GroupingList.Clear();
             Save();

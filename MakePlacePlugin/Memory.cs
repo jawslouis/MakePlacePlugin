@@ -6,12 +6,17 @@ using System.Runtime.InteropServices;
 using Dalamud.Game;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin
 {
-    public class Memory
+    public unsafe class Memory
     {
+        public static IntPtr InventoryManagerAddress;
+        public static GetInventoryContainerDelegate GetInventoryContainer;
+        public delegate InventoryContainer* GetInventoryContainerDelegate(IntPtr inventoryManager, InventoryType inventoryType);
+
         private Memory(SigScanner scanner)
         {
             try
@@ -26,6 +31,10 @@ namespace MakePlacePlugin
 
                 HousingModulePtr = Marshal.ReadIntPtr(HousingModulePtr);
                 LayoutWorldPtr = Marshal.ReadIntPtr(LayoutWorldPtr);
+
+                InventoryManagerAddress = scanner.GetStaticAddressFromSig("BA ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F8 48 85 C0");
+                var getInventoryContainerPtr = scanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
+                GetInventoryContainer = Marshal.GetDelegateForFunctionPointer<GetInventoryContainerDelegate>(getInventoryContainerPtr);
 
             }
             catch (Exception e)
@@ -49,6 +58,12 @@ namespace MakePlacePlugin
         public static void Init(SigScanner scanner)
         {
             Instance = new Memory(scanner);
+        }
+
+        public static InventoryContainer* GetContainer(InventoryType inventoryType)
+        {
+            if (InventoryManagerAddress == IntPtr.Zero) return null;
+            return GetInventoryContainer(InventoryManagerAddress, inventoryType);
         }
 
         public unsafe InteriorFloor CurrentFloor()
@@ -139,28 +154,11 @@ namespace MakePlacePlugin
             return true;
         }
 
-        public unsafe bool TryGetSortedHousingGameObjectList(out List<HousingGameObject> objects, Vector3 playerPos)
+        public unsafe List<HousingGameObject> GetExteriorPlacedObjects()
         {
-            objects = null;
-            if (HousingModule == null ||
-                HousingModule->GetCurrentManager() == null ||
-                HousingModule->GetCurrentManager()->Objects == null)
-                return false;
+            var placedObjects = new List<HousingGameObject>();
 
-            var tmpObjects = new List<(HousingGameObject gObject, float distance)>();
-            objects = new List<HousingGameObject>();
-            for (var i = 0; i < 400; i++)
-            {
-                var oPtr = HousingModule->GetCurrentManager()->Objects[i];
-                if (oPtr == 0)
-                    continue;
-                var o = *(HousingGameObject*)oPtr;
-                tmpObjects.Add((o, Utils.DistanceFromPlayer(o, playerPos)));
-            }
-
-            tmpObjects.Sort((obj1, obj2) => obj1.distance.CompareTo(obj2.distance));
-            objects = tmpObjects.Select(obj => obj.gObject).ToList();
-            return true;
+            return placedObjects;
         }
 
         public unsafe bool TryGetNameSortedHousingGameObjectList(out List<HousingGameObject> objects)
@@ -178,6 +176,7 @@ namespace MakePlacePlugin
                 if (oPtr == 0)
                     continue;
                 var o = *(HousingGameObject*)oPtr;
+
                 objects.Add(o);
             }
 

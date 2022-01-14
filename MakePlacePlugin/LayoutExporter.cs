@@ -44,6 +44,8 @@ namespace MakePlacePlugin
     {
         public string name { get; set; }
 
+        public int itemId { get; set; }
+
         public Transform transform { get; set; } = new Transform();
 
         public List<SaveProperty> properties { get; set; } = new List<SaveProperty>();
@@ -93,8 +95,18 @@ namespace MakePlacePlugin
 
         public string houseSize { get; set; }
 
-        public List<SaveProperty> fixture { get; set; } = new List<SaveProperty>();
-        public List<Furniture> furniture { get; set; } = new List<Furniture>();
+        public float interiorScale { get; set; } = 1;
+
+        public List<SaveProperty> interiorFixture { get; set; } = new List<SaveProperty>();
+
+        public List<Furniture> interiorFurniture { get; set; } = new List<Furniture>();
+
+        public float exteriorScale { get; set; } = 1;
+
+        public List<SaveProperty> exteriorFixture { get; set; } = new List<SaveProperty>();
+        
+        public List<Furniture> exteriorFurniture { get; set; } = new List<Furniture>();
+        
     }
 
 
@@ -163,7 +175,7 @@ namespace MakePlacePlugin
             }
 
             layoutScale = 1;
-            foreach (var prop in layout.fixture)
+            foreach (var prop in layout.interiorFixture)
             {
                 if (prop.key.Equals("Scale"))
                 {
@@ -173,7 +185,7 @@ namespace MakePlacePlugin
             }
 
 
-            foreach (Furniture furniture in layout.furniture)
+            foreach (Furniture furniture in layout.interiorFurniture)
             {
                 var itemRow = ItemList.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
 
@@ -225,7 +237,7 @@ namespace MakePlacePlugin
                     prop.key = $"{Utils.GetFloorDescriptor((InteriorFloor)i)}:{fixtureName}".Replace(" ", "");
                     prop.value = fixtures[j].Item.Name.ToString();
 
-                    save.fixture.Add(prop);
+                    save.interiorFixture.Add(prop);
                 }
             }
 
@@ -261,7 +273,7 @@ namespace MakePlacePlugin
                     }
 
 
-                    save.fixture.Add(new SaveProperty("District", area));
+                    save.interiorFixture.Add(new SaveProperty("District", area));
 
                 }
                 else
@@ -291,12 +303,12 @@ namespace MakePlacePlugin
                     save.houseSize = sizeString;
 
                     if (names.Length > 1)
-                        save.fixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
+                        save.interiorFixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
                 }
             }
 
 
-            save.fixture.Add(new SaveProperty("Scale", "1"));
+            save.interiorFixture.Add(new SaveProperty("Scale", "1"));
 
 
             foreach (HousingItem gameObject in HousingItemList)
@@ -323,7 +335,7 @@ namespace MakePlacePlugin
 
                 }
 
-                save.furniture.Add(furniture);
+                save.interiorFurniture.Add(furniture);
             }
 
             var encoderSettings = new TextEncoderSettings();
