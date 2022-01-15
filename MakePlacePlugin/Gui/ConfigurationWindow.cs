@@ -147,7 +147,7 @@ namespace MakePlacePlugin.Gui
             {
                 try
                 {
-                    MakePlacePlugin.HousePrinter.ExportLayout(Config.InteriorItemList, Config);
+                    MakePlacePlugin.HousePrinter.ExportLayout(Config.InteriorItemList);
                 }
                 catch (Exception e)
                 {
@@ -161,7 +161,7 @@ namespace MakePlacePlugin.Gui
             {
                 try
                 {
-                    Config.InteriorItemList = LayoutExporter.ImportLayout(Config.SaveLocation);
+                    LayoutExporter.ImportLayout(Config.SaveLocation);
                     Plugin.MatchLayout();
                     Config.ResetRecord();
                     Log(String.Format("Imported {0} items", Config.InteriorItemList.Count));

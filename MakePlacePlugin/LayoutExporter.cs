@@ -40,6 +40,14 @@ namespace MakePlacePlugin
         }
     }
 
+    class Fixture
+    {
+        public string name { get; set; }
+        public uint itemId { get; set; }
+        public string level { get; set; }
+        public string type { get; set; }
+    }
+
     class Furniture
     {
         public string name { get; set; }
@@ -97,26 +105,30 @@ namespace MakePlacePlugin
 
         public float interiorScale { get; set; } = 1;
 
-        public List<SaveProperty> interiorFixture { get; set; } = new List<SaveProperty>();
+        public List<Fixture> interiorFixture { get; set; } = new List<Fixture>();
 
         public List<Furniture> interiorFurniture { get; set; } = new List<Furniture>();
 
         public float exteriorScale { get; set; } = 1;
 
-        public List<SaveProperty> exteriorFixture { get; set; } = new List<SaveProperty>();
-        
+        public List<Fixture> exteriorFixture { get; set; } = new List<Fixture>();
+
         public List<Furniture> exteriorFurniture { get; set; } = new List<Furniture>();
-        
+
     }
 
 
     public class LayoutExporter
     {
         public ChatGui chat;
+        public static Configuration Config;
 
-        public LayoutExporter(ChatGui chatGui)
+        public static List<(Color, uint)> ColorList;
+
+        public LayoutExporter(ChatGui chatGui, Configuration config)
         {
             chat = chatGui;
+            Config = config;
         }
 
         public static float layoutScale = 1;
@@ -153,41 +165,14 @@ namespace MakePlacePlugin
             return new List<float> { checkZero(q.X), checkZero(q.Y), checkZero(q.Z), checkZero(q.W) };
         }
 
-        public static List<HousingItem> ImportLayout(string path)
+
+        static void ImportFurniture(List<HousingItem> itemList, List<Furniture> furnitureList)
         {
+            var ItemSheet = Data.GetExcelSheet<Item>();
 
-            string jsonString = File.ReadAllText(path);
-
-            Layout layout = JsonSerializer.Deserialize<Layout>(jsonString);
-
-            List<HousingItem> houseItems = new List<HousingItem>();
-
-
-            var ItemList = Data.GetExcelSheet<Item>();
-            var StainList = Data.GetExcelSheet<Stain>();
-
-            var colorList = new List<(Color, uint)>();
-
-            foreach (var stain in StainList)
+            foreach (Furniture furniture in furnitureList)
             {
-                var color = Utils.StainToVector4(stain.Color);
-                colorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
-            }
-
-            layoutScale = 1;
-            foreach (var prop in layout.interiorFixture)
-            {
-                if (prop.key.Equals("Scale"))
-                {
-                    layoutScale = ParseFloat(prop.value);
-
-                }
-            }
-
-
-            foreach (Furniture furniture in layout.interiorFurniture)
-            {
-                var itemRow = ItemList.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
+                var itemRow = ItemSheet.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
 
                 if (itemRow == null) continue;
 
@@ -196,20 +181,47 @@ namespace MakePlacePlugin
 
                 var houseItem = new HousingItem(
                     itemRow.RowId,
-                    (byte)furniture.GetClosestStain(colorList),
+                    (byte)furniture.GetClosestStain(ColorList),
                     descale(furniture.transform.location[0]),
                     descale(furniture.transform.location[2]), // switch Y & Z axis
                     descale(furniture.transform.location[1]),
                     -QuaternionExtensions.ComputeZAngle(quat),
                     furniture.name);
 
-                houseItems.Add(houseItem);
+                itemList.Add(houseItem);
             }
-
-            return houseItems;
         }
 
-        public void ExportLayout(List<HousingItem> HousingItemList, Configuration Config)
+        public static void ImportLayout(string path)
+        {
+
+            string jsonString = File.ReadAllText(path);
+
+            Layout layout = JsonSerializer.Deserialize<Layout>(jsonString);
+
+
+            var StainList = Data.GetExcelSheet<Stain>();
+
+            ColorList = new List<(Color, uint)>();
+
+            foreach (var stain in StainList)
+            {
+                var color = Utils.StainToVector4(stain.Color);
+                ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
+            }
+
+
+            Config.InteriorItemList.Clear();
+            layoutScale = layout.interiorScale;
+            ImportFurniture(Config.InteriorItemList, layout.interiorFurniture);
+
+            Config.ExteriorItemList.Clear();
+            layoutScale = layout.exteriorScale;
+            ImportFurniture(Config.ExteriorItemList, layout.exteriorFurniture);
+
+        }
+
+        public void ExportLayout(List<HousingItem> HousingItemList)
         {
 
             Memory Mem = Memory.Instance;
@@ -230,14 +242,13 @@ namespace MakePlacePlugin
                     if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
                     if (fixtures[j].Item == null) continue;
 
-                    var fixtureName = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
+                    var fixture = new Fixture();
+                    fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)j).Replace(" ", "");
+                    fixture.level = Utils.GetFloorDescriptor((InteriorFloor)i).Replace(" ", "");
+                    fixture.name = fixtures[j].Item.Name.ToString();
+                    fixture.itemId = fixtures[j].Item.RowId;
 
-                    var prop = new SaveProperty();
-
-                    prop.key = $"{Utils.GetFloorDescriptor((InteriorFloor)i)}:{fixtureName}".Replace(" ", "");
-                    prop.value = fixtures[j].Item.Name.ToString();
-
-                    save.interiorFixture.Add(prop);
+                    save.interiorFixture.Add(fixture);
                 }
             }
 
@@ -272,8 +283,10 @@ namespace MakePlacePlugin
                             break;
                     }
 
-
-                    save.interiorFixture.Add(new SaveProperty("District", area));
+                    var district = new Fixture();
+                    district.type = "District";
+                    district.name = area;
+                    save.interiorFixture.Add(district);
 
                 }
                 else
@@ -303,12 +316,18 @@ namespace MakePlacePlugin
                     save.houseSize = sizeString;
 
                     if (names.Length > 1)
-                        save.interiorFixture.Add(new SaveProperty("District", names[1].Replace("The", "").Trim()));
+                    {
+                        var district = new Fixture();
+                        district.type = "District";
+                        district.name = names[1].Replace("The", "").Trim();
+                        save.interiorFixture.Add(district);
+
+                    }
                 }
             }
 
 
-            save.interiorFixture.Add(new SaveProperty("Scale", "1"));
+            save.interiorScale = 1;
 
 
             foreach (HousingItem gameObject in HousingItemList)
