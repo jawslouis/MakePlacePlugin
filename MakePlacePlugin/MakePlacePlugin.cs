@@ -72,7 +72,7 @@ namespace MakePlacePlugin
 
         public static bool ApplyChange = false;
 
-        public static LayoutExporter HousePrinter;
+        public static SaveLayoutManager LayoutManager;
 
         public static bool logHousingDetour = false;
 
@@ -116,7 +116,7 @@ namespace MakePlacePlugin
 
             HousingData.Init(Data, this);
             Memory.Init(Scanner);
-            HousePrinter = new LayoutExporter(ChatGui, Config);
+            LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
             PluginLog.Log("MakePlace Plugin v2.0 initialized");
         }
@@ -327,7 +327,7 @@ namespace MakePlacePlugin
 
         public unsafe void LoadExterior()
         {
-
+            Config.ExteriorItemList.Clear();
 
             var outdoorMgrAddr = (IntPtr)Memory.Instance.HousingModule->outdoorTerritory;
             var objectListAddr = outdoorMgrAddr + 0x10;
@@ -373,14 +373,18 @@ namespace MakePlacePlugin
                 Config.ExteriorItemList.Add(housingItem);
             }
 
+            Config.Save();
         }
 
         public unsafe void LoadInterior()
         {
             List<HousingGameObject> dObjects;
 
-            bool dObjectsLoaded = Memory.Instance.TryGetNameSortedHousingGameObjectList(out dObjects);
+            SaveLayoutManager.LoadInteriorFixtues();
 
+            Memory.Instance.TryGetNameSortedHousingGameObjectList(out dObjects);
+
+            Config.InteriorItemList.Clear();
 
             foreach (var gameObject in dObjects)
             {
@@ -414,14 +418,12 @@ namespace MakePlacePlugin
 
                 Config.InteriorItemList.Add(housingItem);
             }
+
+            Config.Save();
         }
 
         public void LoadLayout()
         {
-            if (Config.InteriorItemList.Count > 0)
-            {
-                Config.InteriorItemList.Clear();
-            }
 
             Memory Mem = Memory.Instance;
 

@@ -48,10 +48,7 @@ namespace MakePlacePlugin.Gui
                     ImGui.PushStyleColor(ImGuiCol.HeaderHovered, PURPLE);
                     ImGui.PushStyleColor(ImGuiCol.HeaderActive, PURPLE);
 
-                    if (ImGui.CollapsingHeader("Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
-                    {
 
-                    }
                     if (ImGui.CollapsingHeader("Interior Furniture", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.PushID("interior");
@@ -65,7 +62,12 @@ namespace MakePlacePlugin.Gui
                         ImGui.PopID();
                     }
 
-
+                    if (ImGui.CollapsingHeader("Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("fixture");
+                        DrawFixtureList();
+                        ImGui.PopID();
+                    }
                     ImGui.EndChild();
                 }
                 ImGui.EndChild();
@@ -147,7 +149,7 @@ namespace MakePlacePlugin.Gui
             {
                 try
                 {
-                    MakePlacePlugin.HousePrinter.ExportLayout(Config.InteriorItemList);
+                    MakePlacePlugin.LayoutManager.ExportLayout();
                 }
                 catch (Exception e)
                 {
@@ -161,7 +163,7 @@ namespace MakePlacePlugin.Gui
             {
                 try
                 {
-                    LayoutExporter.ImportLayout(Config.SaveLocation);
+                    SaveLayoutManager.ImportLayout(Config.SaveLocation);
                     Plugin.MatchLayout();
                     Config.ResetRecord();
                     Log(String.Format("Imported {0} items", Config.InteriorItemList.Count));
@@ -182,7 +184,7 @@ namespace MakePlacePlugin.Gui
 
             if (ImGui.Button($"Get {inOut} Layout"))
             {
-                if (true || IsDecorMode())
+                if (IsDecorMode())
                 {
                     try
                     {
@@ -196,6 +198,8 @@ namespace MakePlacePlugin.Gui
                 else
                 {
                     LogError("Unable to load layouts outside of Layout mode");
+                    LogError("(Housing -> Indoor/Outdoor Furnishings)");
+
                 }
             }
 
@@ -272,6 +276,56 @@ namespace MakePlacePlugin.Gui
 
 
         }
+
+        private void DrawFixtureList()
+        {
+
+            try
+            {
+                var fixtureList = Config.Layout.interiorFixture;
+
+                if (ImGui.Button("Clear"))
+                {
+                    fixtureList.Clear();
+                    Config.Save();
+                }
+
+                ImGui.Columns(3, "FixtureList", true);
+                ImGui.Separator();
+
+                ImGui.Text("Level"); ImGui.NextColumn();
+                ImGui.Text("Fixture"); ImGui.NextColumn();
+                ImGui.Text("Item"); ImGui.NextColumn();
+
+                ImGui.Separator();
+
+                foreach (var fixture in fixtureList)
+                {
+                    ImGui.Text(fixture.level); ImGui.NextColumn();
+                    ImGui.Text(fixture.type); ImGui.NextColumn();
+
+
+                    var item = Data.GetExcelSheet<Item>().FirstOrDefault(row => row.Name.ToString().Equals(fixture.name));
+                    if (item != null)
+                    {
+                        DrawIcon(item.Icon, new Vector2(20, 20));
+                        ImGui.SameLine();
+                    }
+                    ImGui.Text(fixture.name); ImGui.NextColumn();
+
+                    ImGui.Separator();
+                }
+
+                ImGui.Columns(1);
+
+            }
+            catch (Exception e)
+            {
+                LogError(e.Message, e.StackTrace);
+            }
+
+        }
+
         private void DrawItemList(List<HousingItem> itemList)
         {
 

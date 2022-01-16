@@ -18,7 +18,7 @@ using System.Globalization;
 namespace MakePlacePlugin
 {
 
-    class Transform
+    public class Transform
     {
         public List<float> location { get; set; }
         public List<float> rotation { get; set; }
@@ -28,7 +28,7 @@ namespace MakePlacePlugin
 
 
 
-    struct SaveProperty
+    public struct SaveProperty
     {
         public string key { get; set; }
         public string value { get; set; }
@@ -40,19 +40,19 @@ namespace MakePlacePlugin
         }
     }
 
-    class Fixture
+    public class Fixture
     {
-        public string name { get; set; }
-        public uint itemId { get; set; }
-        public string level { get; set; }
-        public string type { get; set; }
+        public string name { get; set; } = "";
+        public uint itemId { get; set; } = 0;
+        public string level { get; set; } = "";
+        public string type { get; set; } = "";
     }
 
-    class Furniture
+    public class Furniture
     {
         public string name { get; set; }
 
-        public int itemId { get; set; }
+        public uint itemId { get; set; }
 
         public Transform transform { get; set; } = new Transform();
 
@@ -97,7 +97,7 @@ namespace MakePlacePlugin
         }
     }
 
-    class Layout
+    public class Layout
     {
         public Transform playerTransform { get; set; } = new Transform();
 
@@ -118,14 +118,14 @@ namespace MakePlacePlugin
     }
 
 
-    public class LayoutExporter
+    public class SaveLayoutManager
     {
         public ChatGui chat;
         public static Configuration Config;
 
         public static List<(Color, uint)> ColorList;
 
-        public LayoutExporter(ChatGui chatGui, Configuration config)
+        public SaveLayoutManager(ChatGui chatGui, Configuration config)
         {
             chat = chatGui;
             Config = config;
@@ -219,22 +219,19 @@ namespace MakePlacePlugin
             layoutScale = layout.exteriorScale;
             ImportFurniture(Config.ExteriorItemList, layout.exteriorFurniture);
 
+            Config.Layout = layout;
+
         }
 
-        public void ExportLayout(List<HousingItem> HousingItemList)
+        public static void LoadInteriorFixtues()
         {
+            var layout = Config.Layout;
 
-            Memory Mem = Memory.Instance;
-
-            HousingData Data = HousingData.Instance;
-
-            Layout save = new Layout();
-            save.playerTransform.location = new List<float> { 0, 0, 0 };
-            save.playerTransform.rotation = RotationToQuat(0);
+            layout.interiorFixture.Clear();
 
             for (var i = 0; i < IndoorAreaData.FloorMax; i++)
             {
-                var fixtures = Mem.GetInteriorCommonFixtures(i);
+                var fixtures = Memory.Instance.GetInteriorCommonFixtures(i);
                 if (fixtures.Length == 0) continue;
 
                 for (var j = 0; j < IndoorFloorData.PartsMax; j++)
@@ -243,12 +240,12 @@ namespace MakePlacePlugin
                     if (fixtures[j].Item == null) continue;
 
                     var fixture = new Fixture();
-                    fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)j).Replace(" ", "");
-                    fixture.level = Utils.GetFloorDescriptor((InteriorFloor)i).Replace(" ", "");
+                    fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
+                    fixture.level = Utils.GetFloorDescriptor((InteriorFloor)i);
                     fixture.name = fixtures[j].Item.Name.ToString();
                     fixture.itemId = fixtures[j].Item.RowId;
 
-                    save.interiorFixture.Add(fixture);
+                    layout.interiorFixture.Add(fixture);
                 }
             }
 
@@ -261,7 +258,7 @@ namespace MakePlacePlugin
 
                 if (placeName.Contains("Apartment"))
                 {
-                    save.houseSize = "Apartment";
+                    layout.houseSize = "Apartment";
 
                     var area = placeName.Replace("Apartment", "");
 
@@ -286,7 +283,7 @@ namespace MakePlacePlugin
                     var district = new Fixture();
                     district.type = "District";
                     district.name = area;
-                    save.interiorFixture.Add(district);
+                    layout.interiorFixture.Add(district);
 
                 }
                 else
@@ -313,32 +310,33 @@ namespace MakePlacePlugin
                             break;
                     }
 
-                    save.houseSize = sizeString;
+                    layout.houseSize = sizeString;
 
                     if (names.Length > 1)
                     {
                         var district = new Fixture();
                         district.type = "District";
                         district.name = names[1].Replace("The", "").Trim();
-                        save.interiorFixture.Add(district);
+                        layout.interiorFixture.Add(district);
 
                     }
                 }
             }
 
+        }
 
-            save.interiorScale = 1;
-
-
-            foreach (HousingItem gameObject in HousingItemList)
+        void RecordFurniture(List<Furniture> furnitureList, List<HousingItem> itemList)
+        {
+            HousingData Data = HousingData.Instance;
+            furnitureList.Clear();
+            foreach (HousingItem gameObject in itemList)
             {
 
                 var furniture = new Furniture();
 
                 furniture.name = gameObject.Name;
-
+                furniture.itemId = gameObject.ItemKey;
                 furniture.transform.location = new List<float> { scale(gameObject.X), scale(gameObject.Z), scale(gameObject.Y) };
-
                 furniture.transform.rotation = RotationToQuat(-gameObject.Rotate);
 
                 if (gameObject.Stain != 0 && Data.TryGetStain(gameObject.Stain, out var stainColor))
@@ -354,8 +352,25 @@ namespace MakePlacePlugin
 
                 }
 
-                save.interiorFurniture.Add(furniture);
+                furnitureList.Add(furniture);
             }
+
+        }
+
+        public void ExportLayout()
+        {
+
+
+
+            Layout save = Config.Layout;
+            save.playerTransform.location = new List<float> { 0, 0, 0 };
+            save.playerTransform.rotation = RotationToQuat(0);
+
+            save.interiorScale = 1;
+
+            RecordFurniture(save.interiorFurniture, Config.InteriorItemList);
+            RecordFurniture(save.exteriorFurniture, Config.ExteriorItemList);
+
 
             var encoderSettings = new TextEncoderSettings();
             encoderSettings.AllowCharacters('\'');
@@ -368,10 +383,11 @@ namespace MakePlacePlugin
             };
             string jsonString = JsonSerializer.Serialize(save, options);
 
-            string pattern = @"\s+(-?(?:[0-9]*[.])?[0-9]+(?:E-[0-9]+)?,?)\s*(?=\s)";
+            string pattern = @"\s+(-?(?:[0-9]*[.])?[0-9]+(?:E-[0-9]+)?,?)\s*(?=\s[-\d\]])";
             string result = Regex.Replace(jsonString, pattern, " $1");
 
             File.WriteAllText(Config.SaveLocation, result);
+
 
             Log("Finished exporting layout");
         }

@@ -18,10 +18,9 @@ namespace MakePlacePlugin
         public List<int> GroupingList = new List<int>();
         public bool PlaceAnywhere = false;
 
-        internal Layout Layout = new Layout();
+        public Layout Layout = new Layout();
         public List<HousingItem> InteriorItemList = new List<HousingItem>();
         public List<HousingItem> ExteriorItemList = new List<HousingItem>();
-
 
         public List<string> Tags = new List<string>();
         public List<bool> TagsSelectList = new List<bool>();
