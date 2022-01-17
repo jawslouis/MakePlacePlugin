@@ -14,15 +14,15 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 * Search for "MakePlace Plugin" and click "Install"
 
 ## Usage
-Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode (Housing -> Indoor Furnishings. Click on the Rotate button).
+Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode (Housing -> Indoor/Outdoor Furnishings. Click on the Rotate button).
 
 ![Settings](screenshot.png?raw=true)  
 
 * **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
-* **Save**: Saves the *currently loaded* layout to file. You start with a blank layout each time you enter the house, and will need to either import a layout or load the current house layout. 
+* **Save**: Saves the *currently loaded* interior and exterior layout to file. You will need to load the interior/exterior layout before you can save it.
 * **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
-* **House Layout**: Loads the current furniture layout in the house
-* **Apply**: Applies the layout position to all applicable furniture (those that are not grayed out). 
+* **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
+* **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out).
 * **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
 
 ###

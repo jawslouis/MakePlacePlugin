@@ -89,9 +89,6 @@ namespace MakePlacePlugin
             ClientState.TerritoryChanged -= TerritoryChanged;
             CommandManager.RemoveHandler("/makeplace");
             Gui?.Dispose();
-            Interface?.Dispose();
-
-
 
         }
 
