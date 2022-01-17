@@ -20,8 +20,8 @@ namespace MakePlacePlugin
 
     public class Transform
     {
-        public List<float> location { get; set; }
-        public List<float> rotation { get; set; }
+        public List<float> location { get; set; } = new List<float> { 0, 0, 0 };
+        public List<float> rotation { get; set; } = new List<float> { 0, 0, 0, 1 };
         public List<float> scale { get; set; } = new List<float> { 1, 1, 1 };
 
     }
@@ -223,7 +223,7 @@ namespace MakePlacePlugin
 
         }
 
-        public static void LoadInteriorFixtues()
+        public static void LoadInteriorFixtures()
         {
             var layout = Config.Layout;
 
@@ -359,12 +359,8 @@ namespace MakePlacePlugin
 
         public void ExportLayout()
         {
-
-
-
             Layout save = Config.Layout;
-            save.playerTransform.location = new List<float> { 0, 0, 0 };
-            save.playerTransform.rotation = RotationToQuat(0);
+            save.playerTransform = new Transform();
 
             save.interiorScale = 1;
 

@@ -41,10 +41,10 @@ namespace MakePlacePlugin
         {
             return floor switch
             {
-                InteriorFloor.Ground => "GroundFloor",
+                InteriorFloor.Ground => "Ground Floor",
                 InteriorFloor.Basement => "Basement",
-                InteriorFloor.Upstairs => "UpperFloor",
-                InteriorFloor.External => "Main",
+                InteriorFloor.Upstairs => "Upper Floor",
+                InteriorFloor.External => "",
                 _ => "Unknown"
             };
         }
@@ -68,31 +68,6 @@ namespace MakePlacePlugin
         {
             var floatColor = StainToVector4(color.Color);
             ImGui.ColorButton($"##{id}", floatColor, ImGuiColorEditFlags.NoTooltip, size);
-        }
-
-        private static bool Collides(Vector2 origin, Vector2 bounds, Vector2 pos)
-        {
-            return pos.X > origin.X && pos.X < bounds.X &&
-                   pos.Y > origin.Y && pos.Y < bounds.Y;
-        }
-
-        private static void ColorTooltip(string text, Vector4 color)
-        {
-            ImGui.BeginTooltip();
-            var size = new Vector2(ImGui.GetFontSize() * 4 + ImGui.GetStyle().FramePadding.Y * 2,
-                ImGui.GetFontSize() * 4 + ImGui.GetStyle().FramePadding.Y * 2);
-            var cr = (int)(color.X * 255);
-            var cg = (int)(color.Y * 255);
-            var cb = (int)(color.Z * 255);
-            var ca = (int)(color.W * 255);
-            ImGui.ColorButton("##preview", color, ImGuiColorEditFlags.None, size);
-            ImGui.SameLine();
-            ImGui.Text(
-                $"{text}\n" +
-                $"#{cr:X2}{cb:X2}{cg:X2}{ca:X2}\n" +
-                $"R: {cr}, G: {cg}, B: {cg}, A: {ca}\n" +
-                $"({color.X:F3}, {color.Y:F3}, {color.Z:F3}, {color.W:F3})");
-            ImGui.EndTooltip();
         }
 
         public static Vector4 StainToVector4(uint stainColor)

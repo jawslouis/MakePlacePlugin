@@ -14,6 +14,7 @@ using Lumina.Excel.GeneratedSheets;
 using Lumina.Text;
 using MakePlacePlugin.Gui;
 using MakePlacePlugin.Objects;
+using MakePlacePlugin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -329,12 +330,30 @@ namespace MakePlacePlugin
         {
             Config.ExteriorItemList.Clear();
 
-            var outdoorMgrAddr = (IntPtr)Memory.Instance.HousingModule->outdoorTerritory;
-            var objectListAddr = outdoorMgrAddr + 0x10;
+            var mgr = Memory.Instance.HousingModule->outdoorTerritory;
 
+            var outdoorMgrAddr = (IntPtr)mgr;
+            var objectListAddr = outdoorMgrAddr + 0x10;
             var activeObjList = objectListAddr + 0x8968;
 
             var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
+
+            var plotLocation = Plots.Map["Goblet"][mgr->Plot + 1];
+            var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, plotLocation.rotation);
+
+            switch (plotLocation.size)
+            {
+                case "s":
+                    Config.Layout.houseSize = "Small";
+                    break;
+                case "m":
+                    Config.Layout.houseSize = "Medium";
+                    break;
+                case "l":
+                    Config.Layout.houseSize = "Large";
+                    break;
+
+            }
 
             for (int i = 0; i < exteriorItems->Size; i++)
             {
@@ -343,18 +362,21 @@ namespace MakePlacePlugin
 
                 var itemRow = Data.GetExcelSheet<Item>().GetRow(item->ItemID);
 
+                var itemInfo = HousingObjectManager.GetItemInfo(mgr, i);
 
-                var itemPosAddr = objectListAddr + (0x30 * (i + 20));
-                var itemInfo = (HousingItemInfo*)itemPosAddr;
+                var location = new Vector3(itemInfo->X, itemInfo->Y, itemInfo->Z);
+
+                var newLocation = Vector3.Transform(location - plotLocation.ToVector(), rotateVector);
+
 
 
                 var housingItem = new HousingItem(
                     itemRow.RowId,
                     item->Stain,
-                    itemInfo->X,
-                    itemInfo->Y,
-                    itemInfo->Z,
-                    itemInfo->Rotation,
+                    newLocation.X,
+                    newLocation.Y,
+                    newLocation.Z,
+                    itemInfo->Rotation + plotLocation.rotation,
                     itemRow.Name
                 );
 
@@ -368,7 +390,6 @@ namespace MakePlacePlugin
 
                 housingItem.ItemStruct = (IntPtr)gameObj->Item;
 
-                var gameObjPtr = gameObj != null ? (IntPtr)gameObj->Item : IntPtr.Zero;
 
                 Config.ExteriorItemList.Add(housingItem);
             }
@@ -380,7 +401,7 @@ namespace MakePlacePlugin
         {
             List<HousingGameObject> dObjects;
 
-            SaveLayoutManager.LoadInteriorFixtues();
+            SaveLayoutManager.LoadInteriorFixtures();
 
             Memory.Instance.TryGetNameSortedHousingGameObjectList(out dObjects);
 
@@ -477,6 +498,7 @@ namespace MakePlacePlugin
                 if (string.IsNullOrEmpty(args) || args.Equals("config", StringComparison.OrdinalIgnoreCase))
                 {
                     Gui.ConfigWindow.Visible = !Gui.ConfigWindow.Visible;
+
                 }
             }
             catch (Exception e)

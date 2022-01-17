@@ -172,6 +172,10 @@ namespace MakePlacePlugin
     {
         [FieldOffset(0x0010)] public IntPtr ObjectList;
         [FieldOffset(0x8980)] public fixed ulong Objects[400];
+
+        [FieldOffset(0x96A2)] public byte Ward;
+        [FieldOffset(0x96A8)] public byte Plot;
+
         [FieldOffset(0x96E8)] public HousingGameObject* IndoorActiveObject2;
         [FieldOffset(0x96F0)] public HousingGameObject* IndoorHoverObject;
         [FieldOffset(0x96F8)] public HousingGameObject* IndoorActiveObject;
@@ -179,6 +183,12 @@ namespace MakePlacePlugin
         [FieldOffset(0x9AC0)] public HousingGameObject* OutdoorHoverObject;
         [FieldOffset(0x9AC8)] public HousingGameObject* OutdoorActiveObject;
 
+        public static HousingItemInfo* GetItemInfo(HousingObjectManager* mgr, int index)
+        {
+            var objectListAddr = (IntPtr)mgr + 0x10;
+
+            return (HousingItemInfo*)(objectListAddr + (0x30 * (index + 20)));
+        }
     }
 
     [StructLayout(LayoutKind.Explicit)]
