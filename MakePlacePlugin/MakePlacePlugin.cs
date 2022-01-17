@@ -338,7 +338,19 @@ namespace MakePlacePlugin
 
             var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
 
-            var plotLocation = Plots.Map["Goblet"][mgr->Plot + 1];
+
+            var territoryId = Memory.Instance.GetTerritoryTypeId();
+            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+
+            if (row == null)
+            {
+                LogError("Cannot identify territory");
+                return;
+            }
+
+            var placeName = row.PlaceName.Value.Name.ToString();
+
+            var plotLocation = Plots.Map[placeName][mgr->Plot + 1];
             var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, plotLocation.rotation);
 
             switch (plotLocation.size)
@@ -498,7 +510,6 @@ namespace MakePlacePlugin
                 if (string.IsNullOrEmpty(args) || args.Equals("config", StringComparison.OrdinalIgnoreCase))
                 {
                     Gui.ConfigWindow.Visible = !Gui.ConfigWindow.Visible;
-
                 }
             }
             catch (Exception e)
