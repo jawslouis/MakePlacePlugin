@@ -36,6 +36,7 @@ namespace MakePlacePlugin.Gui
             ImGui.SetNextWindowSize(new Vector2(530, 450), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin($"{Plugin.Name}", ref WindowVisible, ImGuiWindowFlags.NoScrollWithMouse))
             {
+                ImGui.PopStyleColor(3);
                 ImGui.End();
                 return;
             }
@@ -68,6 +69,8 @@ namespace MakePlacePlugin.Gui
                         DrawFixtureList();
                         ImGui.PopID();
                     }
+
+                    ImGui.PopStyleColor(3);
                     ImGui.EndChild();
                 }
                 ImGui.EndChild();
