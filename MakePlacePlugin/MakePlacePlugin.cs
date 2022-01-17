@@ -77,6 +77,8 @@ namespace MakePlacePlugin
 
         public static bool logHousingDetour = false;
 
+        internal static Location PlotLocation = new Location();
+
         public void Dispose()
         {
             foreach (var t in this.TextureDictionary)
@@ -116,7 +118,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.0 initialized");
+            PluginLog.Log("MakePlace Plugin v2.1 initialized");
         }
         public void Initialize()
         {
@@ -197,6 +199,11 @@ namespace MakePlacePlugin
             try
             {
 
+                if (Memory.Instance.IsOutdoors())
+                {
+                    GetPlotLocation();
+                }
+
                 while (ItemsToPlace.Count > 0)
                 {
                     var item = ItemsToPlace.First();
@@ -252,6 +259,14 @@ namespace MakePlacePlugin
             Vector3 rotation = new Vector3();
 
             rotation.Y = (float)(rowItem.Rotate * 180 / Math.PI);
+
+            if (MemInstance.IsOutdoors())
+            {
+                var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -PlotLocation.rotation);
+                position = Vector3.Transform(position, rotateVector) + PlotLocation.ToVector();
+                rotation.Y = (float)((rowItem.Rotate - PlotLocation.rotation )* 180 / Math.PI);
+            }
+
             MemInstance.WritePosition(position);
             MemInstance.WriteRotation(rotation);
         }
@@ -259,7 +274,15 @@ namespace MakePlacePlugin
         public void ApplyLayout()
         {
             Log("Applying layout");
-            ItemsToPlace = new List<HousingItem>(Config.InteriorItemList);
+
+            if (Memory.Instance.IsOutdoors())
+            {
+                ItemsToPlace = new List<HousingItem>(Config.ExteriorItemList);
+            }
+            else
+            {
+                ItemsToPlace = new List<HousingItem>(Config.InteriorItemList);
+            }
 
             var thread = new Thread(PlaceNextItem);
             thread.Start();
@@ -322,6 +345,23 @@ namespace MakePlacePlugin
 
         }
 
+        public unsafe void GetPlotLocation()
+        {
+            var mgr = Memory.Instance.HousingModule->outdoorTerritory;
+            var territoryId = Memory.Instance.GetTerritoryTypeId();
+            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+
+            if (row == null)
+            {
+                LogError("Cannot identify territory");
+                return;
+            }
+
+            var placeName = row.PlaceName.Value.Name.ToString();
+
+            PlotLocation = Plots.Map[placeName][mgr->Plot + 1];
+        }
+
 
         public unsafe void LoadExterior()
         {
@@ -335,22 +375,11 @@ namespace MakePlacePlugin
 
             var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
 
+            GetPlotLocation();
+           
+            var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, PlotLocation.rotation);
 
-            var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
-
-            if (row == null)
-            {
-                LogError("Cannot identify territory");
-                return;
-            }
-
-            var placeName = row.PlaceName.Value.Name.ToString();
-
-            var plotLocation = Plots.Map[placeName][mgr->Plot + 1];
-            var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, plotLocation.rotation);
-
-            switch (plotLocation.size)
+            switch (PlotLocation.size)
             {
                 case "s":
                     Config.Layout.houseSize = "Small";
@@ -375,9 +404,7 @@ namespace MakePlacePlugin
 
                 var location = new Vector3(itemInfo->X, itemInfo->Y, itemInfo->Z);
 
-                var newLocation = Vector3.Transform(location - plotLocation.ToVector(), rotateVector);
-
-
+                var newLocation = Vector3.Transform(location - PlotLocation.ToVector(), rotateVector);
 
                 var housingItem = new HousingItem(
                     itemRow.RowId,
@@ -385,7 +412,7 @@ namespace MakePlacePlugin
                     newLocation.X,
                     newLocation.Y,
                     newLocation.Z,
-                    itemInfo->Rotation + plotLocation.rotation,
+                    itemInfo->Rotation + PlotLocation.rotation,
                     itemRow.Name
                 );
 
