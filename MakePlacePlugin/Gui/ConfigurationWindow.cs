@@ -164,16 +164,27 @@ namespace MakePlacePlugin.Gui
             ImGui.SameLine();
             if (ImGui.Button("Load"))
             {
-                try
+
+                if (!IsDecorMode())
                 {
-                    SaveLayoutManager.ImportLayout(Config.SaveLocation);
-                    Plugin.MatchLayout();
-                    Config.ResetRecord();
-                    Log(String.Format("Imported {0} items", Config.InteriorItemList.Count));
+                    LogError("Unable to load layouts outside of Layout mode");
+                    LogError("(Housing -> Indoor/Outdoor Furnishings)");
+
                 }
-                catch (Exception e)
+                else
                 {
-                    LogError($"Load Error: {e.Message}", e.StackTrace);
+
+                    try
+                    {
+                        SaveLayoutManager.ImportLayout(Config.SaveLocation);
+                        Plugin.MatchLayout();
+                        Config.ResetRecord();
+                        Log(String.Format("Imported {0} items", Config.InteriorItemList.Count + Config.ExteriorItemList.Count));
+                    }
+                    catch (Exception e)
+                    {
+                        LogError($"Load Error: {e.Message}", e.StackTrace);
+                    }
                 }
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from file");

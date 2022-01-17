@@ -156,7 +156,36 @@ namespace MakePlacePlugin
 
         public unsafe List<HousingGameObject> GetExteriorPlacedObjects()
         {
+
+            var mgr = Memory.Instance.HousingModule->outdoorTerritory;
+
+            var outdoorMgrAddr = (IntPtr)mgr;
+            var objectListAddr = outdoorMgrAddr + 0x10;
+            var activeObjList = objectListAddr + 0x8968;
+
+
+            var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
+
             var placedObjects = new List<HousingGameObject>();
+
+            for (int i = 0; i < exteriorItems->Size; i++)
+            {
+                var item = exteriorItems->GetInventorySlot(i);
+                if (item == null || item->ItemID == 0) continue;
+
+                var itemInfo = HousingObjectManager.GetItemInfo(mgr, i);
+
+                var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, itemInfo->ObjectIndex);
+
+                if (gameObj == null)
+                {
+                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, (ushort)(i + 20));
+                }
+
+                placedObjects.Add(*gameObj);
+            }
+
+
 
             return placedObjects;
         }

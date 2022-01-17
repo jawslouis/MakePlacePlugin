@@ -140,7 +140,7 @@ namespace MakePlacePlugin
 
         internal delegate IntPtr GetActiveObjectDelegate(IntPtr ObjList, uint index);
 
-        internal IntPtr GetObjectFromIndex(IntPtr ObjList, uint index)
+        internal static IntPtr GetObjectFromIndex(IntPtr ObjList, uint index)
         {
 
             var result = GetObjectFromIndexHook.Original(ObjList, index);
@@ -151,7 +151,7 @@ namespace MakePlacePlugin
         internal static HookWrapper<GetObjectDelegate> GetGameObjectHook;
         internal static HookWrapper<GetActiveObjectDelegate> GetObjectFromIndexHook;
 
-        internal IntPtr GetGameObject(IntPtr ObjList, ushort index)
+        internal static IntPtr GetGameObject(IntPtr ObjList, ushort index)
         {
             return GetGameObjectHook.Original(ObjList, index);
         }
@@ -264,7 +264,7 @@ namespace MakePlacePlugin
             {
                 var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -PlotLocation.rotation);
                 position = Vector3.Transform(position, rotateVector) + PlotLocation.ToVector();
-                rotation.Y = (float)((rowItem.Rotate - PlotLocation.rotation )* 180 / Math.PI);
+                rotation.Y = (float)((rowItem.Rotate - PlotLocation.rotation) * 180 / Math.PI);
             }
 
             MemInstance.WritePosition(position);
@@ -295,7 +295,9 @@ namespace MakePlacePlugin
             List<HousingGameObject> allObjects;
             Memory Mem = Memory.Instance;
 
-            if (Mem.IsIndoors())
+            var indoors = Mem.IsIndoors();
+
+            if (indoors)
             {
                 bool dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out allObjects);
             }
@@ -304,18 +306,32 @@ namespace MakePlacePlugin
                 allObjects = Mem.GetExteriorPlacedObjects();
             }
 
-
             List<HousingGameObject> unmatched = new List<HousingGameObject>();
+
+            int count = 0;
 
             // first we find perfect match
             foreach (var gameObject in allObjects)
             {
 
                 uint furnitureKey = gameObject.housingRowId;
-                var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
-                var itemKey = furniture.Item.Value.RowId;
 
-                var houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+
+                HousingItem houseItem = null;
+                if (indoors)
+                {
+                    var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
+                    var itemKey = furniture.Item.Value.RowId;
+                    houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                }
+                else
+                {
+                    var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
+                    var itemKey = furniture.Item.Value.RowId;
+                    houseItem = Config.ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                }
+
+
                 if (houseItem == null)
                 {
                     unmatched.Add(gameObject);
@@ -330,10 +346,19 @@ namespace MakePlacePlugin
             {
 
                 uint furnitureKey = gameObject.housingRowId;
-                var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
-                var itemKey = furniture.Item.Value.RowId;
-
-                var houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                HousingItem houseItem = null;
+                if (indoors)
+                {
+                    var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
+                    var itemKey = furniture.Item.Value.RowId;
+                    houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                }
+                else
+                {
+                    var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
+                    var itemKey = furniture.Item.Value.RowId;
+                    houseItem = Config.ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                }
                 if (houseItem == null)
                 {
                     continue;
@@ -376,7 +401,7 @@ namespace MakePlacePlugin
             var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
 
             GetPlotLocation();
-           
+
             var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, PlotLocation.rotation);
 
             switch (PlotLocation.size)
