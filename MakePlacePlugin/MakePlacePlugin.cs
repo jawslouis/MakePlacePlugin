@@ -118,7 +118,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.1 initialized");
+            PluginLog.Log("MakePlace Plugin v2.2 initialized");
         }
         public void Initialize()
         {
@@ -382,7 +382,7 @@ namespace MakePlacePlugin
                 return;
             }
 
-            var placeName = row.PlaceName.Value.Name.ToString();
+            var placeName = row.Name.ToString();
 
             PlotLocation = Plots.Map[placeName][mgr->Plot + 1];
         }
@@ -417,6 +417,8 @@ namespace MakePlacePlugin
                     break;
 
             }
+
+            Config.Layout.exteriorScale = 1;
 
             for (int i = 0; i < exteriorItems->Size; i++)
             {

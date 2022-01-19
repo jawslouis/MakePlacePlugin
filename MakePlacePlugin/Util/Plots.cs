@@ -34,7 +34,7 @@ namespace MakePlacePlugin.Util
     {
 
         public static Dictionary<string, Dictionary<int, Location>> Map = new Dictionary<string, Dictionary<int, Location>> {
-            {"Shirogane", new Dictionary<int, Location>{
+            {"e1h1", new Dictionary<int, Location>{
                 { 01, new Location(-34f, 2.02f, 116f, -1.308997f, "m")},
                 { 02, new Location(-27f, 14.52f, 75f, -1.308997f, "s")},
                 { 03, new Location(5f, 6.02f, 125f, -1.134464f, "s")},
@@ -96,7 +96,7 @@ namespace MakePlacePlugin.Util
                 { 59, new Location(-611f, 26.62f, -820f, 2.70526f, "s")},
                 { 60, new Location(-582f, 30.02f, -863f, 0.7853982f, "l")}
             } },
-            {"The Lavender Beds", new Dictionary<int, Location>{
+            {"f1h1", new Dictionary<int, Location>{
 
                 { 01, new Location(144f, 46f, -78.375f, 1.570451f, "m")},
                 { 02, new Location(78.5f, 51f, -100f, 0f, "s")},
@@ -160,7 +160,7 @@ namespace MakePlacePlugin.Util
                 { 60, new Location(-554f, 56f, -754.5f, 1.570796f, "m")}
             } },
 
-            {"Mist", new Dictionary<int, Location>{
+            {"s1h1", new Dictionary<int, Location>{
                 { 01, new Location(-72f, 40f, -108f, -1.570451f, "m")},
                 { 02, new Location(-144f, 36f, -100f, -0.7853982f, "l")},
                 { 03, new Location(-96f, 32f, -60f, 3.141593f, "s")},
@@ -222,7 +222,7 @@ namespace MakePlacePlugin.Util
                 { 59, new Location(-768f, 38f, -508f, 3.141247f, "m")},
                 { 60, new Location(-804f, 20f, -564f, -2.094395f, "m")}
             } },
-            {"The Goblet", new Dictionary<int, Location>{
+            {"w1h1", new Dictionary<int, Location>{
                 { 01, new Location(-38.00001f, -4f, -110f, 2.86234f, "s")},
                 { 02, new Location(-64.00002f, 4f, -98.00002f, -0.6108653f, "s")},
                 { 03, new Location(-85.64f, 6f, -80.02f, -0.8834857f, "s")},

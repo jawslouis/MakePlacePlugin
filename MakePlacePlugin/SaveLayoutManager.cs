@@ -42,10 +42,10 @@ namespace MakePlacePlugin
 
     public class Fixture
     {
-        public string name { get; set; } = "";
-        public uint itemId { get; set; } = 0;
         public string level { get; set; } = "";
         public string type { get; set; } = "";
+        public string name { get; set; } = "";
+        public uint itemId { get; set; } = 0;
     }
 
     public class Furniture
@@ -174,6 +174,8 @@ namespace MakePlacePlugin
             {
                 var itemRow = ItemSheet.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
 
+                if (itemRow == null) itemRow = ItemSheet.FirstOrDefault(row => row.RowId == furniture.itemId);
+
                 if (itemRow == null) continue;
 
                 var r = furniture.transform.rotation;
@@ -250,77 +252,63 @@ namespace MakePlacePlugin
             }
 
             var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = MakePlacePlugin.Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
             if (row != null)
             {
-                var placeName = row.PlaceName.Value.Name.ToString();
+                var placeName = row.Name.ToString();
 
-                if (placeName.Contains("Apartment"))
+                var sizeName = placeName.Substring(1, 3);
+
+                switch (sizeName)
                 {
-                    layout.houseSize = "Apartment";
-
-                    var area = placeName.Replace("Apartment", "");
-
-                    switch (area.Trim())
-                    {
-                        case "Sultana's Breath":
-                            area = "Goblet";
-                            break;
-                        case "Topmast":
-                            area = "Mist";
-                            break;
-                        case "Lily Hills":
-                            area = "Lavender Beds";
-                            break;
-                        case "Kobai Goten":
-                            area = "Shirogane";
-                            break;
-                        default:
-                            break;
-                    }
-
-                    var district = new Fixture();
-                    district.type = "District";
-                    district.name = area;
-                    layout.interiorFixture.Add(district);
-
+                    case "1i1":
+                        layout.houseSize = "Small";
+                        break;
+                    case "1i2":
+                        layout.houseSize = "Medium";
+                        break;
+                    case "1i3":
+                        layout.houseSize = "Large";
+                        break;
+                    case "1i4":
+                        layout.houseSize = "Apartment";
+                        break;
+                    default:
+                        break;
                 }
-                else
+
+
+
+
+                var district = new Fixture();
+                district.type = "District";
+
+                var districtName = placeName.Substring(0, 2);
+
+                switch (districtName)
                 {
-                    var names = placeName.Split('-');
-
-                    string sizeString = "";
-
-                    switch (names[0].Trim())
-                    {
-                        case "Private Cottage":
-                            sizeString = "Small";
-                            break;
-                        case "Private House":
-                            sizeString = "Medium";
-                            break;
-                        case "Private Mansion":
-                            sizeString = "Large";
-                            break;
-                        case "Private Chambers":
-                            sizeString = "Apartment";
-                            break;
-                        default:
-                            break;
-                    }
-
-                    layout.houseSize = sizeString;
-
-                    if (names.Length > 1)
-                    {
-                        var district = new Fixture();
-                        district.type = "District";
-                        district.name = names[1].Replace("The", "").Trim();
-                        layout.interiorFixture.Add(district);
-
-                    }
+                    case "s1":
+                        district.name = "Mist";
+                        break;
+                    case "f1":
+                        district.name = "Lavender Beds";
+                        break;
+                    case "w1":
+                        district.name = "Goblet";
+                        break;
+                    case "e1":
+                        district.name = "Shirogane";
+                        break;
+                    default:
+                        break;
                 }
+
+
+
+                layout.interiorFixture.Add(district);
+
+
             }
 
         }
