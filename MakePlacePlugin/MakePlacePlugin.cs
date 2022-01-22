@@ -118,7 +118,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.2 initialized");
+            PluginLog.Log("MakePlace Plugin v2.3 initialized");
         }
         public void Initialize()
         {
@@ -426,8 +426,10 @@ namespace MakePlacePlugin
                 if (item == null || item->ItemID == 0) continue;
 
                 var itemRow = Data.GetExcelSheet<Item>().GetRow(item->ItemID);
+                if (itemRow == null) continue;
 
                 var itemInfo = HousingObjectManager.GetItemInfo(mgr, i);
+                if (itemInfo == null) continue;
 
                 var location = new Vector3(itemInfo->X, itemInfo->Y, itemInfo->Z);
 
@@ -451,8 +453,10 @@ namespace MakePlacePlugin
                     gameObj = (HousingGameObject*)GetGameObject(objectListAddr, (ushort)(i + 20));
                 }
 
-                housingItem.ItemStruct = (IntPtr)gameObj->Item;
-
+                if (gameObj != null)
+                {
+                    housingItem.ItemStruct = (IntPtr)gameObj->Item;
+                }
 
                 Config.ExteriorItemList.Add(housingItem);
             }
