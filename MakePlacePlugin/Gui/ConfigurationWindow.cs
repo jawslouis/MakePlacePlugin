@@ -221,10 +221,17 @@ namespace MakePlacePlugin.Gui
 
             if (ImGui.Button($"Apply {inOut} Layout"))
             {
-                if (IsDecorMode() && MakePlacePlugin.IsRotateMode())
+                if (IsDecorMode() && IsRotateMode())
                 {
-                    Plugin.ApplyLayout();
-
+                    try
+                    {
+                        Plugin.MatchLayout();
+                        Plugin.ApplyLayout();
+                    }
+                    catch (Exception e)
+                    {
+                        LogError($"Error: {e.Message}", e.StackTrace);
+                    }
                 }
                 else
                 {
