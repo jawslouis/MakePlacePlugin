@@ -187,7 +187,7 @@ namespace MakePlacePlugin
         {
             var objectListAddr = (IntPtr)mgr + 0x10;
 
-            return (HousingItemInfo*)(objectListAddr + (0x30 * (index + 20)));
+            return (HousingItemInfo*)(objectListAddr + (0x30 * index));
         }
     }
 

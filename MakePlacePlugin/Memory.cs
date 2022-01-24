@@ -173,16 +173,22 @@ namespace MakePlacePlugin
                 var item = exteriorItems->GetInventorySlot(i);
                 if (item == null || item->ItemID == 0) continue;
 
-                var itemInfo = HousingObjectManager.GetItemInfo(mgr, i);
+                var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
+                var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
+
+                if (itemInfo == null) continue;
 
                 var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, itemInfo->ObjectIndex);
 
                 if (gameObj == null)
                 {
-                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, (ushort)(i + 20));
+                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, itemInfoIndex);
                 }
 
-                placedObjects.Add(*gameObj);
+                if (gameObj != null)
+                {
+                    placedObjects.Add(*gameObj);
+                }
             }
 
 

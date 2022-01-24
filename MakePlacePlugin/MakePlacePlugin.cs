@@ -103,7 +103,6 @@ namespace MakePlacePlugin
             Config.Initialize(Interface);
             Config.Save();
 
-            // LoadOffset();
             Initialize();
 
             CommandManager.AddHandler("/makeplace", new CommandInfo(CommandHandler)
@@ -118,7 +117,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.3 initialized");
+            PluginLog.Log("MakePlace Plugin v2.4 initialized");
         }
         public void Initialize()
         {
@@ -135,14 +134,27 @@ namespace MakePlacePlugin
 
             GetObjectFromIndexHook = HookManager.Hook<GetActiveObjectDelegate>("81 fa 90 01 00 00 75 08 48 8b 81 88 0c 00 00 c3 0f b7 81 90 0c 00 00 3b d0 72 03 33 c0 c3", GetObjectFromIndex);
 
+            GetYardIndexHook = HookManager.Hook<GetIndexDelegate>("48 89 6c 24 18 56 48 83 ec 20 0f b6 ea 0f b6 f1 84 c9 79 22 0f b6 c1", GetYardIndex);
+
 
         }
+
+        internal static ushort GetYardIndex(byte plotNumber, byte inventoryIndex)
+        {
+            var result = GetYardIndexHook.Original(plotNumber, inventoryIndex);
+            return result;
+        }
+
+
+
+        internal delegate ushort GetIndexDelegate(byte type, byte objStruct);
+        internal static HookWrapper<GetIndexDelegate> GetYardIndexHook;
+
 
         internal delegate IntPtr GetActiveObjectDelegate(IntPtr ObjList, uint index);
 
         internal static IntPtr GetObjectFromIndex(IntPtr ObjList, uint index)
         {
-
             var result = GetObjectFromIndexHook.Original(ObjList, index);
             return result;
         }
@@ -428,8 +440,13 @@ namespace MakePlacePlugin
                 var itemRow = Data.GetExcelSheet<Item>().GetRow(item->ItemID);
                 if (itemRow == null) continue;
 
-                var itemInfo = HousingObjectManager.GetItemInfo(mgr, i);
-                if (itemInfo == null) continue;
+                var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
+
+                var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
+                if (itemInfo == null)
+                {
+                    continue;
+                }
 
                 var location = new Vector3(itemInfo->X, itemInfo->Y, itemInfo->Z);
 
@@ -450,8 +467,11 @@ namespace MakePlacePlugin
 
                 if (gameObj == null)
                 {
-                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, (ushort)(i + 20));
+                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, itemInfoIndex);
                 }
+
+
+
 
                 if (gameObj != null)
                 {
