@@ -13,12 +13,12 @@ namespace MakePlacePlugin
             return partsType switch
             {
                 ExteriorPartsType.Roof => "Roof",
-                ExteriorPartsType.Walls => "Walls",
-                ExteriorPartsType.Windows => "Windows",
+                ExteriorPartsType.Walls => "Exterior Wall",
+                ExteriorPartsType.Windows => "Window",
                 ExteriorPartsType.Door => "Door",
-                ExteriorPartsType.RoofOpt => "Roof (opt)",
-                ExteriorPartsType.WallOpt => "Wall (opt)",
-                ExteriorPartsType.SignOpt => "Signboard (opt)",
+                ExteriorPartsType.RoofOpt => "Roof Decor",
+                ExteriorPartsType.WallOpt => "Exterior Wall Decor",
+                ExteriorPartsType.SignOpt => "Signboard",
                 ExteriorPartsType.Fence => "Fence",
                 _ => "Unknown"
             };

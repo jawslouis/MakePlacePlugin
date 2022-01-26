@@ -117,7 +117,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.5 initialized");
+            PluginLog.Log("MakePlace Plugin v2.6 initialized");
         }
         public void Initialize()
         {
@@ -310,14 +310,16 @@ namespace MakePlacePlugin
             if (indoors)
             {
                 bool dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out allObjects);
-                Config.InteriorItemList.ForEach(item =>{
+                Config.InteriorItemList.ForEach(item =>
+                {
                     item.ItemStruct = IntPtr.Zero;
-               });
+                });
             }
             else
             {
                 allObjects = Mem.GetExteriorPlacedObjects();
-                Config.ExteriorItemList.ForEach(item => {
+                Config.ExteriorItemList.ForEach(item =>
+                {
                     item.ItemStruct = IntPtr.Zero;
                 });
             }
@@ -406,6 +408,9 @@ namespace MakePlacePlugin
 
         public unsafe void LoadExterior()
         {
+
+            SaveLayoutManager.LoadExteriorFixtures();
+
             Config.ExteriorItemList.Clear();
 
             var mgr = Memory.Instance.HousingModule->outdoorTerritory;

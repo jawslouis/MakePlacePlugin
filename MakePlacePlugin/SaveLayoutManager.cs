@@ -208,7 +208,6 @@ namespace MakePlacePlugin
 
             foreach (var stain in StainList)
             {
-                var color = Utils.StainToVector4(stain.Color);
                 ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
             }
 
@@ -223,6 +222,47 @@ namespace MakePlacePlugin
 
             Config.Layout = layout;
 
+        }
+
+        public unsafe static void LoadExteriorFixtures()
+        {
+            var exterior = Config.Layout.exteriorFixture;
+            exterior.Clear();
+
+            if (!Memory.Instance.GetHousingController(out var controller)) return;
+
+            var mgr = Memory.Instance.HousingModule->GetCurrentManager();
+
+            var customize = controller.Houses(mgr->Plot);
+
+            var housingData = HousingData.Instance;
+
+            var roof = customize.GetPart(ExteriorPartsType.Roof);
+            if (roof.FixtureKey != 0 && housingData.IsUnitedExteriorPart(roof.FixtureKey, out var roofItem))
+            {
+                var fixture = new Fixture();
+                fixture.type = Utils.GetExteriorPartDescriptor(ExteriorPartsType.Walls);
+                fixture.name = roofItem.Name.ToString();
+                fixture.itemId = roofItem.RowId;
+                exterior.Add(fixture);
+
+            }
+            else
+            {
+                for (var i = 0; i < HouseCustomize.PartsMax; i++)
+                {
+                    var type = (ExteriorPartsType)i;
+                    var part = customize.GetPart(type);
+                    if (!housingData.TryGetItem(part.FixtureKey, out var item)) continue;
+
+                    var fixture = new Fixture();
+                    fixture.type = Utils.GetExteriorPartDescriptor(type);
+                    fixture.name = item.Name.ToString();
+                    fixture.itemId = item.RowId;
+                    exterior.Add(fixture);
+
+                }
+            }
         }
 
         public static void LoadInteriorFixtures()

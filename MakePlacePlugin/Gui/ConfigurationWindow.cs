@@ -63,10 +63,17 @@ namespace MakePlacePlugin.Gui
                         ImGui.PopID();
                     }
 
-                    if (ImGui.CollapsingHeader("Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
+                    if (ImGui.CollapsingHeader("Interior Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
                     {
-                        ImGui.PushID("fixture");
-                        DrawFixtureList();
+                        ImGui.PushID("interiorFixture");
+                        DrawFixtureList(Config.Layout.interiorFixture);
+                        ImGui.PopID();
+                    }
+
+                    if (ImGui.CollapsingHeader("Exterior Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("exteriorFixture");
+                        DrawFixtureList(Config.Layout.exteriorFixture);
                         ImGui.PopID();
                     }
 
@@ -298,12 +305,12 @@ namespace MakePlacePlugin.Gui
 
         }
 
-        private void DrawFixtureList()
+        private void DrawFixtureList(List<Fixture> fixtureList)
         {
 
             try
             {
-                var fixtureList = Config.Layout.interiorFixture;
+
 
                 if (ImGui.Button("Clear"))
                 {
