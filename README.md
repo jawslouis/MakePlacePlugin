@@ -19,12 +19,12 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 
 ![Settings](screenshot.png?raw=true)  
 
-* **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
-* **Save**: Saves the *currently loaded* interior and exterior layout to file. You will need to load the interior/exterior layout before you can save it.
+* **Save**: Saves the *currently loaded* interior and exterior layout to file. You will need to load the interior/exterior layout before you can save it. Make sure the path contains the file name too (e.g. `save.json`)
 * **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
 * **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
 * **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out). **Furniture needs to be placed before it can be used in the layout** - items in the inventory or storeroom will not be used. Make sure that no furniture is selected before using this.
 * **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
+* **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
 
 ###
 
