@@ -326,8 +326,6 @@ namespace MakePlacePlugin
 
             List<HousingGameObject> unmatched = new List<HousingGameObject>();
 
-            int count = 0;
-
             // first we find perfect match
             foreach (var gameObject in allObjects)
             {

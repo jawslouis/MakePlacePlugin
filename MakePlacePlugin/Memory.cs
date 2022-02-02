@@ -138,22 +138,6 @@ namespace MakePlacePlugin
             return ret;
         }
 
-        public unsafe bool TryGetHousingGameObject(int index, out HousingGameObject? gameObject)
-        {
-            gameObject = null;
-            if (HousingModule == null ||
-                HousingModule->GetCurrentManager() == null ||
-                HousingModule->GetCurrentManager()->Objects == null)
-                return false;
-
-            if (HousingModule->GetCurrentManager()->Objects[index] == 0)
-                return false;
-
-            gameObject = *(HousingGameObject*)HousingModule->GetCurrentManager()->Objects[index];
-
-            return true;
-        }
-
         public unsafe List<HousingGameObject> GetExteriorPlacedObjects()
         {
 
@@ -165,6 +149,8 @@ namespace MakePlacePlugin
 
 
             var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
+
+            if (exteriorItems == null) throw new Exception("Unable to get inventory for exterior");
 
             var placedObjects = new List<HousingGameObject>();
 
@@ -221,38 +207,15 @@ namespace MakePlacePlugin
                     string name1 = "", name2 = "";
                     if (HousingData.Instance.TryGetFurniture(obj1.housingRowId, out var furniture1))
                         name1 = furniture1.Item.Value.Name.ToString();
-                    else if (HousingData.Instance.TryGetYardObject(obj1.housingRowId, out var yardObject1))
-                        name1 = yardObject1.Item.Value.Name.ToString();
+
                     if (HousingData.Instance.TryGetFurniture(obj2.housingRowId, out var furniture2))
                         name2 = furniture2.Item.Value.Name.ToString();
-                    else if (HousingData.Instance.TryGetYardObject(obj2.housingRowId, out var yardObject2))
-                        name2 = yardObject2.Item.Value.Name.ToString();
 
                     return string.Compare(name1, name2, StringComparison.Ordinal);
                 });
             return true;
         }
 
-        public unsafe bool TryGetUnsortedHousingGameObjectList(out List<HousingGameObject> objects)
-        {
-            objects = null;
-            if (HousingModule == null ||
-                HousingModule->GetCurrentManager() == null ||
-                HousingModule->GetCurrentManager()->Objects == null)
-                return false;
-
-            objects = new List<HousingGameObject>();
-            for (var i = 0; i < 400; i++)
-            {
-                var oPtr = HousingModule->GetCurrentManager()->Objects[i];
-                if (oPtr == 0)
-                    continue;
-                var o = *(HousingGameObject*)oPtr;
-                objects.Add(o);
-            }
-
-            return true;
-        }
 
         public unsafe bool GetActiveLayout(out LayoutManager manager)
         {
