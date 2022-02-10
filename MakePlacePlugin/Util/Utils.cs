@@ -18,7 +18,7 @@ namespace MakePlacePlugin
                 ExteriorPartsType.Door => "Door",
                 ExteriorPartsType.RoofOpt => "Roof Decor",
                 ExteriorPartsType.WallOpt => "Exterior Wall Decor",
-                ExteriorPartsType.SignOpt => "Signboard",
+                ExteriorPartsType.SignOpt => "Placard",
                 ExteriorPartsType.Fence => "Fence",
                 _ => "Unknown"
             };

@@ -117,7 +117,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.6 initialized");
+            PluginLog.Log("MakePlace Plugin v2.7 initialized");
         }
         public void Initialize()
         {
@@ -475,6 +475,19 @@ namespace MakePlacePlugin
                 if (gameObj == null)
                 {
                     gameObj = (HousingGameObject*)GetGameObject(objectListAddr, itemInfoIndex);
+
+                    if (gameObj != null)
+                    {
+
+                        location = new Vector3(gameObj->X, gameObj->Y, gameObj->Z);
+
+                        newLocation = Vector3.Transform(location - PlotLocation.ToVector(), rotateVector);
+
+
+                        housingItem.X = newLocation.X;
+                        housingItem.Y = newLocation.Y;
+                        housingItem.Z = newLocation.Z;
+                    }
                 }
 
 
