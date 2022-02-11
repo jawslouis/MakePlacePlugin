@@ -26,6 +26,14 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 * **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
 * **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
 
+### Saving a layout from the game
+* Make sure you are in furniture mode
+* Click on `Get Interior/Exterior Layout`
+* Check the file path
+  * Make sure the folder exists
+  * Make sure the `save.json` file is specified. You can use any file name you want.
+* Click on `Save`. Done!
+
 ###
 
 ## FAQ
