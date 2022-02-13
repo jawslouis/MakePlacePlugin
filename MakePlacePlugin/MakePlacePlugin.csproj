@@ -4,7 +4,7 @@
 		<LangVersion>preview</LangVersion>
 		<AssemblyTitle>MakePlacePlugin</AssemblyTitle>
 		<Product>MakePlacePlugin</Product>
-		<Version>2.7</Version>
+		<Version>2.8</Version>
 		<Description>Displays information about housing fixtures and objects.</Description>
 		<OutputPath>$(AppData)\XIVLauncher\devPlugins\MakePlacePlugin\</OutputPath>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>

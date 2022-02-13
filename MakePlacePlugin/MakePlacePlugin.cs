@@ -117,7 +117,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.7 initialized");
+            PluginLog.Log("MakePlace Plugin v2.8 initialized");
         }
         public void Initialize()
         {
@@ -438,6 +438,7 @@ namespace MakePlacePlugin
             }
 
             Config.Layout.exteriorScale = 1;
+            Config.Layout.properties.Add("entranceLayout", PlotLocation.entranceLayout);
 
             for (int i = 0; i < exteriorItems->Size; i++)
             {

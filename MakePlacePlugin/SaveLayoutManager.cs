@@ -115,6 +115,8 @@ namespace MakePlacePlugin
 
         public List<Furniture> exteriorFurniture { get; set; } = new List<Furniture>();
 
+        public Dictionary<string, string> properties { get; set; } = new Dictionary<string, string>();
+
     }
 
 
@@ -387,6 +389,13 @@ namespace MakePlacePlugin
 
         public void ExportLayout()
         {
+
+            if (Directory.Exists(Config.SaveLocation))
+            {
+                throw new Exception("Save file not specified");
+            }
+
+
             Layout save = Config.Layout;
             save.playerTransform = new Transform();
 
