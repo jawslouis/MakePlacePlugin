@@ -320,9 +320,6 @@ namespace MakePlacePlugin
                         break;
                 }
 
-
-
-
                 var district = new Fixture();
                 district.type = "District";
 
@@ -345,12 +342,7 @@ namespace MakePlacePlugin
                     default:
                         break;
                 }
-
-
-
                 layout.interiorFixture.Add(district);
-
-
             }
 
         }

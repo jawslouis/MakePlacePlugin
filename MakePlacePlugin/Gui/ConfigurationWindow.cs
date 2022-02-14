@@ -333,7 +333,7 @@ namespace MakePlacePlugin.Gui
                     ImGui.Text(fixture.type); ImGui.NextColumn();
 
 
-                    var item = Data.GetExcelSheet<Item>().FirstOrDefault(row => row.Name.ToString().Equals(fixture.name));
+                    var item = Data.GetExcelSheet<Item>().GetRow(fixture.itemId);
                     if (item != null)
                     {
                         DrawIcon(item.Icon, new Vector2(20, 20));
