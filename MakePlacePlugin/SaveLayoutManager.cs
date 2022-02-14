@@ -124,13 +124,15 @@ namespace MakePlacePlugin
     {
         public ChatGui chat;
         public static Configuration Config;
+        public static MakePlacePlugin Plugin;
 
         public static List<(Color, uint)> ColorList;
 
-        public SaveLayoutManager(ChatGui chatGui, Configuration config)
+        public SaveLayoutManager(MakePlacePlugin plugin, ChatGui chatGui, Configuration config)
         {
             chat = chatGui;
             Config = config;
+            Plugin = plugin;
         }
 
         public static float layoutScale = 1;
@@ -214,21 +216,21 @@ namespace MakePlacePlugin
             }
 
 
-            Config.InteriorItemList.Clear();
+            Plugin.InteriorItemList.Clear();
             layoutScale = layout.interiorScale;
-            ImportFurniture(Config.InteriorItemList, layout.interiorFurniture);
+            ImportFurniture(Plugin.InteriorItemList, layout.interiorFurniture);
 
-            Config.ExteriorItemList.Clear();
+            Plugin.ExteriorItemList.Clear();
             layoutScale = layout.exteriorScale;
-            ImportFurniture(Config.ExteriorItemList, layout.exteriorFurniture);
+            ImportFurniture(Plugin.ExteriorItemList, layout.exteriorFurniture);
 
-            Config.Layout = layout;
+            Plugin.Layout = layout;
 
         }
 
         public unsafe static void LoadExteriorFixtures()
         {
-            var exterior = Config.Layout.exteriorFixture;
+            var exterior = Plugin.Layout.exteriorFixture;
             exterior.Clear();
 
             if (!Memory.Instance.GetHousingController(out var controller)) return;
@@ -269,7 +271,7 @@ namespace MakePlacePlugin
 
         public static void LoadInteriorFixtures()
         {
-            var layout = Config.Layout;
+            var layout = Plugin.Layout;
 
             layout.interiorFixture.Clear();
 
@@ -387,14 +389,13 @@ namespace MakePlacePlugin
                 throw new Exception("Save file not specified");
             }
 
-
-            Layout save = Config.Layout;
+            Layout save = Plugin.Layout;
             save.playerTransform = new Transform();
 
             save.interiorScale = 1;
 
-            RecordFurniture(save.interiorFurniture, Config.InteriorItemList);
-            RecordFurniture(save.exteriorFurniture, Config.ExteriorItemList);
+            RecordFurniture(save.interiorFurniture, Plugin.InteriorItemList);
+            RecordFurniture(save.exteriorFurniture, Plugin.ExteriorItemList);
 
 
             var encoderSettings = new TextEncoderSettings();

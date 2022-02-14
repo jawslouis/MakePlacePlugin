@@ -79,6 +79,11 @@ namespace MakePlacePlugin
 
         internal static Location PlotLocation = new Location();
 
+        public Layout Layout = new Layout();
+        public List<HousingItem> InteriorItemList = new List<HousingItem>();
+        public List<HousingItem> ExteriorItemList = new List<HousingItem>();
+
+
         public void Dispose()
         {
             foreach (var t in this.TextureDictionary)
@@ -115,9 +120,9 @@ namespace MakePlacePlugin
 
             HousingData.Init(Data, this);
             Memory.Init(Scanner);
-            LayoutManager = new SaveLayoutManager(ChatGui, Config);
+            LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.9 initialized");
+            PluginLog.Log("MakePlace Plugin v2.10 initialized");
         }
         public void Initialize()
         {
@@ -283,15 +288,15 @@ namespace MakePlacePlugin
 
         public void ApplyLayout()
         {
-            Log("Applying layout");
+            Log($"Applying layout with interval of {Config.LoadInterval}ms");
 
             if (Memory.Instance.IsOutdoors())
             {
-                ItemsToPlace = new List<HousingItem>(Config.ExteriorItemList);
+                ItemsToPlace = new List<HousingItem>(ExteriorItemList);
             }
             else
             {
-                ItemsToPlace = new List<HousingItem>(Config.InteriorItemList);
+                ItemsToPlace = new List<HousingItem>(InteriorItemList);
             }
 
             var thread = new Thread(PlaceNextItem);
@@ -310,7 +315,7 @@ namespace MakePlacePlugin
             if (indoors)
             {
                 bool dObjectsLoaded = Mem.TryGetNameSortedHousingGameObjectList(out allObjects);
-                Config.InteriorItemList.ForEach(item =>
+                InteriorItemList.ForEach(item =>
                 {
                     item.ItemStruct = IntPtr.Zero;
                 });
@@ -318,7 +323,7 @@ namespace MakePlacePlugin
             else
             {
                 allObjects = Mem.GetExteriorPlacedObjects();
-                Config.ExteriorItemList.ForEach(item =>
+                ExteriorItemList.ForEach(item =>
                 {
                     item.ItemStruct = IntPtr.Zero;
                 });
@@ -338,13 +343,13 @@ namespace MakePlacePlugin
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                    houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
                 }
                 else
                 {
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = Config.ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                    houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
                 }
 
 
@@ -367,13 +372,13 @@ namespace MakePlacePlugin
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = Config.InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                    houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
                 }
                 else
                 {
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = Config.ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                    houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
                 }
                 if (houseItem == null)
                 {
@@ -409,7 +414,7 @@ namespace MakePlacePlugin
 
             SaveLayoutManager.LoadExteriorFixtures();
 
-            Config.ExteriorItemList.Clear();
+            ExteriorItemList.Clear();
 
             var mgr = Memory.Instance.HousingModule->outdoorTerritory;
 
@@ -426,19 +431,19 @@ namespace MakePlacePlugin
             switch (PlotLocation.size)
             {
                 case "s":
-                    Config.Layout.houseSize = "Small";
+                    Layout.houseSize = "Small";
                     break;
                 case "m":
-                    Config.Layout.houseSize = "Medium";
+                    Layout.houseSize = "Medium";
                     break;
                 case "l":
-                    Config.Layout.houseSize = "Large";
+                    Layout.houseSize = "Large";
                     break;
 
             }
 
-            Config.Layout.exteriorScale = 1;
-            Config.Layout.properties.Add("entranceLayout", PlotLocation.entranceLayout);
+            Layout.exteriorScale = 1;
+            Layout.properties["entranceLayout"] = PlotLocation.entranceLayout;
 
             for (int i = 0; i < exteriorItems->Size; i++)
             {
@@ -499,7 +504,7 @@ namespace MakePlacePlugin
                     housingItem.ItemStruct = (IntPtr)gameObj->Item;
                 }
 
-                Config.ExteriorItemList.Add(housingItem);
+                ExteriorItemList.Add(housingItem);
             }
 
             Config.Save();
@@ -513,7 +518,7 @@ namespace MakePlacePlugin
 
             Memory.Instance.TryGetNameSortedHousingGameObjectList(out dObjects);
 
-            Config.InteriorItemList.Clear();
+            InteriorItemList.Clear();
 
             foreach (var gameObject in dObjects)
             {
@@ -545,7 +550,7 @@ namespace MakePlacePlugin
 
                 housingItem.ItemStruct = (IntPtr)gameObject.Item;
 
-                Config.InteriorItemList.Add(housingItem);
+                InteriorItemList.Add(housingItem);
             }
 
             Config.Save();
@@ -556,7 +561,7 @@ namespace MakePlacePlugin
 
             Memory Mem = Memory.Instance;
 
-            var itemList = Mem.IsOutdoors() ? Config.ExteriorItemList : Config.InteriorItemList;
+            var itemList = Mem.IsOutdoors() ? ExteriorItemList : InteriorItemList;
             itemList.Clear();
 
             if (Mem.IsOutdoors())

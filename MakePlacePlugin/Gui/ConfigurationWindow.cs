@@ -53,27 +53,27 @@ namespace MakePlacePlugin.Gui
                     if (ImGui.CollapsingHeader("Interior Furniture", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.PushID("interior");
-                        DrawItemList(Config.InteriorItemList);
+                        DrawItemList(Plugin.InteriorItemList);
                         ImGui.PopID();
                     }
                     if (ImGui.CollapsingHeader("Exterior Furniture", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.PushID("exterior");
-                        DrawItemList(Config.ExteriorItemList);
+                        DrawItemList(Plugin.ExteriorItemList);
                         ImGui.PopID();
                     }
 
                     if (ImGui.CollapsingHeader("Interior Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.PushID("interiorFixture");
-                        DrawFixtureList(Config.Layout.interiorFixture);
+                        DrawFixtureList(Plugin.Layout.interiorFixture);
                         ImGui.PopID();
                     }
 
                     if (ImGui.CollapsingHeader("Exterior Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.PushID("exteriorFixture");
-                        DrawFixtureList(Config.Layout.exteriorFixture);
+                        DrawFixtureList(Plugin.Layout.exteriorFixture);
                         ImGui.PopID();
                     }
 
@@ -186,7 +186,7 @@ namespace MakePlacePlugin.Gui
                         SaveLayoutManager.ImportLayout(Config.SaveLocation);
                         Plugin.MatchLayout();
                         Config.ResetRecord();
-                        Log(String.Format("Imported {0} items", Config.InteriorItemList.Count + Config.ExteriorItemList.Count));
+                        Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
                     }
                     catch (Exception e)
                     {
@@ -454,7 +454,7 @@ namespace MakePlacePlugin.Gui
 
             if (Memory.Instance == null) return;
 
-            var itemList = Memory.Instance.IsOutdoors() ? Config.ExteriorItemList : Config.InteriorItemList;
+            var itemList = Memory.Instance.IsOutdoors() ? Plugin.ExteriorItemList : Plugin.InteriorItemList;
 
             for (int i = 0; i < itemList.Count(); i++)
             {
