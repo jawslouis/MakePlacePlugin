@@ -76,6 +76,12 @@ namespace MakePlacePlugin.Gui
                         DrawFixtureList(Plugin.Layout.exteriorFixture);
                         ImGui.PopID();
                     }
+                    if (ImGui.CollapsingHeader("Unused Furniture", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("unused");
+                        DrawItemList(Plugin.UnusedItemList, true);
+                        ImGui.PopID();
+                    }
 
                     ImGui.PopStyleColor(3);
                     ImGui.EndChild();
@@ -261,7 +267,7 @@ namespace MakePlacePlugin.Gui
 
         }
 
-        private void DrawRow(int i, HousingItem housingItem, int childIndex = -1)
+        private void DrawRow(int i, HousingItem housingItem, bool showSetPosition=true, int childIndex = -1)
         {
             ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}"); ImGui.NextColumn();
             ImGui.Text($"{housingItem.Rotate:N3}"); ImGui.NextColumn();
@@ -285,22 +291,25 @@ namespace MakePlacePlugin.Gui
 
             }
             ImGui.NextColumn();
-            string uniqueID = childIndex == -1 ? i.ToString() : i.ToString() + "_" + childIndex.ToString();
 
-            if (housingItem.ItemStruct != IntPtr.Zero)
+            if (showSetPosition)
             {
+                string uniqueID = childIndex == -1 ? i.ToString() : i.ToString() + "_" + childIndex.ToString();
 
-                if (ImGui.Button("Set" + "##" + uniqueID))
+                if (housingItem.ItemStruct != IntPtr.Zero)
                 {
-                    SetItemPosition(housingItem);
-                }
-            }
-            else
-            {
-                //ImGui.NextColumn();
-            }
-            ImGui.NextColumn();
 
+                    if (ImGui.Button("Set" + "##" + uniqueID))
+                    {
+                        SetItemPosition(housingItem);
+                    }
+                }
+                else
+                {
+                    //ImGui.NextColumn();
+                }
+                ImGui.NextColumn();
+            }
 
 
         }
@@ -354,7 +363,7 @@ namespace MakePlacePlugin.Gui
 
         }
 
-        private void DrawItemList(List<HousingItem> itemList)
+        private void DrawItemList(List<HousingItem> itemList, bool isUnused = false)
         {
 
 
@@ -383,11 +392,15 @@ namespace MakePlacePlugin.Gui
                 itemList.Clear();
                 Config.Save();
             }
-            ImGui.SameLine();
-            ImGui.Text("Note: Missing items and incorrect dyes are grayed out");
+
+            if (!isUnused)
+            {
+                ImGui.SameLine();
+                ImGui.Text("Note: Missing items and incorrect dyes are grayed out");
+            }
 
             // name, position, r, color, set
-            int columns = 5;
+            int columns = isUnused ? 4 : 5;
 
 
             ImGui.Columns(columns, "ItemList", true);
@@ -397,8 +410,10 @@ namespace MakePlacePlugin.Gui
             ImGui.Text("Rotation"); ImGui.NextColumn();
             ImGui.Text("Dye"); ImGui.NextColumn();
 
-            ImGui.Text("Set Position"); ImGui.NextColumn();
-
+            if (!isUnused)
+            {
+                ImGui.Text("Set Position"); ImGui.NextColumn();
+            }
 
             ImGui.Separator();
             for (int i = 0; i < itemList.Count(); i++)
@@ -423,7 +438,7 @@ namespace MakePlacePlugin.Gui
 
 
                 ImGui.NextColumn();
-                DrawRow(i, housingItem);
+                DrawRow(i, housingItem, !isUnused);
 
                 if (housingItem.ItemStruct == IntPtr.Zero)
                 {

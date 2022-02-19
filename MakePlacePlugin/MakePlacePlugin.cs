@@ -82,7 +82,7 @@ namespace MakePlacePlugin
         public Layout Layout = new Layout();
         public List<HousingItem> InteriorItemList = new List<HousingItem>();
         public List<HousingItem> ExteriorItemList = new List<HousingItem>();
-
+        public List<HousingItem> UnusedItemList = new List<HousingItem>();
 
         public void Dispose()
         {
@@ -362,26 +362,43 @@ namespace MakePlacePlugin
                 houseItem.ItemStruct = (IntPtr)gameObject.Item;
             }
 
+            UnusedItemList.Clear();
+
             // then we match even if the dye doesn't fit
             foreach (var gameObject in unmatched)
             {
 
                 uint furnitureKey = gameObject.housingRowId;
                 HousingItem houseItem = null;
+
+                var name = "";
+
                 if (indoors)
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
+                    name = furniture.Item.Value.Name.ToString();
                     houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
                 }
                 else
                 {
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
+                    name = furniture.Item.Value.Name.ToString();
                     houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
                 }
                 if (houseItem == null)
                 {
+         
+                    var unmatchedItem = new HousingItem(
+                    gameObject.housingRowId,
+                    gameObject.color,
+                    gameObject.X,
+                    gameObject.Y,
+                    gameObject.Z,
+                    gameObject.rotation,
+                    name);
+                    UnusedItemList.Add(unmatchedItem);
                     continue;
                 }
 
