@@ -58,6 +58,8 @@ namespace MakePlacePlugin
 
         public List<SaveProperty> properties { get; set; } = new List<SaveProperty>();
 
+        public List<Furniture> attachments { get; set; } = new List<Furniture>();
+
         public Color GetColor()
         {
             foreach (var prop in properties)
@@ -169,32 +171,47 @@ namespace MakePlacePlugin
             return new List<float> { checkZero(q.X), checkZero(q.Y), checkZero(q.Z), checkZero(q.W) };
         }
 
+        static HousingItem ConvertToHousingItem(Furniture furniture)
+        {
+            var ItemSheet = Data.GetExcelSheet<Item>();
+            var itemRow = ItemSheet.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
+
+            if (itemRow == null) itemRow = ItemSheet.FirstOrDefault(row => row.RowId == furniture.itemId);
+
+            if (itemRow == null) return null;
+
+            var r = furniture.transform.rotation;
+            var quat = new Quaternion(r[0], r[1], r[2], r[3]);
+
+            var houseItem = new HousingItem(
+                itemRow.RowId,
+                (byte)furniture.GetClosestStain(ColorList),
+                descale(furniture.transform.location[0]),
+                descale(furniture.transform.location[2]), // switch Y & Z axis
+                descale(furniture.transform.location[1]),
+                -QuaternionExtensions.ComputeZAngle(quat),
+                furniture.name);
+
+            return houseItem;
+        }
+
 
         static void ImportFurniture(List<HousingItem> itemList, List<Furniture> furnitureList)
         {
-            var ItemSheet = Data.GetExcelSheet<Item>();
+            
 
             foreach (Furniture furniture in furnitureList)
             {
-                var itemRow = ItemSheet.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
 
-                if (itemRow == null) itemRow = ItemSheet.FirstOrDefault(row => row.RowId == furniture.itemId);
-
-                if (itemRow == null) continue;
-
-                var r = furniture.transform.rotation;
-                var quat = new Quaternion(r[0], r[1], r[2], r[3]);
-
-                var houseItem = new HousingItem(
-                    itemRow.RowId,
-                    (byte)furniture.GetClosestStain(ColorList),
-                    descale(furniture.transform.location[0]),
-                    descale(furniture.transform.location[2]), // switch Y & Z axis
-                    descale(furniture.transform.location[1]),
-                    -QuaternionExtensions.ComputeZAngle(quat),
-                    furniture.name);
-
+                var houseItem = ConvertToHousingItem(furniture);
                 itemList.Add(houseItem);
+
+                foreach (Furniture child in furniture.attachments)
+                {
+                    var childItem = ConvertToHousingItem(child);
+                    itemList.Add(childItem);
+                }
+
             }
         }
 
