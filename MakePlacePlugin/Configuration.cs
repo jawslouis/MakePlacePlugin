@@ -26,7 +26,7 @@ namespace MakePlacePlugin
 
         public DateTime lastPosPackageTime = DateTime.Now;
 
-        public string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace('\\', '/') + "/MakePlace/save.json";
+        public string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace('\\', '/') + "/MakePlace/Save/save.json";
 
         #region Init and Save
 
