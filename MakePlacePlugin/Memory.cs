@@ -29,8 +29,6 @@ namespace MakePlacePlugin
                     scanner.GetStaticAddressFromSig(
                         "48 8B 05 ?? ?? ?? ?? 48 8B 48 20 48 85 C9 74 31 83 B9 ?? ?? ?? ?? ?? 74 28 80 B9 ?? ?? ?? ?? ?? 75 1F 80 B9 ?? ?? ?? ?? ?? 74 03 B0 01 C3", 2);
 
-                HousingModulePtr = Marshal.ReadIntPtr(HousingModulePtr);
-                LayoutWorldPtr = Marshal.ReadIntPtr(LayoutWorldPtr);
 
                 InventoryManagerAddress = scanner.GetStaticAddressFromSig("BA ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F8 48 85 C0");
                 var getInventoryContainerPtr = scanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
@@ -48,8 +46,8 @@ namespace MakePlacePlugin
         private IntPtr HousingModulePtr { get; }
         private IntPtr LayoutWorldPtr { get; }
 
-        public unsafe HousingModule* HousingModule => (HousingModule*)HousingModulePtr;
-        public unsafe LayoutWorld* LayoutWorld => (LayoutWorld*)LayoutWorldPtr;
+        public unsafe HousingModule* HousingModule => HousingModulePtr != IntPtr.Zero ? (HousingModule*)Marshal.ReadIntPtr(HousingModulePtr) : null;
+        public unsafe LayoutWorld* LayoutWorld => LayoutWorldPtr != IntPtr.Zero ? (LayoutWorld*)Marshal.ReadIntPtr(LayoutWorldPtr) : null;
         public unsafe HousingObjectManager* CurrentManager => HousingModule->currentTerritory;
         public unsafe HousingStructure* HousingStructure => LayoutWorld->HousingStruct;
 

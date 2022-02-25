@@ -122,7 +122,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.11 initialized");
+            PluginLog.Log("MakePlace Plugin v2.12 initialized");
         }
         public void Initialize()
         {
@@ -205,7 +205,7 @@ namespace MakePlacePlugin
             return Memory.Instance.HousingStructure->Mode == HousingLayoutMode.Rotate;
         }
 
-        public unsafe void PlaceNextItem()
+        public unsafe void PlaceItems()
         {
 
             if (!IsDecorMode() || !IsRotateMode() || ItemsToPlace.Count == 0)
@@ -270,6 +270,7 @@ namespace MakePlacePlugin
 
             SelectItem(rowItem.ItemStruct);
 
+
             Vector3 position = new Vector3(rowItem.X, rowItem.Y, rowItem.Z);
             Vector3 rotation = new Vector3();
 
@@ -281,7 +282,6 @@ namespace MakePlacePlugin
                 position = Vector3.Transform(position, rotateVector) + PlotLocation.ToVector();
                 rotation.Y = (float)((rowItem.Rotate - PlotLocation.rotation) * 180 / Math.PI);
             }
-
             MemInstance.WritePosition(position);
             MemInstance.WriteRotation(rotation);
         }
@@ -290,16 +290,37 @@ namespace MakePlacePlugin
         {
             Log($"Applying layout with interval of {Config.LoadInterval}ms");
 
+            ItemsToPlace.Clear();
+
+            List<HousingItem> placedLast = new List<HousingItem>();
+
+            List<HousingItem> toBePlaced;
+
             if (Memory.Instance.IsOutdoors())
             {
-                ItemsToPlace = new List<HousingItem>(ExteriorItemList);
+                toBePlaced = new List<HousingItem>(ExteriorItemList);
             }
             else
             {
-                ItemsToPlace = new List<HousingItem>(InteriorItemList);
+                toBePlaced = new List<HousingItem>(InteriorItemList);
             }
 
-            var thread = new Thread(PlaceNextItem);
+            foreach (var item in toBePlaced)
+            {
+                if (item.IsTableOrWallMounted)
+                {
+                    placedLast.Add(item);
+                }
+                else
+                {
+                    ItemsToPlace.Add(item);
+                }
+            }
+
+            ItemsToPlace.AddRange(placedLast);
+
+
+            var thread = new Thread(PlaceItems);
             thread.Start();
         }
 
@@ -371,33 +392,32 @@ namespace MakePlacePlugin
                 uint furnitureKey = gameObject.housingRowId;
                 HousingItem houseItem = null;
 
-                var name = "";
+
+                Item item;
 
                 if (indoors)
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
-                    var itemKey = furniture.Item.Value.RowId;
-                    name = furniture.Item.Value.Name.ToString();
-                    houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                    item = furniture.Item.Value;
+
+                    houseItem = InteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero);
                 }
                 else
                 {
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
-                    var itemKey = furniture.Item.Value.RowId;
-                    name = furniture.Item.Value.Name.ToString();
-                    houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.ItemStruct == IntPtr.Zero);
+                    item = furniture.Item.Value;
+
+                    houseItem = ExteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero);
                 }
                 if (houseItem == null)
                 {
-         
                     var unmatchedItem = new HousingItem(
-                    gameObject.housingRowId,
+                    item,
                     gameObject.color,
                     gameObject.X,
                     gameObject.Y,
                     gameObject.Z,
-                    gameObject.rotation,
-                    name);
+                    gameObject.rotation);
                     UnusedItemList.Add(unmatchedItem);
                     continue;
                 }
@@ -483,13 +503,12 @@ namespace MakePlacePlugin
                 var newLocation = Vector3.Transform(location - PlotLocation.ToVector(), rotateVector);
 
                 var housingItem = new HousingItem(
-                    itemRow.RowId,
+                    itemRow,
                     item->Stain,
                     newLocation.X,
                     newLocation.Y,
                     newLocation.Z,
-                    itemInfo->Rotation + PlotLocation.rotation,
-                    itemRow.Name
+                    itemInfo->Rotation + PlotLocation.rotation
                 );
 
 
@@ -556,14 +575,12 @@ namespace MakePlacePlugin
                 var z = gameObject.Z;
 
                 var housingItem = new HousingItem(
-                        item.RowId,
-                        stain,
-                        x,
-                        y,
-                        z,
-                        rotate,
-                        item.Name
-                    );
+                    item,
+                    stain,
+                    x,
+                    y,
+                    z,
+                    rotate);
 
                 housingItem.ItemStruct = (IntPtr)gameObject.Item;
 

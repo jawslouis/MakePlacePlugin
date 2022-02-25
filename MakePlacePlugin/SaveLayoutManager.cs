@@ -184,13 +184,12 @@ namespace MakePlacePlugin
             var quat = new Quaternion(r[0], r[1], r[2], r[3]);
 
             var houseItem = new HousingItem(
-                itemRow.RowId,
+                itemRow,
                 (byte)furniture.GetClosestStain(ColorList),
                 descale(furniture.transform.location[0]),
                 descale(furniture.transform.location[2]), // switch Y & Z axis
                 descale(furniture.transform.location[1]),
-                -QuaternionExtensions.ComputeZAngle(quat),
-                furniture.name);
+                -QuaternionExtensions.ComputeZAngle(quat));
 
             return houseItem;
         }
