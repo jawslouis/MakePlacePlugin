@@ -18,13 +18,15 @@ namespace MakePlacePlugin
         public List<int> GroupingList = new List<int>();
         public bool PlaceAnywhere = false;
 
+        public bool Basement = true;
+        public bool GroundFloor = true;
+        public bool UpperFloor = true;
+
 
         public List<string> Tags = new List<string>();
         public List<bool> TagsSelectList = new List<bool>();
         public int LocationId = 0;
         public int LoadInterval = 400;
-
-        public DateTime lastPosPackageTime = DateTime.Now;
 
         public string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).Replace('\\', '/') + "/MakePlace/save.json";
 

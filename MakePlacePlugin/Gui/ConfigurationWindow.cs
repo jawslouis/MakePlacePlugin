@@ -202,6 +202,29 @@ namespace MakePlacePlugin.Gui
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from file");
 
+            ImGui.Dummy(new Vector2(0, 15));
+
+            ImGui.Text("Selected Floors");
+
+            if (ImGui.Checkbox("Basement", ref Config.Basement))
+            {
+                Plugin.MatchLayout();
+                Config.Save();
+            }
+            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+
+            if (ImGui.Checkbox("Ground Floor", ref Config.GroundFloor))
+            {
+                Plugin.MatchLayout();
+                Config.Save();
+            }
+            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+
+            if (ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
+            {
+                Plugin.MatchLayout();
+                Config.Save();
+            }
 
             ImGui.Dummy(new Vector2(0, 15));
 
@@ -267,7 +290,7 @@ namespace MakePlacePlugin.Gui
 
         }
 
-        private void DrawRow(int i, HousingItem housingItem, bool showSetPosition=true, int childIndex = -1)
+        private void DrawRow(int i, HousingItem housingItem, bool showSetPosition = true, int childIndex = -1)
         {
             ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}"); ImGui.NextColumn();
             ImGui.Text($"{housingItem.Rotate:N3}"); ImGui.NextColumn();
@@ -396,7 +419,7 @@ namespace MakePlacePlugin.Gui
             if (!isUnused)
             {
                 ImGui.SameLine();
-                ImGui.Text("Note: Missing items and incorrect dyes are grayed out");
+                ImGui.Text("Note: Missing items, incorrect dyes, and items on unselected floors are grayed out");
             }
 
             // name, position, r, color, set

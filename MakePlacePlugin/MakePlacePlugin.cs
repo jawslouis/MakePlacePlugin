@@ -302,7 +302,14 @@ namespace MakePlacePlugin
             }
             else
             {
-                toBePlaced = new List<HousingItem>(InteriorItemList);
+                toBePlaced = new List<HousingItem>();
+                foreach (var houseItem in InteriorItemList)
+                {
+                    if (IsSelectedFloor(houseItem.Y))
+                    {
+                        toBePlaced.Add(houseItem);
+                    }
+                }
             }
 
             foreach (var item in toBePlaced)
@@ -355,22 +362,22 @@ namespace MakePlacePlugin
             // first we find perfect match
             foreach (var gameObject in allObjects)
             {
+                if (!IsSelectedFloor(gameObject.Y)) continue;
 
                 uint furnitureKey = gameObject.housingRowId;
-
 
                 HousingItem houseItem = null;
                 if (indoors)
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                    houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y));
                 }
                 else
                 {
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero);
+                    houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y));
                 }
 
 
@@ -400,14 +407,14 @@ namespace MakePlacePlugin
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
 
-                    houseItem = InteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero);
+                    houseItem = InteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y));
                 }
                 else
                 {
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
 
-                    houseItem = ExteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero);
+                    houseItem = ExteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y));
                 }
                 if (houseItem == null)
                 {
@@ -546,6 +553,15 @@ namespace MakePlacePlugin
             Config.Save();
         }
 
+        public bool IsSelectedFloor(float y)
+        {
+            if (y < -0.001) return Config.Basement;
+            if (y >= -0.001 && y < 6.999) return Config.GroundFloor;
+            if (y >= 6.999) return Config.UpperFloor;
+
+            return false;
+        }
+
         public unsafe void LoadInterior()
         {
             List<HousingGameObject> dObjects;
@@ -558,8 +574,6 @@ namespace MakePlacePlugin
 
             foreach (var gameObject in dObjects)
             {
-                //Log($"Processing item #{count++}");
-
                 uint furnitureKey = gameObject.housingRowId;
 
                 var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
@@ -568,11 +582,14 @@ namespace MakePlacePlugin
                 if (item == null) continue;
                 if (item.RowId == 0) continue;
 
-                byte stain = gameObject.color;
-                var rotate = gameObject.rotation;
                 var x = gameObject.X;
                 var y = gameObject.Y;
                 var z = gameObject.Z;
+
+                if (!IsSelectedFloor(y)) continue;
+
+                byte stain = gameObject.color;
+                var rotate = gameObject.rotation;
 
                 var housingItem = new HousingItem(
                     item,

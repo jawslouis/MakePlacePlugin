@@ -103,7 +103,7 @@ namespace MakePlacePlugin
     {
         public Transform playerTransform { get; set; } = new Transform();
 
-        public string houseSize { get; set; }
+        public string houseSize { get; set; } = "";
 
         public float interiorScale { get; set; } = 1;
 
@@ -119,6 +119,15 @@ namespace MakePlacePlugin
 
         public Dictionary<string, string> properties { get; set; } = new Dictionary<string, string>();
 
+        public bool hasBasement()
+        {
+            return houseSize.Equals("Small") || houseSize.Equals("Medium") || houseSize.Equals("Large");
+        }
+
+        public bool hasUpperFloor()
+        {
+            return houseSize.Equals("Medium") || houseSize.Equals("Large");
+        }
     }
 
 
