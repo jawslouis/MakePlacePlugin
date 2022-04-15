@@ -156,7 +156,7 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Dummy(new Vector2(0, 10));
             ImGui.Text("Save/Load file location");
-            if (ImGui.InputText("##saveLocation", ref Config.SaveLocation, 100))
+            if (ImGui.InputText("##saveLocation", ref Config.SaveLocation, 150))
             {
                 Config.Save();
             }
