@@ -4,7 +4,7 @@
 		<LangVersion>preview</LangVersion>
 		<AssemblyTitle>MakePlacePlugin</AssemblyTitle>
 		<Product>MakePlacePlugin</Product>
-		<Version>2.12</Version>
+		<Version>2.13</Version>
 		<Description>Displays information about housing fixtures and objects.</Description>
 		<OutputPath>$(AppData)\XIVLauncher\devPlugins\MakePlacePlugin\</OutputPath>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -52,6 +52,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DalamudPackager" Version="2.1.5" />
+		<PackageReference Include="DalamudPackager" Version="2.1.6" />
 	</ItemGroup>
 </Project>
