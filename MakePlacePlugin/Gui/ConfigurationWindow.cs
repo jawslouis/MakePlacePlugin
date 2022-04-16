@@ -319,18 +319,25 @@ namespace MakePlacePlugin.Gui
             {
                 string uniqueID = childIndex == -1 ? i.ToString() : i.ToString() + "_" + childIndex.ToString();
 
-                if (housingItem.ItemStruct != IntPtr.Zero)
-                {
+                bool noMatch = housingItem.ItemStruct == IntPtr.Zero;
 
+                if (!noMatch)
+                {
                     if (ImGui.Button("Set" + "##" + uniqueID))
                     {
-                        SetItemPosition(housingItem);
+                        Plugin.MatchLayout();
+
+                        if (housingItem.ItemStruct != IntPtr.Zero)
+                        {
+                            SetItemPosition(housingItem);
+                        }
+                        else
+                        {
+                            LogError($"Unable to set position for {housingItem.Name}");
+                        }
                     }
-                }
-                else
-                {
-                    //ImGui.NextColumn();
-                }
+                }                    
+
                 ImGui.NextColumn();
             }
 
@@ -339,11 +346,8 @@ namespace MakePlacePlugin.Gui
 
         private void DrawFixtureList(List<Fixture> fixtureList)
         {
-
             try
             {
-
-
                 if (ImGui.Button("Clear"))
                 {
                     fixtureList.Clear();

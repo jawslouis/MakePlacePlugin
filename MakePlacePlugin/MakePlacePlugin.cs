@@ -122,7 +122,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.13 initialized");
+            PluginLog.Log("MakePlace Plugin v2.14 initialized");
         }
         public void Initialize()
         {
