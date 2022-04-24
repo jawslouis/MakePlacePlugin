@@ -2,6 +2,14 @@
 
 A plugin to automatically save and load housing furniture layouts for FFXIV. It can also import/export layouts from the [MakePlace](https://jawslouis.itch.io/makeplace) program since it uses the same file format.
 
+## Contents
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Saving a layout from the game](#saving-a-layout-from-the-game)
+* [FAQ](#faq)
+* [Donate](#donate)
+
+
 ## Installation
 
 * You will need to use the [FFXIV Quick Launcher](https://goatcorp.github.io/) to run the game. This allows third-party plugins (such as this) to be used.
@@ -56,6 +64,9 @@ Overall, I believe that the danger is low since SE focuses more on ToS violation
 
 ### How do I update the plugin?
 When an update is available, simply return to the plugins window and click on the "Update Plugins" button.
+
+### Why does the plugin crash sometimes when applying a layout?
+Make sure your mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. There is unfortunately no solution to this, since this is tied to how the game operates.
 
 ### Why does this plugin look familiar?
 This plugin builds upon the foundation laid by 3 other great plugins: [HousingPos](https://github.com/Bluefissure/HousingPos), [BDTH](https://github.com/LeonBlade/BDTHPlugin) and [HouseMate](https://github.com/lmcintyre/Housemate). The UI in particular borrows heavily from HousingPos.
