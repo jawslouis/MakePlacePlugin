@@ -339,6 +339,7 @@ namespace MakePlacePlugin
             Memory Mem = Memory.Instance;
 
             var indoors = Mem.IsIndoors();
+            Quaternion rotateVector = new();
 
             if (indoors)
             {
@@ -350,11 +351,13 @@ namespace MakePlacePlugin
             }
             else
             {
+                GetPlotLocation();
                 allObjects = Mem.GetExteriorPlacedObjects();
                 ExteriorItemList.ForEach(item =>
                 {
                     item.ItemStruct = IntPtr.Zero;
                 });
+                rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, PlotLocation.rotation);
             }
 
             List<HousingGameObject> unmatched = new List<HousingGameObject>();
@@ -365,19 +368,26 @@ namespace MakePlacePlugin
                 if (!IsSelectedFloor(gameObject.Y)) continue;
 
                 uint furnitureKey = gameObject.housingRowId;
-
                 HousingItem houseItem = null;
                 if (indoors)
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = InteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y));
+                    houseItem = Utils.GetNearestHousingItem(
+                        InteriorItemList.Where(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y)),
+                        new Vector3(gameObject.X, gameObject.Y, gameObject.Z)
+                    );
                 }
                 else
                 {
+                    Vector3 localPosition = Vector3.Transform(new Vector3(gameObject.X, gameObject.Y, gameObject.Z) - PlotLocation.ToVector(), rotateVector);
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
-                    houseItem = ExteriorItemList.FirstOrDefault(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y));
+                    houseItem = Utils.GetNearestHousingItem(
+                        ExteriorItemList.Where(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y)),
+                        localPosition
+                    );
+
                 }
 
 
@@ -386,7 +396,6 @@ namespace MakePlacePlugin
                     unmatched.Add(gameObject);
                     continue;
                 }
-
                 houseItem.ItemStruct = (IntPtr)gameObject.Item;
             }
 
@@ -406,15 +415,20 @@ namespace MakePlacePlugin
                 {
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
-
-                    houseItem = InteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y));
+                    houseItem = Utils.GetNearestHousingItem(
+                        InteriorItemList.Where(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y)),
+                        new Vector3(gameObject.X, gameObject.Y, gameObject.Z)
+                    );
                 }
                 else
                 {
+                    Vector3 localPosition = Vector3.Transform(new Vector3(gameObject.X, gameObject.Y, gameObject.Z) - PlotLocation.ToVector(), rotateVector);
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
-
-                    houseItem = ExteriorItemList.FirstOrDefault(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y));
+                    houseItem = Utils.GetNearestHousingItem(
+                        ExteriorItemList.Where(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y)),
+                        localPosition
+                    );
                 }
                 if (houseItem == null)
                 {
