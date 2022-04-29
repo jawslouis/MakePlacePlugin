@@ -65,6 +65,11 @@ Overall, I believe that the danger is low since SE focuses more on ToS violation
 ### How do I update the plugin?
 When an update is available, simply return to the plugins window and click on the "Update Plugins" button.
 
+### Why does the furniture snap back to the floor/wall after I apply a layout and exit the furnishing menu?
+Items have a minimum float distance, below which they will snap back to the floor. Similarly, wall-mounted items have a minimum distance they need to be from a wall or partition, otherwise they will snap to it. Unfortunately, this is a game limitation and you will need to adjust your design.
+
+If using the MakePlace app, you can enable `Minimum Float Distance` in settings to get a visual indicator when placing furniture.
+
 ### Why does the plugin crash sometimes when applying a layout?
 Make sure your mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. There is unfortunately no solution to this, since this is tied to how the game operates.
 
