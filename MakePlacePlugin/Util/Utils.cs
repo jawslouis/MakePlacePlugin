@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Logging;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
+using MakePlacePlugin.Objects;
 
 namespace MakePlacePlugin
 {
@@ -54,15 +57,19 @@ namespace MakePlacePlugin
             return Distance(new Vector3(playerPos.X, playerPos.Y, playerPos.Z), new Vector3(obj.X, obj.Y, obj.Z));
         }
 
-        public static float Distance(Vector3 v1, Vector3 v2)
+        public static double FastDistance(Vector3 v1, Vector3 v2) // for comparison, when actual distance doesn't matter
         {
             var x1 = Math.Pow(v2.X - v1.X, 2);
             var y1 = Math.Pow(v2.Y - v1.Y, 2);
             var z1 = Math.Pow(v2.Z - v1.Z, 2);
 
-            return (float)Math.Sqrt(x1 + y1 + z1);
+            return x1 + y1 + z1;
         }
 
+        public static float Distance(Vector3 v1, Vector3 v2)
+        {
+            return (float)Math.Sqrt(FastDistance(v1, v2));
+        }
 
         public static void StainButton(string id, Stain color, Vector2 size)
         {
@@ -83,5 +90,11 @@ namespace MakePlacePlugin
             };
         }
 
+        public static HousingItem GetNearestHousingItem(IEnumerable<HousingItem> items, Vector3 position)
+        {
+            return items
+                .OrderBy(item => FastDistance(position, new Vector3(item.X, item.Y, item.Z)))
+                .FirstOrDefault();
+        }
     }
 }
