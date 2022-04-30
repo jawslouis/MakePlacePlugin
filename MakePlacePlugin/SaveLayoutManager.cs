@@ -366,6 +366,9 @@ namespace MakePlacePlugin
                     case "e1":
                         district.name = "Shirogane";
                         break;
+                    case "r1":
+                        district.name = "Empyreum";
+                        break;
                     default:
                         break;
                 }
