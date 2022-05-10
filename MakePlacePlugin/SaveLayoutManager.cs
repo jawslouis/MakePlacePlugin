@@ -212,12 +212,18 @@ namespace MakePlacePlugin
             {
 
                 var houseItem = ConvertToHousingItem(furniture);
-                itemList.Add(houseItem);
+                if(houseItem != null)
+                {
+                    itemList.Add(houseItem);
+                }
 
                 foreach (Furniture child in furniture.attachments)
                 {
                     var childItem = ConvertToHousingItem(child);
-                    itemList.Add(childItem);
+                    if (childItem != null)
+                    {
+                        itemList.Add(childItem);
+                    }
                 }
 
             }
