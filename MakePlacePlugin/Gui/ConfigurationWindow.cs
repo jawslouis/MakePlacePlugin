@@ -184,6 +184,10 @@ namespace MakePlacePlugin.Gui
                     LogError("(Housing -> Indoor/Outdoor Furnishings)");
 
                 }
+                else if (!Config.SaveLocation.EndsWith(".json"))
+                {
+                    LogError("Error: Json layout file not specified");
+                }
                 else
                 {
 
@@ -336,7 +340,7 @@ namespace MakePlacePlugin.Gui
                             LogError($"Unable to set position for {housingItem.Name}");
                         }
                     }
-                }                    
+                }
 
                 ImGui.NextColumn();
             }

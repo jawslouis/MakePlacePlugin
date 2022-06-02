@@ -237,7 +237,10 @@ namespace MakePlacePlugin
 
             foreach (var stain in StainList)
             {
-                ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
+                if (stain.Unknown5)
+                {
+                    ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
+                }
             }
 
 
