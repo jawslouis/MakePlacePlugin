@@ -69,7 +69,7 @@ namespace MakePlacePlugin
         public delegate void SelectItemDelegate(IntPtr housingStruct, IntPtr item);
         private static HookWrapper<SelectItemDelegate> SelectItemHook;
 
-
+        public static bool CurrentlyPlacingItems = false;
 
         public static bool ApplyChange = false;
 
@@ -247,6 +247,8 @@ namespace MakePlacePlugin
             {
                 LogError($"Error: {e.Message}", e.StackTrace);
             }
+
+            CurrentlyPlacingItems = false;
         }
 
         unsafe public static void SetItemPosition(HousingItem rowItem)
@@ -288,6 +290,13 @@ namespace MakePlacePlugin
 
         public void ApplyLayout()
         {
+            if (CurrentlyPlacingItems)
+            {
+                Log($"Already placing items");
+                return;
+            }
+
+            CurrentlyPlacingItems = true;
             Log($"Applying layout with interval of {Config.LoadInterval}ms");
 
             ItemsToPlace.Clear();

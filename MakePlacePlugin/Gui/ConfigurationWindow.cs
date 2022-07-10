@@ -173,6 +173,9 @@ namespace MakePlacePlugin.Gui
                 }
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Save current layout to file");
+            ImGui.SameLine();
+            ImGui.Text("Plugin → File           ");
+
 
             ImGui.SameLine();
             if (ImGui.Button("Load"))
@@ -205,6 +208,9 @@ namespace MakePlacePlugin.Gui
                 }
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from file");
+            ImGui.SameLine();
+            ImGui.Text("File → Plugin");
+
 
             ImGui.Dummy(new Vector2(0, 15));
 
@@ -256,7 +262,8 @@ namespace MakePlacePlugin.Gui
 
                 }
             }
-
+            ImGui.SameLine();
+            ImGui.Text("Game → Plugin           ");
             ImGui.SameLine();
 
             if (ImGui.Button($"Apply {inOut} Layout"))
@@ -278,7 +285,8 @@ namespace MakePlacePlugin.Gui
                     LogError("Unable to apply layouts outside of Rotate Layout mode");
                 }
             }
-
+            ImGui.SameLine();
+            ImGui.Text("Plugin → Game           ");
             ImGui.SameLine();
 
             ImGui.PushItemWidth(100);

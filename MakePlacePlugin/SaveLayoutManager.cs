@@ -8,12 +8,14 @@ using System.IO;
 using System.Numerics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using System.Linq;
 using static MakePlacePlugin.MakePlacePlugin;
 using System.Drawing;
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace MakePlacePlugin
 {
@@ -26,19 +28,6 @@ namespace MakePlacePlugin
 
     }
 
-
-
-    public struct SaveProperty
-    {
-        public string key { get; set; }
-        public string value { get; set; }
-
-        public SaveProperty(string k, string v)
-        {
-            key = k;
-            value = v;
-        }
-    }
 
     public class Fixture
     {
@@ -56,18 +45,17 @@ namespace MakePlacePlugin
 
         public Transform transform { get; set; } = new Transform();
 
-        public List<SaveProperty> properties { get; set; } = new List<SaveProperty>();
+        public Dictionary<string, object> properties { get; set; } = new Dictionary<string, object>();
 
         public List<Furniture> attachments { get; set; } = new List<Furniture>();
 
         public Color GetColor()
         {
-            foreach (var prop in properties)
+            
+            if (properties.TryGetValue("color", out object colorObj))
             {
-                if (prop.key.Equals("Color"))
-                {
-                    return System.Drawing.ColorTranslator.FromHtml("#" + prop.value.Substring(0, 6));
-                }
+                var color = (string) colorObj;
+                return System.Drawing.ColorTranslator.FromHtml("#" + color.Substring(0, 6));
             }
 
             return Color.Empty;
@@ -129,6 +117,30 @@ namespace MakePlacePlugin
             return houseSize.Equals("Medium") || houseSize.Equals("Large");
         }
     }
+
+    public class ObjectToInferredTypesConverter : JsonConverter<object>
+    {
+        public override object Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options) => reader.TokenType switch
+            {
+                JsonTokenType.True => true,
+                JsonTokenType.False => false,
+                JsonTokenType.Number when reader.TryGetInt64(out long l) => l,
+                JsonTokenType.Number => reader.GetDouble(),
+                JsonTokenType.String when reader.TryGetDateTime(out DateTime datetime) => datetime,
+                JsonTokenType.String => reader.GetString()!,
+                _ => JsonDocument.ParseValue(ref reader).RootElement.Clone()
+            };
+
+        public override void Write(
+            Utf8JsonWriter writer,
+            object objectToWrite,
+            JsonSerializerOptions options) =>
+            JsonSerializer.Serialize(writer, objectToWrite, objectToWrite.GetType(), options);
+    }
+
 
 
     public class SaveLayoutManager
@@ -206,13 +218,13 @@ namespace MakePlacePlugin
 
         static void ImportFurniture(List<HousingItem> itemList, List<Furniture> furnitureList)
         {
-            
+
 
             foreach (Furniture furniture in furnitureList)
             {
 
                 var houseItem = ConvertToHousingItem(furniture);
-                if(houseItem != null)
+                if (houseItem != null)
                 {
                     itemList.Add(houseItem);
                 }
@@ -233,8 +245,9 @@ namespace MakePlacePlugin
         {
 
             string jsonString = File.ReadAllText(path);
-
-            Layout layout = JsonSerializer.Deserialize<Layout>(jsonString);
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new ObjectToInferredTypesConverter());
+            Layout layout = JsonSerializer.Deserialize<Layout>(jsonString, options);
 
 
             var StainList = Data.GetExcelSheet<Stain>();
@@ -409,7 +422,7 @@ namespace MakePlacePlugin
                     var cb = (int)(color.Z * 255);
                     var ca = (int)(color.W * 255);
 
-                    furniture.properties.Add(new SaveProperty("Color", $"{cr:X2}{cg:X2}{cb:X2}{ca:X2}"));
+                    furniture.properties.Add("color", $"{cr:X2}{cg:X2}{cb:X2}{ca:X2}");
 
                 }
 
@@ -442,7 +455,9 @@ namespace MakePlacePlugin
             var options = new JsonSerializerOptions
             {
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                WriteIndented = true
+                WriteIndented = true,
+                Converters = { new ObjectToInferredTypesConverter() }
+
             };
             string jsonString = JsonSerializer.Serialize(save, options);
 
