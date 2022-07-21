@@ -6,7 +6,9 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 * [Installation](#installation)
 * [Usage](#usage)
   * [Saving a layout from the game](#saving-a-layout-from-the-game)
+  * [Loading a layout into the game](#loading-a-layout-into-the-game)  
 * [FAQ](#faq)
+* [Credits](#credits)
 * [Donate](#donate)
 
 
@@ -42,6 +44,12 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
   * Make sure the `save.json` file is specified. You can use any file name you want.
 * Click on `Save`. Done!
 
+### Loading a layout into the game
+* Make sure you are in *rotate* furniture mode
+* Make sure the file path points to your layout json file. It should end in `.json`
+* Click on `Load`. Your layout should show up in the plugin
+* Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
+
 ###
 
 ## FAQ
@@ -73,7 +81,14 @@ If using the MakePlace app, you can enable `Minimum Float Distance` in settings 
 ### Why does the plugin crash sometimes when applying a layout?
 Make sure your mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. There is unfortunately no solution to this, since this is tied to how the game operates.
 
-### Why does this plugin look familiar?
+### I'm getting a Load Error
+![Load Error](load-error.png?raw=true)
+There was a recent update to the layout json format. Update the MakePlace App (not the plugin) to the latest version, and re-save the layout while inside and outside. The json should now load in the plugin.
+
+### The plugin says it's placing items but nothing is moving
+You probably pressed `Get Interior Layout`, which loads the current layout in the game, instead of `Load`, which loads the layout from the file. Since the plugin is placing furniture that is already in position, it will look like nothing is moving.
+
+## Credits
 This plugin builds upon the foundation laid by 3 other great plugins: [HousingPos](https://github.com/Bluefissure/HousingPos), [BDTH](https://github.com/LeonBlade/BDTHPlugin) and [HouseMate](https://github.com/lmcintyre/Housemate). The UI in particular borrows heavily from HousingPos.
 
 ## Donate
