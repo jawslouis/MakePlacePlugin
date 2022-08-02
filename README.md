@@ -84,7 +84,7 @@ Make sure your mouse cursor is not hovering over any item (even if the item is b
 ### I'm getting a Load Error
 ![Load Error](load-error.png?raw=true)
 
-There was a recent update to the layout json format. Update the MakePlace App (not the plugin) to the latest version, and re-save the layout while inside and outside. The json should now load in the plugin.
+There was a recent update to the layout json format. Update the MakePlace App (not the plugin) to the latest version, and re-save the layout in the app while inside and outside. The json should now load in the plugin.
 
 ### The plugin says it's placing items but nothing is moving
 You probably pressed `Get Interior Layout`, which loads the current layout in the game, instead of `Load`, which loads the layout from the file. Since the plugin is placing furniture that is already in position, it will look like nothing is moving.
