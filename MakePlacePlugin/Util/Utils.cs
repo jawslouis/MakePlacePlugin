@@ -47,7 +47,7 @@ namespace MakePlacePlugin
                 InteriorFloor.Ground => "Ground Floor",
                 InteriorFloor.Basement => "Basement",
                 InteriorFloor.Upstairs => "Upper Floor",
-                InteriorFloor.External => "",
+                InteriorFloor.External => "Main",
                 _ => "Unknown"
             };
         }
