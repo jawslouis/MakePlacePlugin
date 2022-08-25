@@ -43,7 +43,8 @@ namespace MakePlacePlugin
         public static HookWrapper<T> HookAddress<T>(IntPtr addr, T detour, bool enable = true, int addressOffset = 0) where T : Delegate
         {
             PluginLog.Information($"Hooking {detour.Method.Name} at {addr.ToString("X")}");
-            var h = new Hook<T>(addr + addressOffset, detour);
+
+            var h = Dalamud.Hooking.Hook<T>.FromAddress(addr + addressOffset, detour);
             var wh = new HookWrapper<T>(h);
             if (enable) wh.Enable();
             HookList.Add(wh);

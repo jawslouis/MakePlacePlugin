@@ -18,7 +18,22 @@ namespace MakePlacePlugin
             RowId = parser.RowId;
             SubRowId = parser.SubRowId;
 
-            LandSets = parser.ReadStructuresAsArray<LandSet>(0, 60);
+            LandSets = new LandSet[60];
+
+            ushort offset = 0;
+            for (int i = 0; i < LandSets.Length; i++)
+            {
+                LandSets[i].LandRange = parser.ReadOffset<uint>(offset);
+                offset += 4;
+                LandSets[i].PlacardId = parser.ReadOffset<uint>(offset);
+                offset += 4;
+                LandSets[i].UnknownRange1 = parser.ReadOffset<uint>(offset);
+                offset += 4;
+                LandSets[i].InitialPrice = parser.ReadOffset<uint>(offset);
+                offset += 4;
+                LandSets[i].Size = parser.ReadOffset<byte>(offset);
+                offset += 4;
+            }
             UnknownRange = parser.ReadColumn<uint>(300);
             UnknownRange2 = parser.ReadColumn<uint>(301);
         }
