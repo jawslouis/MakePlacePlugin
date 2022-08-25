@@ -13,7 +13,7 @@ namespace MakePlacePlugin
 {
     public unsafe class Memory
     {
-        public static IntPtr InventoryManagerAddress;
+
         public static GetInventoryContainerDelegate GetInventoryContainer;
         public delegate InventoryContainer* GetInventoryContainerDelegate(IntPtr inventoryManager, InventoryType inventoryType);
 
@@ -30,7 +30,6 @@ namespace MakePlacePlugin
                         "48 8B 05 ?? ?? ?? ?? 48 8B 48 20 48 85 C9 74 31 83 B9 ?? ?? ?? ?? ?? 74 28 80 B9 ?? ?? ?? ?? ?? 75 1F 80 B9 ?? ?? ?? ?? ?? 74 03 B0 01 C3", 2);
 
 
-                InventoryManagerAddress = scanner.GetStaticAddressFromSig("BA ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F8 48 85 C0");
                 var getInventoryContainerPtr = scanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
                 GetInventoryContainer = Marshal.GetDelegateForFunctionPointer<GetInventoryContainerDelegate>(getInventoryContainerPtr);
 
@@ -60,8 +59,7 @@ namespace MakePlacePlugin
 
         public static InventoryContainer* GetContainer(InventoryType inventoryType)
         {
-            if (InventoryManagerAddress == IntPtr.Zero) return null;
-            return GetInventoryContainer(InventoryManagerAddress, inventoryType);
+            return InventoryManager.Instance()->GetInventoryContainer(inventoryType);
         }
 
         public unsafe InteriorFloor CurrentFloor()
