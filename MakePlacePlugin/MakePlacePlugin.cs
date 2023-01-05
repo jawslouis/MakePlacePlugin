@@ -405,6 +405,10 @@ namespace MakePlacePlugin
                     unmatched.Add(gameObject);
                     continue;
                 }
+                else
+                {
+                    houseItem.IsPlaced = true;
+                }
                 houseItem.ItemStruct = (IntPtr)gameObject.Item;
             }
 
@@ -450,6 +454,10 @@ namespace MakePlacePlugin
                     gameObject.rotation);
                     UnusedItemList.Add(unmatchedItem);
                     continue;
+                } 
+                else
+                {
+                    houseItem.IsPlaced = true;
                 }
 
                 houseItem.ItemStruct = (IntPtr)gameObject.Item;

@@ -19,6 +19,7 @@ namespace MakePlacePlugin.Objects
         public string Name = "";
         public IntPtr ItemStruct = IntPtr.Zero;
         public bool DyeMatch = true;
+        public bool IsPlaced = false;
         public bool IsTableOrWallMounted = false;
 
         public HousingItem(Item item, byte stain, float x, float y, float z, float rotate)

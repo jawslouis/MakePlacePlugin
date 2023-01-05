@@ -22,6 +22,7 @@ namespace MakePlacePlugin.Gui
 
         private readonly Vector4 PURPLE = new(0.26275f, 0.21569f, 0.56863f, 1f);
         private readonly Vector4 PURPLE_ALPHA = new(0.26275f, 0.21569f, 0.56863f, 0.5f);
+        private readonly Vector4 INACTIVE_GREY = new(0.5f, 0.5f, 0.5f, 1);
 
         public ConfigurationWindow(MakePlacePlugin plugin) : base(plugin)
         {
@@ -56,12 +57,24 @@ namespace MakePlacePlugin.Gui
                         DrawItemList(Plugin.InteriorItemList);
                         ImGui.PopID();
                     }
+                    if (ImGui.CollapsingHeader("Interior Furniture, missing Dyes", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("interiorMissingDyes");
+                        DrawMissingDyesList(Plugin.InteriorItemList);
+                        ImGui.PopID();
+                    }                    
                     if (ImGui.CollapsingHeader("Exterior Furniture", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.PushID("exterior");
                         DrawItemList(Plugin.ExteriorItemList);
                         ImGui.PopID();
                     }
+                    if (ImGui.CollapsingHeader("Exterior Furniture, missing Dyes", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.PushID("exteriorMissingDyes");
+                        DrawMissingDyesList(Plugin.ExteriorItemList);
+                        ImGui.PopID();
+                    }                    
 
                     if (ImGui.CollapsingHeader("Interior Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
                     {
@@ -69,6 +82,7 @@ namespace MakePlacePlugin.Gui
                         DrawFixtureList(Plugin.Layout.interiorFixture);
                         ImGui.PopID();
                     }
+                    
 
                     if (ImGui.CollapsingHeader("Exterior Fixtures", ImGuiTreeNodeFlags.DefaultOpen))
                     {
@@ -237,6 +251,14 @@ namespace MakePlacePlugin.Gui
             }
 
             ImGui.Dummy(new Vector2(0, 15));
+          
+            ImGui.Text("Furniture Filters (will not impact placement, only select one)");
+
+            if (ImGui.Checkbox("Show Only Unplaced", ref Config.ShowOnlyUnplaced)) Config.Save();
+            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+            if (ImGui.Checkbox("Show Only Undyed", ref Config.ShowOnlyUndyed)) Config.Save();
+
+            ImGui.Dummy(new Vector2(0, 15));
 
             ImGui.Text("Layout Actions");
 
@@ -302,29 +324,34 @@ namespace MakePlacePlugin.Gui
 
         }
 
+        private void DrawDyeSwatch(int indexId, Stain stain, bool isMatched = true)
+        {
+            var colorName = stain?.Name;
+
+            Utils.StainButton("dye_" + indexId, stain, new Vector2(20));
+            ImGui.SameLine();
+
+            if (!isMatched)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, INACTIVE_GREY);
+            }
+
+            ImGui.Text($"{colorName}");
+
+            if (!isMatched)
+                ImGui.PopStyleColor();            
+        }
         private void DrawRow(int i, HousingItem housingItem, bool showSetPosition = true, int childIndex = -1)
         {
             ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}"); ImGui.NextColumn();
             ImGui.Text($"{housingItem.Rotate:N3}"); ImGui.NextColumn();
-            var stain = MakePlacePlugin.Data.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
-            var colorName = stain?.Name;
 
-            if (housingItem.Stain != 0)
+            if (housingItem.Stain != 0) 
             {
-                Utils.StainButton("dye_" + i, stain, new Vector2(20));
-                ImGui.SameLine();
-
-                if (!housingItem.DyeMatch)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
-                }
-
-                ImGui.Text($"{colorName}");
-
-                if (!housingItem.DyeMatch)
-                    ImGui.PopStyleColor();
-
+                var stain = MakePlacePlugin.Data.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
+                DrawDyeSwatch(i, stain, housingItem.DyeMatch);
             }
+
             ImGui.NextColumn();
 
             if (showSetPosition)
@@ -402,6 +429,31 @@ namespace MakePlacePlugin.Gui
 
         }
 
+        private void DrawMissingDyesList(List<HousingItem> itemList)
+        {
+            try 
+            {
+                Dictionary<Stain, int> colorToMissingCountDictionary = itemList.Where(item => !item.DyeMatch).Aggregate(new Dictionary<Stain, int>(), (acc, item) => {
+                    var stainKey = MakePlacePlugin.Data.GetExcelSheet<Stain>().GetRow(item.Stain);
+                    int currentCount = acc.GetValueOrDefault(stainKey, 0);
+                    acc[stainKey] = currentCount + 1;
+                    return acc;
+                });
+                int idIndex = 0;
+                foreach (KeyValuePair<Stain, int> colorToMissingCount in colorToMissingCountDictionary) 
+                {
+
+                    ImGui.Text($"{colorToMissingCount.Value}x");
+                    ImGui.SameLine();
+                    DrawDyeSwatch(idIndex++, colorToMissingCount.Key, true);
+                    ImGui.Separator();
+                }
+            }
+            catch (Exception e)
+            {
+                LogError(e.Message, e.StackTrace);
+            }
+        }
         private void DrawItemList(List<HousingItem> itemList, bool isUnused = false)
         {
 
@@ -461,6 +513,15 @@ namespace MakePlacePlugin.Gui
                 var displayName = housingItem.Name;
 
                 var item = MakePlacePlugin.Data.GetExcelSheet<Item>().GetRow(housingItem.ItemKey);
+
+                if (Config.ShowOnlyUndyed && housingItem.DyeMatch) {
+                    continue;
+                }
+
+                if (Config.ShowOnlyUnplaced && housingItem.IsPlaced) {
+                    continue;
+                }
+
                 if (item != null)
                 {
                     DrawIcon(item.Icon, new Vector2(20, 20));
@@ -469,12 +530,10 @@ namespace MakePlacePlugin.Gui
 
                 if (housingItem.ItemStruct == IntPtr.Zero)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
+                    ImGui.PushStyleColor(ImGuiCol.Text, INACTIVE_GREY);
                 }
 
                 ImGui.Text(displayName);
-
-
 
                 ImGui.NextColumn();
                 DrawRow(i, housingItem, !isUnused);

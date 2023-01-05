@@ -21,6 +21,8 @@ namespace MakePlacePlugin
         public bool Basement = true;
         public bool GroundFloor = true;
         public bool UpperFloor = true;
+        public bool ShowOnlyUnplaced = false;
+        public bool ShowOnlyUndyed = false;
 
 
         public List<string> Tags = new List<string>();
