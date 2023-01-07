@@ -228,7 +228,7 @@ namespace MakePlacePlugin
 
                     if (item.ItemStruct == IntPtr.Zero) continue;
 
-                    SetItemPosition(item);
+                    SetItemPosition(item, Config.LogPlacement);
 
                     if (Config.LoadInterval > 0)
                     {
@@ -251,7 +251,7 @@ namespace MakePlacePlugin
             CurrentlyPlacingItems = false;
         }
 
-        unsafe public static void SetItemPosition(HousingItem rowItem)
+        unsafe public static void SetItemPosition(HousingItem rowItem, bool logPlacement = true)
         {
 
             if (!IsDecorMode() || !IsRotateMode())
@@ -263,7 +263,9 @@ namespace MakePlacePlugin
 
             if (rowItem.ItemStruct == IntPtr.Zero) return;
 
-            Log("Placing " + rowItem.Name);
+            if (logPlacement) {
+                Log("Placing " + rowItem.Name);
+            }
 
             var MemInstance = Memory.Instance;
 

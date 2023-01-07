@@ -23,6 +23,7 @@ namespace MakePlacePlugin
         public bool UpperFloor = true;
         public bool ShowOnlyUnplaced = false;
         public bool ShowOnlyUndyed = false;
+        public bool LogPlacement = true;
 
 
         public List<string> Tags = new List<string>();

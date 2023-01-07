@@ -259,6 +259,12 @@ namespace MakePlacePlugin.Gui
             if (ImGui.Checkbox("Show Only Undyed", ref Config.ShowOnlyUndyed)) Config.Save();
 
             ImGui.Dummy(new Vector2(0, 15));
+          
+            ImGui.Text("Log messages");
+
+            if (ImGui.Checkbox("Individual item placement", ref Config.LogPlacement)) Config.Save();            
+
+            ImGui.Dummy(new Vector2(0, 15));
 
             ImGui.Text("Layout Actions");
 
@@ -368,7 +374,7 @@ namespace MakePlacePlugin.Gui
 
                         if (housingItem.ItemStruct != IntPtr.Zero)
                         {
-                            SetItemPosition(housingItem);
+                            SetItemPosition(housingItem, Config.LogPlacement);
                         }
                         else
                         {
@@ -607,7 +613,7 @@ namespace MakePlacePlugin.Gui
                                 continue;
                             }
 
-                            SetItemPosition(housingItem);
+                            SetItemPosition(housingItem, Config.LogPlacement);
                             Config.HiddenScreenItemHistory.Add(i);
                             Config.Save();
                         }
