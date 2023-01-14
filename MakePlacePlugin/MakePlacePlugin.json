@@ -11,5 +11,6 @@
     "jawslouis"
   ],
   "IconUrl": "https://raw.githubusercontent.com/jawslouis/MakePlacePlugin/master/icon.png",
-  "Punchline": "Automatically save & load furniture layouts in your house."
+  "Punchline": "Automatically save & load furniture layouts in your house.",
+  "DalamudAPILevel":  8
 }
