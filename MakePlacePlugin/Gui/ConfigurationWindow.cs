@@ -28,16 +28,10 @@ namespace MakePlacePlugin.Gui
 
         }
 
-        protected override void DrawUi()
+        protected void DrawAllUi()
         {
-            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, PURPLE);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, PURPLE_ALPHA);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, PURPLE_ALPHA);
-            ImGui.SetNextWindowSize(new Vector2(530, 450), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin($"{Plugin.Name}", ref WindowVisible, ImGuiWindowFlags.NoScrollWithMouse))
             {
-                ImGui.PopStyleColor(3);
-                ImGui.End();
                 return;
             }
             if (ImGui.BeginChild("##SettingsRegion"))
@@ -88,9 +82,18 @@ namespace MakePlacePlugin.Gui
                 }
                 ImGui.EndChild();
             }
+        }
+
+        protected override void DrawUi()
+        {
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, PURPLE);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, PURPLE_ALPHA);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, PURPLE_ALPHA);
+            ImGui.SetNextWindowSize(new Vector2(530, 450), ImGuiCond.FirstUseEver);
+
+            DrawAllUi();
 
             ImGui.PopStyleColor(3);
-
             ImGui.End();
         }
 

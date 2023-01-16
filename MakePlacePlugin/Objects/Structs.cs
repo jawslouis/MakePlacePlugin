@@ -158,11 +158,11 @@ namespace MakePlacePlugin
         [FieldOffset(0x030)] public fixed byte name[64];
         [FieldOffset(0x080)] public uint housingRowId;
         [FieldOffset(0x84)] public uint OwnerID;
-        [FieldOffset(0x0A0)] public float X;
-        [FieldOffset(0x0A4)] public float Y;
-        [FieldOffset(0x0A8)] public float Z;
-        [FieldOffset(0xF8)] public HousingItemStruct* Item;
-        [FieldOffset(0x0B0)] public float rotation;
+        [FieldOffset(0x0B0)] public float X;
+        [FieldOffset(0x0B4)] public float Y;
+        [FieldOffset(0x0B8)] public float Z;
+        [FieldOffset(0x108)] public HousingItemStruct* Item;
+        [FieldOffset(0x0C0)] public float rotation;
         [FieldOffset(0x1A8)] public uint housingRowId2;
         [FieldOffset(0x1B0)] public byte color;
     }
