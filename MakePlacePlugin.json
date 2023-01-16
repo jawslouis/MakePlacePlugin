@@ -17,9 +17,9 @@
   "LoadPriority": 0,
   "IconUrl": "https://raw.githubusercontent.com/jawslouis/MakePlacePlugin/master/icon.png",
   "DownloadCount": 32831,
-  "DownloadLinkInstall": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v2.18/MakePlacePlugin.zip",
-  "DownloadLinkTesting": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v2.18/MakePlacePlugin.zip",
-  "DownloadLinkUpdate": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v2.18/MakePlacePlugin.zip",
+  "DownloadLinkInstall": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v2.19/MakePlacePlugin.zip",
+  "DownloadLinkTesting": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v2.19/MakePlacePlugin.zip",
+  "DownloadLinkUpdate": "https://github.com/jawslouis/MakePlacePlugin/releases/download/v2.19/MakePlacePlugin.zip",
   "_isDip17Plugin": false,
   "_Dip17Channel": null
 }]
