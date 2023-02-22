@@ -363,8 +363,19 @@ namespace MakePlacePlugin.Gui
 
         private void DrawRow(int i, HousingItem housingItem, bool showSetPosition = true, int childIndex = -1)
         {
-            ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}"); ImGui.NextColumn();
+            if (!housingItem.CorrectLocation) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
+            ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}");
+            if (!housingItem.CorrectLocation) ImGui.PopStyleColor();
+
+
+            ImGui.NextColumn();
+
+            if (!housingItem.CorrectRotation) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
             ImGui.Text($"{housingItem.Rotate:N3}"); ImGui.NextColumn();
+            if (!housingItem.CorrectRotation) ImGui.PopStyleColor();
+
+
+
             var stain = MakePlacePlugin.Data.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
             var colorName = stain?.Name;
 
