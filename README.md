@@ -28,8 +28,8 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode (Housing -> Indoor/Outdoor Furnishings. Click on the Rotate button).
 
 ![Settings](screenshot.png?raw=true)  
-
-* **Save**: Saves the *currently loaded* interior and exterior layout to file. You will need to load the interior/exterior layout before you can save it. Make sure the path contains the file name too (e.g. `save.json`)
+* **Save As**: Saves the *currently loaded* interior and exterior layout to the specified file. You will need to load the interior/exterior layout before you can save it. 
+* **Save**: Saves the layout to the current file. When first starting the plugin, this is not available since no file is specified.
 * **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
 * **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
 * **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out). **Furniture needs to be placed before it can be used in the layout** - items in the inventory or storeroom will not be used. Make sure that no furniture is selected before using this.
@@ -39,15 +39,13 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 ### Saving a layout from the game
 * Make sure you are in furniture mode
 * Click on `Get Interior/Exterior Layout`
-* Check the file path
-  * Make sure the folder exists
-  * Make sure the `save.json` file is specified. You can use any file name you want.
-* Click on `Save`. Done!
+* Click on `Save As`, and specify the file name. Done!
 
 ### Loading a layout into the game
 * Make sure you are in *rotate* furniture mode
-* Make sure the file path points to your layout json file. It should end in `.json`
-* Click on `Load`. Your layout should show up in the plugin
+* Click on `Load` and select the .json design file. Your layout should show up in the plugin
+* Make sure the relevant floors are checked.
+  * If in an apartment, you want to check all floors
 * Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
 
 ###
