@@ -122,7 +122,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.20 initialized");
+            PluginLog.Log("MakePlace Plugin v2.21 initialized");
         }
         public void Initialize()
         {
@@ -424,11 +424,6 @@ namespace MakePlacePlugin
                 var locationError = houseItem.GetLocation() - localPosition;
                 houseItem.CorrectLocation = locationError.LengthSquared() < 0.0001;
                 houseItem.CorrectRotation = localRotation - houseItem.Rotate < 0.001;
-
-                if (!houseItem.CorrectRotation)
-                {
-                    Log($"localRotation: {localRotation}, houseItem rotation: {houseItem.Rotate * 180 / Math.PI}");
-                }
 
                 houseItem.ItemStruct = (IntPtr)gameObject.Item;
             }
