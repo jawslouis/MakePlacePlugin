@@ -47,6 +47,7 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 * Make sure the relevant floors are checked.
   * If in an apartment, you want to check all floors
 * Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
+  * If there are crashes, check [this section of the FAQ](#why-does-the-plugin-crash-sometimes-when-applying-a-layout):    
 
 ###
 
@@ -77,12 +78,12 @@ Items have a minimum float distance, below which they will snap back to the floo
 If using the MakePlace app, you can enable `Minimum Float Distance` in settings to get a visual indicator when placing furniture.
 
 ### Why does the plugin crash sometimes when applying a layout?
-Make sure your mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. There is unfortunately no solution to this, since this is tied to how the game operates.
+Make sure of the following:
+- Mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. 
+- Character is not in the way of where furniture will be placed
+- No more than 10 items attached to another (e.g. table-top items on tables, wall-mounted items on partition walls)
 
-### I'm getting a Load Error
-![Load Error](load-error.png?raw=true)
-
-There was a recent update to the layout json format. Update the MakePlace App (not the plugin) to the latest version, and re-save the layout in the app while inside and outside. The json should now load in the plugin.
+There is unfortunately no solution to the above issues, since this is tied to how the game operates.
 
 ### The plugin says it's placing items but nothing is moving
 You probably pressed `Get Interior Layout`, which loads the current layout in the game, instead of `Load`, which loads the layout from the file. Since the plugin is placing furniture that is already in position, it will look like nothing is moving.
