@@ -46,6 +46,9 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 * Click on `Load` and select the .json design file. Your layout should show up in the plugin
 * Make sure the relevant floors are checked.
   * If in an apartment, you want to check all floors
+* Make sure all the required furniture are placed in the house
+  * The plugin will not touch furniture that are in your inventory or storage
+  * If you re-load the design, all the furniture in the list should be white and not grayed out  
 * Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
   * If there are crashes, check [this section of the FAQ](#why-does-the-plugin-crash-sometimes-when-applying-a-layout):    
 
