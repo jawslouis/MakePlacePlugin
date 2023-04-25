@@ -578,6 +578,8 @@ namespace MakePlacePlugin
 
         public bool IsSelectedFloor(float y)
         {
+            if (Memory.Instance.IsOutdoors() || Layout.houseSize.Equals("Apartment")) return true;
+
             if (y < -0.001) return Config.Basement;
             if (y >= -0.001 && y < 6.999) return Config.GroundFloor;
             if (y >= 6.999) return Config.UpperFloor;

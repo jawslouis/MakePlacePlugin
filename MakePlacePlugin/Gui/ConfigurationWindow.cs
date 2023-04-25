@@ -217,29 +217,36 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Dummy(new Vector2(0, 15));
 
-            ImGui.Text("Selected Floors");
+            bool noFloors = Memory.Instance.IsOutdoors() || Plugin.Layout.houseSize.Equals("Apartment");
 
-            if (ImGui.Checkbox("Basement", ref Config.Basement))
+            if (!noFloors)
             {
-                Plugin.MatchLayout();
-                Config.Save();
-            }
-            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
-            if (ImGui.Checkbox("Ground Floor", ref Config.GroundFloor))
-            {
-                Plugin.MatchLayout();
-                Config.Save();
-            }
-            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+                ImGui.Text("Selected Floors");
 
-            if (ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
-            {
-                Plugin.MatchLayout();
-                Config.Save();
-            }
+                if (ImGui.Checkbox("Basement", ref Config.Basement))
+                {
+                    Plugin.MatchLayout();
+                    Config.Save();
+                }
+                ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
-            ImGui.Dummy(new Vector2(0, 15));
+                if (ImGui.Checkbox("Ground Floor", ref Config.GroundFloor))
+                {
+                    Plugin.MatchLayout();
+                    Config.Save();
+                }
+                ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+
+                if (ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
+                {
+                    Plugin.MatchLayout();
+                    Config.Save();
+                }
+
+                ImGui.Dummy(new Vector2(0, 15));
+
+            }
 
             ImGui.Text("Layout Actions");
 
