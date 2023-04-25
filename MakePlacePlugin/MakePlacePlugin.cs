@@ -122,7 +122,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.21 initialized");
+            PluginLog.Log("MakePlace Plugin v2.22 initialized");
         }
         public void Initialize()
         {
@@ -613,7 +613,12 @@ namespace MakePlacePlugin
 
             if (y < -0.001) return Config.Basement;
             if (y >= -0.001 && y < 6.999) return Config.GroundFloor;
-            if (y >= 6.999) return Config.UpperFloor;
+
+            if (y >= 6.999)
+            {
+                if (Layout.hasUpperFloor()) return Config.UpperFloor;
+                else return Config.GroundFloor;
+            }
 
             return false;
         }

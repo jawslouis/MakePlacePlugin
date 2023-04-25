@@ -249,6 +249,7 @@ namespace MakePlacePlugin.Gui
                             Config.Save();
 
                             SaveLayoutManager.ImportLayout(Config.SaveLocation);
+
                             Plugin.MatchLayout();
                             Config.ResetRecord();
                             Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
@@ -290,7 +291,7 @@ namespace MakePlacePlugin.Gui
                 }
                 ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
-                if (ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
+                if (Plugin.Layout.hasUpperFloor() && ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
                 {
                     Plugin.MatchLayout();
                     Config.Save();
