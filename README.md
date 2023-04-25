@@ -17,7 +17,8 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 * You will need to use the [FFXIV Quick Launcher](https://goatcorp.github.io/) to run the game. This allows third-party plugins (such as this) to be used.
 * Open the settings window by using the command `/xlsettings` in the chat, or by hitting `Esc` and selecting Dalamud Settings.
 * Click on the "Experimental" tab
-* Copy the following url into a new line on the Custom Plugin Repositories section: https://raw.githubusercontent.com/jawslouis/MakePlacePlugin/master/MakePlacePlugin.json
+* Copy the following url into a new line on the Custom Plugin Repositories section: https://raw.githubusercontent.com/jawslouis/MakePlacePlugin/master/MakePlacePlugin.json  
+  - For the CN server, use this version(国服用这个): https://raw.fastgit.org/haruka411/MakePlacePlugin/master-cn/MakePlacePlugin.json  
 * Click on the `+` button. Make sure the new entry has "Enabled" checked.
 * Click the "Save and Close" button
 * Open the plugins window by typing `/xlplugins` in the chat, or hit `Esc` and select Dalamud Plugins
@@ -27,8 +28,8 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode (Housing -> Indoor/Outdoor Furnishings. Click on the Rotate button).
 
 ![Settings](screenshot.png?raw=true)  
-
-* **Save**: Saves the *currently loaded* interior and exterior layout to file. You will need to load the interior/exterior layout before you can save it. Make sure the path contains the file name too (e.g. `save.json`)
+* **Save As**: Saves the *currently loaded* interior and exterior layout to the specified file. You will need to load the interior/exterior layout before you can save it. 
+* **Save**: Saves the layout to the current file. When first starting the plugin, this is not available since no file is specified.
 * **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
 * **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
 * **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out). **Furniture needs to be placed before it can be used in the layout** - items in the inventory or storeroom will not be used. Make sure that no furniture is selected before using this.
@@ -38,16 +39,18 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 ### Saving a layout from the game
 * Make sure you are in furniture mode
 * Click on `Get Interior/Exterior Layout`
-* Check the file path
-  * Make sure the folder exists
-  * Make sure the `save.json` file is specified. You can use any file name you want.
-* Click on `Save`. Done!
+* Click on `Save As`, and specify the file name. Done!
 
 ### Loading a layout into the game
 * Make sure you are in *rotate* furniture mode
-* Make sure the file path points to your layout json file. It should end in `.json`
-* Click on `Load`. Your layout should show up in the plugin
+* Click on `Load` and select the .json design file. Your layout should show up in the plugin
+* Make sure the relevant floors are checked.
+  * If in an apartment, you want to check all floors
+* Make sure all the required furniture are placed in the house
+  * The plugin will not touch furniture that are in your inventory or storage
+  * If you re-load the design, all the furniture in the list should be white and not grayed out  
 * Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
+  * If there are crashes, check [this section of the FAQ](#why-does-the-plugin-crash-sometimes-when-applying-a-layout):    
 
 ###
 
@@ -78,12 +81,12 @@ Items have a minimum float distance, below which they will snap back to the floo
 If using the MakePlace app, you can enable `Minimum Float Distance` in settings to get a visual indicator when placing furniture.
 
 ### Why does the plugin crash sometimes when applying a layout?
-Make sure your mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. There is unfortunately no solution to this, since this is tied to how the game operates.
+Make sure of the following:
+- Mouse cursor is not hovering over any item (even if the item is behind the plugin UI). When applying a layout, hovering over an item may cause some game code to conflict with the placement process. 
+- Character is not in the way of where furniture will be placed
+- No more than 10 items attached to another (e.g. table-top items on tables, wall-mounted items on partition walls)
 
-### I'm getting a Load Error
-![Load Error](load-error.png?raw=true)
-
-There was a recent update to the layout json format. Update the MakePlace App (not the plugin) to the latest version, and re-save the layout in the app while inside and outside. The json should now load in the plugin.
+There is unfortunately no solution to the above issues, since this is tied to how the game operates.
 
 ### The plugin says it's placing items but nothing is moving
 You probably pressed `Get Interior Layout`, which loads the current layout in the game, instead of `Load`, which loads the layout from the file. Since the plugin is placing furniture that is already in position, it will look like nothing is moving.

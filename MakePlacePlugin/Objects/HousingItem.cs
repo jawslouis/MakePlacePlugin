@@ -19,6 +19,8 @@ namespace MakePlacePlugin.Objects
         public string Name = "";
         public IntPtr ItemStruct = IntPtr.Zero;
         public bool DyeMatch = true;
+        public bool CorrectLocation = true;
+        public bool CorrectRotation = true;
         public bool IsTableOrWallMounted = false;
 
         public HousingItem(Item item, byte stain, float x, float y, float z, float rotate)
@@ -34,5 +36,9 @@ namespace MakePlacePlugin.Objects
             Rotate = rotate;
         }
 
+        public Vector3 GetLocation()
+        {
+            return new Vector3(X, Y, Z);
+        }
     }
 }

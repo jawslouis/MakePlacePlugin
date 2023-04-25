@@ -1,10 +1,12 @@
 ﻿using Dalamud.Utility;
+using Dalamud.Interface.ImGuiFileDialog;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using MakePlacePlugin.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -23,9 +25,14 @@ namespace MakePlacePlugin.Gui
         private readonly Vector4 PURPLE = new(0.26275f, 0.21569f, 0.56863f, 1f);
         private readonly Vector4 PURPLE_ALPHA = new(0.26275f, 0.21569f, 0.56863f, 0.5f);
 
+        private FileDialogManager FileDialogManager { get; }
+
         public ConfigurationWindow(MakePlacePlugin plugin) : base(plugin)
         {
-
+            this.FileDialogManager = new FileDialogManager
+            {
+                AddedWindowFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking,
+            };
         }
 
         protected void DrawAllUi()
@@ -82,6 +89,8 @@ namespace MakePlacePlugin.Gui
                 }
                 ImGui.EndChild();
             }
+
+            this.FileDialogManager.Draw();
         }
 
         protected override void DrawUi()
@@ -158,24 +167,56 @@ namespace MakePlacePlugin.Gui
             ImGui.TextUnformatted("Show Tooltips");
 
             ImGui.Dummy(new Vector2(0, 10));
-            ImGui.Text("Save/Load file location");
-            if (ImGui.InputText("##saveLocation", ref Config.SaveLocation, 150))
+
+
+            ImGui.Text("Layout");
+
+            if (!Config.SaveLocation.IsNullOrEmpty())
             {
-                Config.Save();
+                ImGui.Text($"Current file location: {Config.SaveLocation}");
+
+                if (ImGui.Button("Save"))
+                {
+                    try
+                    {
+                        MakePlacePlugin.LayoutManager.ExportLayout();
+                    }
+                    catch (Exception e)
+                    {
+                        LogError($"Save Error: {e.Message}", e.StackTrace);
+                    }
+                }
+
+                ImGui.SameLine();
+
             }
 
-            if (ImGui.Button("Save"))
+
+            if (ImGui.Button("Save As"))
             {
                 try
                 {
-                    MakePlacePlugin.LayoutManager.ExportLayout();
+                    string saveName = "save";
+                    if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
+
+                    FileDialogManager.SaveFileDialog("Select a Save Location", ".json", saveName, "json", (bool ok, string res) =>
+                    {
+                        if (!ok)
+                        {
+                            return;
+                        }
+
+                        Config.SaveLocation = res;
+                        Config.Save();
+                        MakePlacePlugin.LayoutManager.ExportLayout();
+
+                    }, Path.GetDirectoryName(Config.SaveLocation));
                 }
                 catch (Exception e)
                 {
                     LogError($"Save Error: {e.Message}", e.StackTrace);
                 }
             }
-            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Save current layout to file");
             ImGui.SameLine();
             ImGui.Text("Plugin → File           ");
 
@@ -183,31 +224,42 @@ namespace MakePlacePlugin.Gui
             ImGui.SameLine();
             if (ImGui.Button("Load"))
             {
-
                 if (!IsDecorMode())
                 {
                     LogError("Unable to load layouts outside of Layout mode");
                     LogError("(Housing -> Indoor/Outdoor Furnishings)");
 
                 }
-                else if (!Config.SaveLocation.EndsWith(".json"))
-                {
-                    LogError("Error: Json layout file not specified");
-                }
                 else
                 {
 
                     try
                     {
-                        SaveLayoutManager.ImportLayout(Config.SaveLocation);
-                        Plugin.MatchLayout();
-                        Config.ResetRecord();
-                        Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
+                        string saveName = "save";
+                        if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
+
+                        FileDialogManager.OpenFileDialog("Select a Layout File", ".json", (bool ok, List<string> res) =>
+                        {
+                            if (!ok)
+                            {
+                                return;
+                            }
+
+                            Config.SaveLocation = res.FirstOrDefault("");
+                            Config.Save();
+
+                            SaveLayoutManager.ImportLayout(Config.SaveLocation);
+                            Plugin.MatchLayout();
+                            Config.ResetRecord();
+                            Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
+
+                        }, 1, Path.GetDirectoryName(Config.SaveLocation));
                     }
                     catch (Exception e)
                     {
                         LogError($"Load Error: {e.Message}", e.StackTrace);
                     }
+
                 }
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from file");
@@ -314,8 +366,19 @@ namespace MakePlacePlugin.Gui
 
         private void DrawRow(int i, HousingItem housingItem, bool showSetPosition = true, int childIndex = -1)
         {
-            ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}"); ImGui.NextColumn();
+            if (!housingItem.CorrectLocation) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
+            ImGui.Text($"{housingItem.X:N3}, {housingItem.Y:N3}, {housingItem.Z:N3}");
+            if (!housingItem.CorrectLocation) ImGui.PopStyleColor();
+
+
+            ImGui.NextColumn();
+
+            if (!housingItem.CorrectRotation) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
             ImGui.Text($"{housingItem.Rotate:N3}"); ImGui.NextColumn();
+            if (!housingItem.CorrectRotation) ImGui.PopStyleColor();
+
+
+
             var stain = MakePlacePlugin.Data.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
             var colorName = stain?.Name;
 
