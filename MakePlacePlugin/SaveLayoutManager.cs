@@ -257,7 +257,7 @@ namespace MakePlacePlugin
 
             foreach (var stain in StainList)
             {
-                if (stain.Unknown5)
+                if (stain.Unknown6) // bool for whether the dye can be used for housing
                 {
                     ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
                 }
