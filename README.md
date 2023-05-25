@@ -27,15 +27,6 @@ A plugin to automatically save and load housing furniture layouts for FFXIV. It 
 ## Usage
 Type `/makeplace` to open the plugin screen. Most functions are only available when in Rotate Furniture mode (Housing -> Indoor/Outdoor Furnishings. Click on the Rotate button).
 
-![Settings](screenshot.png?raw=true)  
-* **Save As**: Saves the *currently loaded* interior and exterior layout to the specified file. You will need to load the interior/exterior layout before you can save it. 
-* **Save**: Saves the layout to the current file. When first starting the plugin, this is not available since no file is specified.
-* **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
-* **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
-* **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out). **Furniture needs to be placed before it can be used in the layout** - items in the inventory or storeroom will not be used. Make sure that no furniture is selected before using this.
-* **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
-* **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
-
 ### Saving a layout from the game
 * Make sure you are in furniture mode
 * Click on `Get Interior/Exterior Layout`
@@ -51,6 +42,16 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
   * If you re-load the design, all the furniture in the list should be white and not grayed out  
 * Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
   * If there are crashes, check [this section of the FAQ](#why-does-the-plugin-crash-sometimes-when-applying-a-layout):    
+
+### Interface
+![Settings](screenshot.png?raw=true)  
+* **Save As**: Saves the *currently loaded* interior and exterior layout to the specified file. You will need to load the interior/exterior layout before you can save it. 
+* **Save**: Saves the layout to the current file. When first starting the plugin, this is not available since no file is specified.
+* **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
+* **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
+* **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out). **Furniture needs to be placed before it can be used in the layout** - items in the inventory or storeroom will not be used. Make sure that no furniture is selected before using this.
+* **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
+* **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
 
 ###
 
