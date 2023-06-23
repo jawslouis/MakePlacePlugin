@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
 using static FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using static MakePlacePlugin.Utils;
@@ -123,8 +124,15 @@ namespace MakePlacePlugin
     {
         [FieldOffset(0x50)] public Vector3 Position;
         [FieldOffset(0x60)] public Quaternion Rotation;
-        // [FieldOffset(0x90)] public HousingItemUnknown1* unknown;
+        [FieldOffset(0xF8)] public ItemMaterialManager* MaterialManager;
     }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public unsafe struct ItemMaterialManager
+    {
+        [FieldOffset(0xcc)] public ushort MaterialSlot1;
+    }
+
 
     [StructLayout(LayoutKind.Explicit, Size = 0x30)]
     public unsafe struct HousingItemInfo

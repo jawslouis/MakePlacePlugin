@@ -16,6 +16,7 @@ using static MakePlacePlugin.MakePlacePlugin;
 using System.Drawing;
 using System.Globalization;
 using System.Text.Json.Serialization;
+using ImGuiNET;
 
 namespace MakePlacePlugin
 {
@@ -28,21 +29,21 @@ namespace MakePlacePlugin
 
     }
 
-
-    public class Fixture
+    public class BasicItem
     {
-        public string level { get; set; } = "";
-        public string type { get; set; } = "";
         public string name { get; set; } = "";
         public uint itemId { get; set; } = 0;
     }
 
-    public class Furniture
+    public class Fixture : BasicItem
     {
-        public string name { get; set; }
+        public string level { get; set; } = "";
+        public string type { get; set; } = "";
 
-        public uint itemId { get; set; }
+    }
 
+    public class Furniture : BasicItem
+    {
         public Transform transform { get; set; } = new Transform();
 
         public Dictionary<string, object> properties { get; set; } = new Dictionary<string, object>();
@@ -59,6 +60,17 @@ namespace MakePlacePlugin
             }
 
             return Color.Empty;
+        }
+
+        public BasicItem GetMaterial()
+        {
+            if (properties.TryGetValue("material", out object materialObj))
+            {
+                var materialJson = (JsonElement)materialObj;
+                return materialJson.Deserialize<BasicItem>();
+            }
+
+            return new BasicItem();
         }
 
         int ColorDiff(Color c1, Color c2)
@@ -211,6 +223,13 @@ namespace MakePlacePlugin
                 descale(furniture.transform.location[2]), // switch Y & Z axis
                 descale(furniture.transform.location[1]),
                 -QuaternionExtensions.ComputeZAngle(quat));
+
+
+            if (furniture.properties.ContainsKey("material"))
+            {
+                var material = furniture.GetMaterial();
+                houseItem.MaterialItemKey = material.itemId;
+            }
 
             return houseItem;
         }
@@ -424,7 +443,20 @@ namespace MakePlacePlugin
 
                     furniture.properties.Add("color", $"{cr:X2}{cg:X2}{cb:X2}{ca:X2}");
 
+                } else if (gameObject.MaterialItemKey != 0)
+                {
+                    var item = MakePlacePlugin.Data.GetExcelSheet<Item>().GetRow(gameObject.MaterialItemKey);
+                    if (item != null)
+                    {
+                        var basicItem = new BasicItem();
+                        basicItem.name = item.Name.ToString();
+                        basicItem.itemId = gameObject.MaterialItemKey;
+
+                        furniture.properties.Add("material", basicItem);
+                    }
+
                 }
+
 
                 furnitureList.Add(furniture);
             }

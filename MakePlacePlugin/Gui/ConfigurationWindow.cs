@@ -399,6 +399,17 @@ namespace MakePlacePlugin.Gui
                     ImGui.PopStyleColor();
 
             }
+            else if (housingItem.MaterialItemKey != 0)
+            {
+                var item = Data.GetExcelSheet<Item>().GetRow(housingItem.MaterialItemKey);
+                if (item != null)
+                {
+                    DrawIcon(item.Icon, new Vector2(20, 20));
+                    ImGui.SameLine();
+                    ImGui.Text(item.Name.ToString());
+                }
+
+            }
             ImGui.NextColumn();
 
             if (showSetPosition)
@@ -521,7 +532,7 @@ namespace MakePlacePlugin.Gui
             ImGui.Text("Item"); ImGui.NextColumn();
             ImGui.Text("Position (X,Y,Z)"); ImGui.NextColumn();
             ImGui.Text("Rotation"); ImGui.NextColumn();
-            ImGui.Text("Dye"); ImGui.NextColumn();
+            ImGui.Text("Dye/Material"); ImGui.NextColumn();
 
             if (!isUnused)
             {

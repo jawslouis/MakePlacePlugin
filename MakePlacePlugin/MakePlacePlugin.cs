@@ -11,15 +11,12 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiScene;
 using Lumina.Excel.GeneratedSheets;
-using Lumina.Text;
-using MakePlacePlugin.Gui;
 using MakePlacePlugin.Objects;
 using MakePlacePlugin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace MakePlacePlugin
@@ -122,7 +119,7 @@ namespace MakePlacePlugin
             Memory.Init(Scanner);
             LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
 
-            PluginLog.Log("MakePlace Plugin v2.23 initialized");
+            PluginLog.Log("MakePlace Plugin v2.24 initialized");
         }
         public void Initialize()
         {
@@ -140,8 +137,6 @@ namespace MakePlacePlugin
             GetObjectFromIndexHook = HookManager.Hook<GetActiveObjectDelegate>("81 fa 90 01 00 00 75 08 48 8b 81 88 0c 00 00 c3 0f b7 81 90 0c 00 00 3b d0 72 03 33 c0 c3", GetObjectFromIndex);
 
             GetYardIndexHook = HookManager.Hook<GetIndexDelegate>("48 89 6c 24 18 56 48 83 ec 20 0f b6 ea 0f b6 f1 84 c9 79 22 0f b6 c1", GetYardIndex);
-
-
         }
 
         internal static ushort GetYardIndex(byte plotNumber, byte inventoryIndex)
@@ -149,7 +144,6 @@ namespace MakePlacePlugin
             var result = GetYardIndexHook.Original(plotNumber, inventoryIndex);
             return result;
         }
-
 
 
         internal delegate ushort GetIndexDelegate(byte type, byte objStruct);
@@ -662,10 +656,20 @@ namespace MakePlacePlugin
 
                 housingItem.ItemStruct = (IntPtr)gameObject.Item;
 
+                if (gameObject.Item != null && gameObject.Item->MaterialManager != null)
+                {
+                    ushort material = gameObject.Item->MaterialManager->MaterialSlot1;
+                    if (material != 0)
+                    {
+                        housingItem.MaterialItemKey = Wallpaper.Map[material];
+                    }
+                }
+
                 InteriorItemList.Add(housingItem);
             }
 
             Config.Save();
+
         }
 
         public void LoadLayout()

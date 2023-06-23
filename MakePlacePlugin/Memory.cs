@@ -7,6 +7,7 @@ using Dalamud.Game;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using Lumina.Excel.GeneratedSheets;
 using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin
@@ -182,11 +183,13 @@ namespace MakePlacePlugin
                 return false;
 
             objects = new List<HousingGameObject>();
+
             for (var i = 0; i < 400; i++)
             {
                 var oPtr = HousingModule->GetCurrentManager()->Objects[i];
                 if (oPtr == 0)
                     continue;
+
                 var o = *(HousingGameObject*)oPtr;
 
                 objects.Add(o);

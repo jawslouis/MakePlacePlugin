@@ -12,6 +12,7 @@ namespace MakePlacePlugin.Objects
     {
         public uint ItemKey;
         public byte Stain;
+        public uint MaterialItemKey = 0;
         public float X;
         public float Y;
         public float Z;
@@ -40,5 +41,7 @@ namespace MakePlacePlugin.Objects
         {
             return new Vector3(X, Y, Z);
         }
+
+
     }
 }

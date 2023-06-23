@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<PluginVersion>2.23</PluginVersion>
+		<PluginVersion>2.24</PluginVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
