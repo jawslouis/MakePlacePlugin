@@ -1,10 +1,6 @@
 ﻿using Lumina.Excel.GeneratedSheets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MakePlacePlugin.Objects
 {
@@ -41,7 +37,5 @@ namespace MakePlacePlugin.Objects
         {
             return new Vector3(X, Y, Z);
         }
-
-
     }
 }

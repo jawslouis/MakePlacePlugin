@@ -344,6 +344,27 @@ namespace MakePlacePlugin
             thread.Start();
         }
 
+        public bool MatchItem(HousingItem item, uint itemKey)
+        {
+            if (item.ItemStruct != IntPtr.Zero) return false;       // this item is already matched. We can skip
+
+            return item.ItemKey == itemKey && IsSelectedFloor(item.Y);
+        }
+
+        public unsafe bool MatchExactItem(HousingItem item, uint itemKey, HousingGameObject obj)
+        {
+            if (!MatchItem(item, itemKey)) return false;
+
+            if (item.Stain != obj.color) return false;
+
+            var matNumber = obj.Item->MaterialManager->MaterialSlot1;
+
+            if (item.MaterialItemKey == 0 && matNumber == 0) return true;
+            else if (item.MaterialItemKey != 0 && matNumber == 0) return false;
+
+            return Util.Wallpaper.Map[matNumber] == item.MaterialItemKey;
+
+        }
 
         public unsafe void MatchLayout()
         {
@@ -391,7 +412,7 @@ namespace MakePlacePlugin
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
                     houseItem = Utils.GetNearestHousingItem(
-                        InteriorItemList.Where(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y)),
+                        InteriorItemList.Where(item => MatchExactItem(item, itemKey, gameObject)),
                         localPosition
                     );
                 }
@@ -402,7 +423,7 @@ namespace MakePlacePlugin
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
                     houseItem = Utils.GetNearestHousingItem(
-                        ExteriorItemList.Where(item => item.ItemKey == itemKey && item.Stain == gameObject.color && item.ItemStruct == IntPtr.Zero && IsSelectedFloor(item.Y)),
+                        ExteriorItemList.Where(item => MatchExactItem(item, itemKey, gameObject)),
                         localPosition
                     );
 
@@ -441,7 +462,7 @@ namespace MakePlacePlugin
                     var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
                     houseItem = Utils.GetNearestHousingItem(
-                        InteriorItemList.Where(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y)),
+                        InteriorItemList.Where(hItem => MatchItem(hItem, item.RowId)),
                         new Vector3(gameObject.X, gameObject.Y, gameObject.Z)
                     );
                 }
@@ -453,7 +474,7 @@ namespace MakePlacePlugin
                     var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
                     houseItem = Utils.GetNearestHousingItem(
-                        ExteriorItemList.Where(hItem => hItem.ItemKey == item.RowId && hItem.ItemStruct == IntPtr.Zero && IsSelectedFloor(hItem.Y)),
+                        ExteriorItemList.Where(hItem => MatchItem(hItem, item.RowId)),
                         localPosition
                     );
                 }

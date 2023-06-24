@@ -388,15 +388,11 @@ namespace MakePlacePlugin.Gui
                 Utils.StainButton("dye_" + i, stain, new Vector2(20));
                 ImGui.SameLine();
 
-                if (!housingItem.DyeMatch)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
-                }
+                if (!housingItem.DyeMatch) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
 
                 ImGui.Text($"{colorName}");
 
-                if (!housingItem.DyeMatch)
-                    ImGui.PopStyleColor();
+                if (!housingItem.DyeMatch) ImGui.PopStyleColor();
 
             }
             else if (housingItem.MaterialItemKey != 0)
@@ -404,9 +400,13 @@ namespace MakePlacePlugin.Gui
                 var item = Data.GetExcelSheet<Item>().GetRow(housingItem.MaterialItemKey);
                 if (item != null)
                 {
+                    if (!housingItem.DyeMatch) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
+
                     DrawIcon(item.Icon, new Vector2(20, 20));
                     ImGui.SameLine();
                     ImGui.Text(item.Name.ToString());
+
+                    if (!housingItem.DyeMatch) ImGui.PopStyleColor();
                 }
 
             }
