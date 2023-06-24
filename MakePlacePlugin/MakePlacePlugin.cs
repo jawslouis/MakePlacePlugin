@@ -362,7 +362,9 @@ namespace MakePlacePlugin
             if (item.MaterialItemKey == 0 && matNumber == 0) return true;
             else if (item.MaterialItemKey != 0 && matNumber == 0) return false;
 
-            return Util.Wallpaper.Map[matNumber] == item.MaterialItemKey;
+            if (!Util.Wallpaper.Map.TryGetValue(matNumber, out var matItemKey)) return true;
+
+            return matItemKey == item.MaterialItemKey;
 
         }
 
@@ -680,9 +682,9 @@ namespace MakePlacePlugin
                 if (gameObject.Item != null && gameObject.Item->MaterialManager != null)
                 {
                     ushort material = gameObject.Item->MaterialManager->MaterialSlot1;
-                    if (material != 0)
+                    if (material != 0 && Util.Wallpaper.Map.TryGetValue(material, out var matItemKey))
                     {
-                        housingItem.MaterialItemKey = Wallpaper.Map[material];
+                        housingItem.MaterialItemKey = matItemKey;
                     }
                 }
 
