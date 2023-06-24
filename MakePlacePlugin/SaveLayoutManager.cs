@@ -66,8 +66,11 @@ namespace MakePlacePlugin
         {
             if (properties.TryGetValue("material", out object materialObj))
             {
-                var materialJson = (JsonElement)materialObj;
-                return materialJson.Deserialize<BasicItem>();
+                if (materialObj is JsonElement materialJson)
+                {
+                    return materialJson.Deserialize<BasicItem>();
+                }
+                                
             }
 
             return new BasicItem();
