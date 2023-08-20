@@ -17,6 +17,8 @@ using System.Drawing;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using ImGuiNET;
+using FFXIVClientStructs.FFXIV.Client.Game.MJI;
+using System.Xml.Linq;
 
 namespace MakePlacePlugin
 {
@@ -40,6 +42,22 @@ namespace MakePlacePlugin
         public string level { get; set; } = "";
         public string type { get; set; } = "";
 
+        public Fixture() { }
+
+        public Fixture(string inType)
+        {
+            type = inType;
+        }
+
+        public Fixture(string inType, string inName) : this(inType)
+        {
+            name = inName;
+        }
+
+        public Fixture(string inType, string inName, string inLevel) : this(inType, inName)
+        {
+            level = inLevel;
+        }
     }
 
     public class Furniture : BasicItem
@@ -70,7 +88,7 @@ namespace MakePlacePlugin
                 {
                     return materialJson.Deserialize<BasicItem>();
                 }
-                                
+
             }
 
             return new BasicItem();
@@ -338,10 +356,97 @@ namespace MakePlacePlugin
             }
         }
 
+        public unsafe static void LoadIslandFixtures()
+        {
+            Plugin.Layout.houseSize = "Island";
+
+            var exterior = Plugin.Layout.exteriorFixture;
+            exterior.Clear();
+
+            var manager = MJIManager.Instance();
+            var state = manager->IslandState;
+
+            string TerrainMatName(byte id)
+            {
+                switch (id)
+                {
+                    case 0:
+                        return "Overgrown";
+                    case 1:
+                        return "Dirt";
+                    case 2:
+                        return "Stone";
+                    default:
+                        return "";
+                }
+            }
+
+            exterior.Add(new Fixture("Grounds", TerrainMatName(state.GroundsGlamourId)));
+            exterior.Add(new Fixture("Paths", TerrainMatName(state.PathsGlamourId)));
+            exterior.Add(new Fixture("Slopes", TerrainMatName(state.SlopesGlamourId)));
+
+            // TODO: Add Cabin Levels when the IslandState struct is fixed
+
+            string ToRoman(byte id)
+            {
+                switch (id)
+                {
+                    case 1:
+                        return "I";
+                    case 2:
+                        return "II";
+                    case 3:
+                        return "III";
+                    case 4:
+                        return "IV";
+                    case 5:
+                        return "V";
+                    case 6:
+                        return "VI";
+                    default:
+                        return "";
+                }
+            }
+
+            var BuildingSheet = Data.GetExcelSheet<MJIBuilding>();
+
+            var workshop = state.Workshops;
+            for (int i = 0; i < 4; i++)
+            {
+                if (workshop.PlaceId[i] == 0) continue;
+
+                var fixture = new Fixture("Facility");
+                fixture.level = "Facility " + ToRoman(workshop.PlaceId[i]);
+                fixture.name = BuildingSheet.GetRow(1, workshop.GlamourLevel[i])?.Name.Value.Text.ToString();
+                exterior.Add(fixture);
+            }
+
+            var granary = state.Granaries;
+            for (int i = 0; i < 4; i++)
+            {
+                if (granary.PlaceId[i] == 0) continue;
+                var fixture = new Fixture("Facility");
+                fixture.level = "Facility " + ToRoman(granary.PlaceId[i]);
+                fixture.name = BuildingSheet.GetRow(2, fixture.itemId)?.Name.Value.Text.ToString();
+                exterior.Add(fixture);
+            }
+
+            var LandmarkSheet = Data.GetExcelSheet<MJILandmark>();
+            for (int i = 0; i < 5; i++)
+            {
+                var id = state.LandmarkIds[i];
+                if (id == 0) continue;
+
+                var fixture = new Fixture("Landmark");
+                fixture.level = "Landmark " + ToRoman((byte)(i + 1));
+                fixture.name = LandmarkSheet.GetRow(id)?.Name.Value.Text.ToString();
+                exterior.Add(fixture);
+            }
+        }
+
         public static void LoadInteriorFixtures()
         {
             var layout = Plugin.Layout;
-
             layout.interiorFixture.Clear();
 
             for (var i = 0; i < IndoorAreaData.FloorMax; i++)
@@ -446,7 +551,8 @@ namespace MakePlacePlugin
 
                     furniture.properties.Add("color", $"{cr:X2}{cg:X2}{cb:X2}{ca:X2}");
 
-                } else if (gameObject.MaterialItemKey != 0)
+                }
+                else if (gameObject.MaterialItemKey != 0)
                 {
                     var item = MakePlacePlugin.Data.GetExcelSheet<Item>().GetRow(gameObject.MaterialItemKey);
                     if (item != null)

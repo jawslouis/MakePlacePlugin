@@ -33,6 +33,11 @@ namespace MakePlacePlugin.Objects
             Rotate = rotate;
         }
 
+        public HousingItem(Item item, HousingGameObject gameObject)
+            : this(item, gameObject.color, gameObject.X, gameObject.Y, gameObject.Z, gameObject.rotation)
+        {
+        }
+
         public Vector3 GetLocation()
         {
             return new Vector3(X, Y, Z);

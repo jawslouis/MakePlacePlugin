@@ -25,7 +25,6 @@ namespace MakePlacePlugin
 
         public List<string> Tags = new List<string>();
         public List<bool> TagsSelectList = new List<bool>();
-        public int LocationId = 0;
         public int LoadInterval = 400;
 
         public string SaveLocation = null;

@@ -7,6 +7,7 @@ using Dalamud.Game;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using Lumina.Excel.GeneratedSheets;
 using static MakePlacePlugin.MakePlacePlugin;
 
@@ -58,12 +59,6 @@ namespace MakePlacePlugin
             return InventoryManager.Instance()->GetInventoryContainer(inventoryType);
         }
 
-        public unsafe InteriorFloor CurrentFloor()
-        {
-            if (HousingModule->currentTerritory == null || HousingModule->IsOutdoors()) return InteriorFloor.None;
-            return HousingModule->CurrentFloor();
-        }
-
         public uint GetTerritoryTypeId()
         {
             if (!GetActiveLayout(out var manager)) return 0;
@@ -72,7 +67,8 @@ namespace MakePlacePlugin
 
         public float GetInteriorLightLevel()
         {
-            if (IsOutdoors()) return 0f;
+
+            if (GetCurrentTerritory() != HousingArea.Indoors) return 0f;
             if (!GetActiveLayout(out var manager)) return 0f;
             if (!manager.IndoorAreaData.HasValue) return 0f;
             return manager.IndoorAreaData.Value.LightLevel;
@@ -80,7 +76,7 @@ namespace MakePlacePlugin
 
         public CommonFixture[] GetInteriorCommonFixtures(int floorId)
         {
-            if (IsOutdoors()) return new CommonFixture[0];
+            if (GetCurrentTerritory() != HousingArea.Indoors) return new CommonFixture[0];
             if (!GetActiveLayout(out var manager)) return new CommonFixture[0];
             if (!manager.IndoorAreaData.HasValue) return new CommonFixture[0];
             var floor = manager.IndoorAreaData.Value.GetFloor(floorId);
@@ -105,7 +101,7 @@ namespace MakePlacePlugin
 
         public CommonFixture[] GetExteriorCommonFixtures(int plotId)
         {
-            if (IsIndoors()) return new CommonFixture[0];
+            if (GetCurrentTerritory() != HousingArea.Outdoors) return new CommonFixture[0];
             if (!GetHousingController(out var controller)) return new CommonFixture[0];
             var home = controller.Houses(plotId);
 
@@ -174,6 +170,23 @@ namespace MakePlacePlugin
             return placedObjects;
         }
 
+        public unsafe bool TryGetIslandGameObjectList(out List<HousingGameObject> objects)
+        {
+            objects = new List<HousingGameObject>();
+
+            var manager = (MjiManagerExtended*)MJIManager.Instance();
+            var objectManager = manager->ObjectManager;
+            var furnManager = objectManager->FurnitureManager;
+
+            for (int i = 0; i < 200; i++)
+            {
+                var objPtr = (HousingGameObject*)furnManager->Objects[i];
+                if (objPtr == null) continue;
+                objects.Add(*objPtr);
+            }
+            return true;
+        }
+
         public unsafe bool TryGetNameSortedHousingGameObjectList(out List<HousingGameObject> objects)
         {
             objects = null;
@@ -232,18 +245,45 @@ namespace MakePlacePlugin
             return true;
         }
 
-        public unsafe bool IsOutdoors()
+        public enum HousingArea
         {
-            if (HousingModule == null) return false;
-            return HousingModule->IsOutdoors();
+            Indoors,
+            Outdoors,
+            Island,
+            None
         }
 
-        public unsafe bool IsIndoors()
+        public unsafe HousingArea GetCurrentTerritory()
         {
-            if (HousingModule == null) return false;
-            return HousingModule->IsIndoors();
+            var territoryRow = Data.GetExcelSheet<TerritoryType>().GetRow(GetTerritoryTypeId());
+            if (territoryRow == null)
+            {
+                LogError("Cannot identify territory");
+                return HousingArea.None;
+            }
+
+            if (territoryRow.Name.ToString().Equals("h1m2"))
+            {
+                return HousingArea.Island;
+            }
+
+            if (HousingModule == null) return HousingArea.None;
+
+            if (HousingModule->IsOutdoors()) return HousingArea.Outdoors;
+            else return HousingArea.Indoors;
         }
 
+
+
+
+        public unsafe bool IsHousingMode()
+        {
+            if (HousingStructure == null)
+                return false;
+
+            // Rotate mode only.
+            return HousingStructure->Mode != HousingLayoutMode.None;
+        }
 
         /// <summary>
         /// Checks if you can edit a housing item, specifically checks that rotate mode is active.

@@ -224,7 +224,7 @@ namespace MakePlacePlugin.Gui
             ImGui.SameLine();
             if (ImGui.Button("Load"))
             {
-                if (!IsDecorMode())
+                if (!Memory.Instance.IsHousingMode())
                 {
                     LogError("Unable to load layouts outside of Layout mode");
                     LogError("(Housing -> Indoor/Outdoor Furnishings)");
@@ -270,7 +270,7 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Dummy(new Vector2(0, 15));
 
-            bool noFloors = Memory.Instance.IsOutdoors() || Plugin.Layout.houseSize.Equals("Apartment");
+            bool noFloors = Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Plugin.Layout.houseSize.Equals("Apartment");
 
             if (!noFloors)
             {
@@ -303,11 +303,23 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Text("Layout Actions");
 
-            var inOut = Memory.Instance.IsOutdoors() ? "Exterior" : "Interior";
+            string inOut = "";
+            switch (Memory.Instance.GetCurrentTerritory())
+            {
+                case Memory.HousingArea.Indoors:
+                    inOut = "Interior";
+                    break;
+                case Memory.HousingArea.Outdoors:
+                    inOut = "Exterior";
+                    break;
+                case Memory.HousingArea.Island:
+                    inOut = "Island";
+                    break;
+            }
 
             if (ImGui.Button($"Get {inOut} Layout"))
             {
-                if (IsDecorMode())
+                if (Memory.Instance.IsHousingMode())
                 {
                     try
                     {
@@ -331,7 +343,7 @@ namespace MakePlacePlugin.Gui
 
             if (ImGui.Button($"Apply {inOut} Layout"))
             {
-                if (IsDecorMode() && IsRotateMode())
+                if (Memory.Instance.CanEditItem())
                 {
                     try
                     {
@@ -593,7 +605,7 @@ namespace MakePlacePlugin.Gui
 
             if (Memory.Instance == null) return;
 
-            var itemList = Memory.Instance.IsOutdoors() ? Plugin.ExteriorItemList : Plugin.InteriorItemList;
+            var itemList = Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Indoors ? Plugin.InteriorItemList : Plugin.ExteriorItemList;
 
             for (int i = 0; i < itemList.Count(); i++)
             {
@@ -627,7 +639,7 @@ namespace MakePlacePlugin.Gui
 
                         if (ImGui.Button("Set" + "##ScreenItem" + i.ToString()))
                         {
-                            if (!IsDecorMode() || !IsRotateMode())
+                            if (!Memory.Instance.CanEditItem())
                             {
                                 LogError("Unable to set position while not in rotate layout mode");
                                 continue;
