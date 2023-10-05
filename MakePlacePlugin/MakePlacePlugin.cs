@@ -21,6 +21,8 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Dalamud.Interface.Internal;
+using Dalamud.Plugin.Services;
 
 namespace MakePlacePlugin
 {
@@ -31,32 +33,37 @@ namespace MakePlacePlugin
         public Configuration Config { get; private set; }
 
         [PluginService]
-        public static CommandManager CommandManager { get; private set; }
+        public static ICommandManager CommandManager { get; private set; }
         [PluginService]
-        public static Framework Framework { get; private set; }
+        public static IFramework Framework { get; private set; }
 
         [PluginService]
         public static DalamudPluginInterface Interface { get; private set; }
         [PluginService]
-        public static GameGui GameGui { get; private set; }
+        public static IGameGui GameGui { get; private set; }
         [PluginService]
-        public static ChatGui ChatGui { get; private set; }
+        public static IChatGui ChatGui { get; private set; }
         [PluginService]
-        public static ClientState ClientState { get; private set; }
+        public static IClientState ClientState { get; private set; }
         [PluginService]
-        public static DataManager Data { get; private set; }
+        public static IDataManager Data { get; private set; }
+        [PluginService]
+        public static ITextureProvider TextureProvider { get; private set; }
 
         [PluginService]
-        public static SigScanner Scanner { get; private set; }
+        public static ISigScanner Scanner { get; private set; }
 
         [PluginService]
-        public static TargetManager TargetMgr { get; private set; }
+        public static IGameInteropProvider GameInteropProvider { get; private set; }
 
-        [PluginService] public static GameNetwork GameNetwork { get; private set; }
+        [PluginService]
+        public static ITargetManager TargetMgr { get; private set; }
+
+        [PluginService] public static IGameNetwork GameNetwork { get; private set; }
 
 
         // Texture dictionary for the housing item icons.
-        public readonly Dictionary<ushort, TextureWrap> TextureDictionary = new Dictionary<ushort, TextureWrap>();
+        public readonly Dictionary<ushort, IDalamudTextureWrap> TextureDictionary = new Dictionary<ushort, IDalamudTextureWrap>();
 
         public static List<HousingItem> ItemsToPlace = new List<HousingItem>();
 
@@ -101,7 +108,7 @@ namespace MakePlacePlugin
 
         public MakePlacePlugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] CommandManager commandManager
+            [RequiredVersion("1.0")] ICommandManager commandManager
         )
         {
             Config = Interface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -127,9 +134,9 @@ namespace MakePlacePlugin
         public void Initialize()
         {
 
-            HookManager.Init(Scanner);
+            HookManager.Init(Scanner, GameInteropProvider);
 
-            IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 76 01 00 00", IsSaveLayoutDetour);
+            IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 ?? 01 00 00", IsSaveLayoutDetour);
 
             SelectItemHook = HookManager.Hook<SelectItemDelegate>("E8 ?? ?? ?? ?? 48 8B CE E8 ?? ?? ?? ?? 48 8B 6C 24 40 48 8B CE", SelectItemDetour);
 
@@ -708,7 +715,7 @@ namespace MakePlacePlugin
         }
 
 
-        private void TerritoryChanged(object sender, ushort e)
+        private void TerritoryChanged(ushort e)
         {
             Config.DrawScreen = false;
             Config.Save();

@@ -6,17 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Plugin.Services;
 
 namespace MakePlacePlugin
 {
     public class HookManager
     {
         public static List<IHookWrapper> HookList = new();
-        public static SigScanner Scanner;
+        public static ISigScanner Scanner;
+        public static IGameInteropProvider InteropProvider;
 
-        public static void Init(SigScanner s)
+        public static void Init(ISigScanner s, IGameInteropProvider interopProvider)
         {
             Scanner = s;
+            InteropProvider = interopProvider;
         }
 
         public static void Dispose()
@@ -43,8 +46,8 @@ namespace MakePlacePlugin
         public static HookWrapper<T> HookAddress<T>(IntPtr addr, T detour, bool enable = true, int addressOffset = 0) where T : Delegate
         {
             PluginLog.Information($"Hooking {detour.Method.Name} at {addr.ToString("X")}");
-
-            var h = Dalamud.Hooking.Hook<T>.FromAddress(addr + addressOffset, detour);
+            
+            var h = InteropProvider.HookFromAddress(addr + addressOffset, detour);
             var wh = new HookWrapper<T>(h);
             if (enable) wh.Enable();
             HookList.Add(wh);

@@ -136,8 +136,7 @@ namespace MakePlacePlugin.Gui
                     {
                         try
                         {
-                            var iconTex = MakePlacePlugin.Data.GetIcon(icon);
-                            var tex = MakePlacePlugin.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(), iconTex.Header.Width, iconTex.Header.Height, 4);
+                            var tex = MakePlacePlugin.TextureProvider.GetIcon(icon);
                             if (tex != null && tex.ImGuiHandle != IntPtr.Zero)
                                 Plugin.TextureDictionary[icon] = tex;
                         }

@@ -16,6 +16,7 @@ using static MakePlacePlugin.MakePlacePlugin;
 using System.Drawing;
 using System.Globalization;
 using System.Text.Json.Serialization;
+using Dalamud.Plugin.Services;
 
 namespace MakePlacePlugin
 {
@@ -145,13 +146,13 @@ namespace MakePlacePlugin
 
     public class SaveLayoutManager
     {
-        public ChatGui chat;
+        public IChatGui chat;
         public static Configuration Config;
         public static MakePlacePlugin Plugin;
 
         public static List<(Color, uint)> ColorList;
 
-        public SaveLayoutManager(MakePlacePlugin plugin, ChatGui chatGui, Configuration config)
+        public SaveLayoutManager(MakePlacePlugin plugin, IChatGui chatGui, Configuration config)
         {
             chat = chatGui;
             Config = config;

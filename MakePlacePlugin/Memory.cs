@@ -17,7 +17,7 @@ namespace MakePlacePlugin
         public static GetInventoryContainerDelegate GetInventoryContainer;
         public delegate InventoryContainer* GetInventoryContainerDelegate(IntPtr inventoryManager, InventoryType inventoryType);
 
-        private Memory(SigScanner scanner)
+        private Memory(ISigScanner scanner)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace MakePlacePlugin
 
 
 
-        public static void Init(SigScanner scanner)
+        public static void Init(ISigScanner scanner)
         {
             Instance = new Memory(scanner);
         }

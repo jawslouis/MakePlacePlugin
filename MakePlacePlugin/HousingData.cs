@@ -2,6 +2,7 @@
 using System.Linq;
 using Dalamud.Data;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 
 namespace MakePlacePlugin
@@ -18,7 +19,7 @@ namespace MakePlacePlugin
 
         private static MakePlacePlugin Plugin;
 
-        private HousingData(DataManager dataMgr)
+        private HousingData(IDataManager dataMgr)
         {
 
             var sheet = dataMgr.GetExcelSheet<HousingLandSet>();
@@ -64,7 +65,7 @@ namespace MakePlacePlugin
 
         public static HousingData Instance { get; private set; }
 
-        public static void Init(DataManager dataMgr, MakePlacePlugin plugin)
+        public static void Init(IDataManager dataMgr, MakePlacePlugin plugin)
         {
             Plugin = plugin;
             Instance = new HousingData(dataMgr);
