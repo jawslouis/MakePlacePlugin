@@ -140,15 +140,6 @@ namespace MakePlacePlugin
 
         public Dictionary<string, dynamic> properties { get; set; } = new Dictionary<string, dynamic>();
 
-        public bool hasBasement()
-        {
-            return houseSize.Equals("Small") || houseSize.Equals("Medium") || houseSize.Equals("Large");
-        }
-
-        public bool hasUpperFloor()
-        {
-            return houseSize.Equals("Medium") || houseSize.Equals("Large");
-        }
     }
 
     public class ObjectToInferredTypesConverter : JsonConverter<object>
@@ -467,32 +458,14 @@ namespace MakePlacePlugin
                 }
             }
 
+            layout.houseSize = Memory.Instance.GetIndoorHouseSize();
+
             var territoryId = Memory.Instance.GetTerritoryTypeId();
             var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
             if (row != null)
             {
                 var placeName = row.Name.ToString();
-
-                var sizeName = placeName.Substring(1, 3);
-
-                switch (sizeName)
-                {
-                    case "1i1":
-                        layout.houseSize = "Small";
-                        break;
-                    case "1i2":
-                        layout.houseSize = "Medium";
-                        break;
-                    case "1i3":
-                        layout.houseSize = "Large";
-                        break;
-                    case "1i4":
-                        layout.houseSize = "Apartment";
-                        break;
-                    default:
-                        break;
-                }
 
                 var district = new Fixture();
                 district.type = "District";

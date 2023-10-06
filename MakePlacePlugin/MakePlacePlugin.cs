@@ -97,7 +97,7 @@ namespace MakePlacePlugin
         public void Initialize()
         {
 
-            IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 76 01 00 00", IsSaveLayoutDetour);
+            IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 ?? 01 00 00", IsSaveLayoutDetour);
 
             SelectItemHook = HookManager.Hook<SelectItemDelegate>("E8 ?? ?? ?? ?? 48 8B CE E8 ?? ?? ?? ?? 48 8B 6C 24 40 48 8B CE", SelectItemDetour);
 
@@ -580,9 +580,6 @@ namespace MakePlacePlugin
                     }
                 }
 
-
-
-
                 if (gameObj != null)
                 {
                     housingItem.ItemStruct = (IntPtr)gameObj->Item;
@@ -596,14 +593,14 @@ namespace MakePlacePlugin
 
         public bool IsSelectedFloor(float y)
         {
-            if (Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Layout.houseSize.Equals("Apartment")) return true;
+            if (Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Memory.Instance.GetIndoorHouseSize().Equals("Apartment")) return true;
 
             if (y < -0.001) return Config.Basement;
             if (y >= -0.001 && y < 6.999) return Config.GroundFloor;
 
             if (y >= 6.999)
             {
-                if (Layout.hasUpperFloor()) return Config.UpperFloor;
+                if (Memory.Instance.HasUpperFloor()) return Config.UpperFloor;
                 else return Config.GroundFloor;
             }
 

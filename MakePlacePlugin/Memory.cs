@@ -65,6 +65,41 @@ namespace MakePlacePlugin
             return manager.TerritoryTypeId;
         }
 
+        public bool HasUpperFloor()
+        {
+            var houseSize = GetIndoorHouseSize();
+            return houseSize.Equals("Medium") || houseSize.Equals("Large");
+        }
+
+        public string GetIndoorHouseSize()
+        {
+            var territoryId = Memory.Instance.GetTerritoryTypeId();
+            var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+
+            if (row == null) return null;
+
+            var placeName = row.Name.ToString();
+            var sizeName = placeName.Substring(1, 3);
+
+            switch (sizeName)
+            {
+                case "1i1":
+                    return "Small";
+
+                case "1i2":
+                    return "Medium";
+
+                case "1i3":
+                    return "Large";
+
+                case "1i4":
+                    return "Apartment";
+
+                default:
+                    return null;
+            }
+        }
+
         public float GetInteriorLightLevel()
         {
 
@@ -272,9 +307,6 @@ namespace MakePlacePlugin
             if (HousingModule->IsOutdoors()) return HousingArea.Outdoors;
             else return HousingArea.Indoors;
         }
-
-
-
 
         public unsafe bool IsHousingMode()
         {

@@ -237,7 +237,7 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Dummy(new Vector2(0, 15));
 
-            bool noFloors = Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Plugin.Layout.houseSize.Equals("Apartment");
+            bool noFloors = Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Memory.Instance.GetIndoorHouseSize().Equals("Apartment");
 
             if (!noFloors)
             {
@@ -258,7 +258,7 @@ namespace MakePlacePlugin.Gui
                 }
                 ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
-                if (Plugin.Layout.hasUpperFloor() && ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
+                if (Memory.Instance.HasUpperFloor() && ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
                 {
                     Plugin.MatchLayout();
                     Config.Save();
