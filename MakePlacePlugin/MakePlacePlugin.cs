@@ -34,36 +34,7 @@ namespace MakePlacePlugin
         public PluginUi Gui { get; private set; }
         public Configuration Config { get; private set; }
 
-        [PluginService]
-        public static CommandManager CommandManager { get; private set; }
-        [PluginService]
-        public static Framework Framework { get; private set; }
-
-        [PluginService]
-        public static DalamudPluginInterface Interface { get; private set; }
-        [PluginService]
-        public static GameGui GameGui { get; private set; }
-        [PluginService]
-        public static ChatGui ChatGui { get; private set; }
-        [PluginService]
-        public static ClientState ClientState { get; private set; }
-        [PluginService]
-        public static DataManager Data { get; private set; }
-
-        [PluginService]
-        public static SigScanner Scanner { get; private set; }
-
-        [PluginService]
-        public static TargetManager TargetMgr { get; private set; }
-
-        [PluginService] public static GameNetwork GameNetwork { get; private set; }
-
-
-        // Texture dictionary for the housing item icons.
-        public readonly Dictionary<ushort, TextureWrap> TextureDictionary = new Dictionary<ushort, TextureWrap>();
-
         public static List<HousingItem> ItemsToPlace = new List<HousingItem>();
-
 
         private delegate bool UpdateLayoutDelegate(IntPtr a1);
         private HookWrapper<UpdateLayoutDelegate> IsSaveLayoutHook;
@@ -90,48 +61,41 @@ namespace MakePlacePlugin
 
         public void Dispose()
         {
-            foreach (var t in this.TextureDictionary)
-                t.Value?.Dispose();
-            TextureDictionary.Clear();
-
+            
             HookManager.Dispose();
 
             Config.PlaceAnywhere = false;
-            ClientState.TerritoryChanged -= TerritoryChanged;
-            CommandManager.RemoveHandler("/makeplace");
+            DalamudApi.ClientState.TerritoryChanged -= TerritoryChanged;
+            DalamudApi.CommandManager.RemoveHandler("/makeplace");
             Gui?.Dispose();
 
         }
 
-        public MakePlacePlugin(
-            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] CommandManager commandManager
-        )
+        public MakePlacePlugin(DalamudPluginInterface pi)
         {
-            Config = Interface.GetPluginConfig() as Configuration ?? new Configuration();
-            Config.Initialize(Interface);
+            DalamudApi.Initialize(pi);
+
+            Config = DalamudApi.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();            
             Config.Save();
 
             Initialize();
 
-            CommandManager.AddHandler("/makeplace", new CommandInfo(CommandHandler)
+            DalamudApi.CommandManager.AddHandler("/makeplace", new CommandInfo(CommandHandler)
             {
                 HelpMessage = "load config window."
             });
             Gui = new PluginUi(this);
-            ClientState.TerritoryChanged += TerritoryChanged;
+            DalamudApi.ClientState.TerritoryChanged += TerritoryChanged;
 
 
-            HousingData.Init(Data, this);
-            Memory.Init(Scanner);
-            LayoutManager = new SaveLayoutManager(this, ChatGui, Config);
+            HousingData.Init(this);
+            Memory.Init();
+            LayoutManager = new SaveLayoutManager(this, Config);
 
-            PluginLog.Log("MakePlace Plugin v3.0.0 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.1.0 initialized");
         }
         public void Initialize()
         {
-
-            HookManager.Init(Scanner);
 
             IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 7d 38 83 76 01 00 00", IsSaveLayoutDetour);
 
@@ -413,7 +377,7 @@ namespace MakePlacePlugin
 
                 if (currentTerritory == HousingArea.Indoors)
                 {
-                    var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
+                    var furniture = DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
                     houseItem = Utils.GetNearestHousingItem(
                         InteriorItemList.Where(item => MatchExactItem(item, itemKey, gameObject)),
@@ -427,7 +391,7 @@ namespace MakePlacePlugin
                         localPosition = Vector3.Transform(localPosition - PlotLocation.ToVector(), rotateVector);
                         localRotation += PlotLocation.rotation;
                     }
-                    var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
+                    var furniture = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
                     houseItem = Utils.GetNearestHousingItem(
                         ExteriorItemList.Where(item => MatchExactItem(item, itemKey, gameObject)),
@@ -465,7 +429,7 @@ namespace MakePlacePlugin
 
                 if (currentTerritory == HousingArea.Indoors)
                 {
-                    var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
+                    var furniture = DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
                     houseItem = Utils.GetNearestHousingItem(
                         InteriorItemList.Where(hItem => MatchItem(hItem, item.RowId)),
@@ -479,7 +443,7 @@ namespace MakePlacePlugin
                         localPosition = Vector3.Transform(localPosition - PlotLocation.ToVector(), rotateVector);
                         localRotation += PlotLocation.rotation;
                     }
-                    var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
+                    var furniture = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     item = furniture.Item.Value;
                     houseItem = Utils.GetNearestHousingItem(
                         ExteriorItemList.Where(hItem => MatchItem(hItem, item.RowId)),
@@ -516,7 +480,7 @@ namespace MakePlacePlugin
         {
             var mgr = Memory.Instance.HousingModule->outdoorTerritory;
             var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+            var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
             if (row == null)
             {
@@ -571,7 +535,7 @@ namespace MakePlacePlugin
                 var item = exteriorItems->GetInventorySlot(i);
                 if (item == null || item->ItemID == 0) continue;
 
-                var itemRow = Data.GetExcelSheet<Item>().GetRow(item->ItemID);
+                var itemRow = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(item->ItemID);
                 if (itemRow == null) continue;
 
                 var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
@@ -659,7 +623,7 @@ namespace MakePlacePlugin
             {
                 uint furnitureKey = gameObject.housingRowId;
 
-                var furniture = Data.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
+                var furniture = DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
                 Item item = furniture?.Item?.Value;
 
                 if (item == null) continue;
@@ -698,7 +662,7 @@ namespace MakePlacePlugin
             foreach (var gameObject in objects)
             {
                 uint furnitureKey = gameObject.housingRowId;
-                var furniture = Data.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
+                var furniture = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                 Item item = furniture?.Item?.Value;
 
                 if (item == null) continue;
@@ -758,7 +722,7 @@ namespace MakePlacePlugin
         }
 
 
-        private void TerritoryChanged(object sender, ushort e)
+        private void TerritoryChanged(ushort e)
         {
             Config.DrawScreen = false;
             Config.Save();
@@ -784,17 +748,17 @@ namespace MakePlacePlugin
         public static void Log(string message, string detail_message = "")
         {
             var msg = $"{message}";
-            PluginLog.Log(detail_message == "" ? msg : detail_message);
-            ChatGui.Print(msg);
+            DalamudApi.PluginLog.Info(detail_message == "" ? msg : detail_message);
+            DalamudApi.ChatGui.Print(msg);
         }
         public static void LogError(string message, string detail_message = "")
         {
             var msg = $"{message}";
-            PluginLog.LogError(msg);
+            DalamudApi.PluginLog.Error(msg);
 
-            if (detail_message.Length > 0) PluginLog.LogError(detail_message);
+            if (detail_message.Length > 0) DalamudApi.PluginLog.Error(detail_message);
 
-            ChatGui.PrintError(msg);
+            DalamudApi.ChatGui.PrintError(msg);
         }
 
     }

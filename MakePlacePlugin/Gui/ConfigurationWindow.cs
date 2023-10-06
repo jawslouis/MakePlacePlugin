@@ -111,41 +111,8 @@ namespace MakePlacePlugin.Gui
         {
             if (icon < 65000)
             {
-                if (Plugin.TextureDictionary.ContainsKey(icon))
-                {
-                    var tex = Plugin.TextureDictionary[icon];
-                    if (tex == null || tex.ImGuiHandle == IntPtr.Zero)
-                    {
-                        ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(1, 0, 0, 1));
-                        ImGui.BeginChild("FailedTexture", size);
-                        ImGui.Text(icon.ToString());
-                        ImGui.EndChild();
-                        ImGui.PopStyleColor();
-                    }
-                    else
-                        ImGui.Image(Plugin.TextureDictionary[icon].ImGuiHandle, size);
-                }
-                else
-                {
-                    ImGui.BeginChild("WaitingTexture", size, true);
-                    ImGui.EndChild();
-
-                    Plugin.TextureDictionary[icon] = null;
-
-                    Task.Run(() =>
-                    {
-                        try
-                        {
-                            var iconTex = MakePlacePlugin.Data.GetIcon(icon);
-                            var tex = MakePlacePlugin.Interface.UiBuilder.LoadImageRaw(iconTex.GetRgbaImageData(), iconTex.Header.Width, iconTex.Header.Height, 4);
-                            if (tex != null && tex.ImGuiHandle != IntPtr.Zero)
-                                Plugin.TextureDictionary[icon] = tex;
-                        }
-                        catch
-                        {
-                        }
-                    });
-                }
+                var tex = DalamudApi.TextureProvider.GetIcon(icon);
+                ImGui.Image(tex.ImGuiHandle, size);
             }
         }
         #endregion
@@ -392,7 +359,7 @@ namespace MakePlacePlugin.Gui
 
 
 
-            var stain = MakePlacePlugin.Data.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
+            var stain = DalamudApi.DataManager.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
             var colorName = stain?.Name;
 
             if (housingItem.Stain != 0)
@@ -409,7 +376,7 @@ namespace MakePlacePlugin.Gui
             }
             else if (housingItem.MaterialItemKey != 0)
             {
-                var item = Data.GetExcelSheet<Item>().GetRow(housingItem.MaterialItemKey);
+                var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(housingItem.MaterialItemKey);
                 if (item != null)
                 {
                     if (!housingItem.DyeMatch) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
@@ -478,7 +445,7 @@ namespace MakePlacePlugin.Gui
                     ImGui.Text(fixture.type); ImGui.NextColumn();
 
 
-                    var item = Data.GetExcelSheet<Item>().GetRow(fixture.itemId);
+                    var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(fixture.itemId);
                     if (item != null)
                     {
                         DrawIcon(item.Icon, new Vector2(20, 20));
@@ -557,7 +524,7 @@ namespace MakePlacePlugin.Gui
                 var housingItem = itemList[i];
                 var displayName = housingItem.Name;
 
-                var item = MakePlacePlugin.Data.GetExcelSheet<Item>().GetRow(housingItem.ItemKey);
+                var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(housingItem.ItemKey);
                 if (item != null)
                 {
                     DrawIcon(item.Icon, new Vector2(20, 20));
@@ -609,7 +576,7 @@ namespace MakePlacePlugin.Gui
 
             for (int i = 0; i < itemList.Count(); i++)
             {
-                var playerPos = MakePlacePlugin.ClientState.LocalPlayer.Position;
+                var playerPos = DalamudApi.ClientState.LocalPlayer.Position;
                 var housingItem = itemList[i];
 
                 if (housingItem.ItemStruct == IntPtr.Zero) continue;
@@ -621,7 +588,7 @@ namespace MakePlacePlugin.Gui
                 if (Config.DrawDistance > 0 && (playerPos - itemPos).Length() > Config.DrawDistance)
                     continue;
                 var displayName = housingItem.Name;
-                if (MakePlacePlugin.GameGui.WorldToScreen(itemPos, out var screenCoords))
+                if (DalamudApi.GameGui.WorldToScreen(itemPos, out var screenCoords))
                 {
                     ImGui.PushID("HousingItemWindow" + i);
                     ImGui.SetNextWindowPos(new Vector2(screenCoords.X, screenCoords.Y));

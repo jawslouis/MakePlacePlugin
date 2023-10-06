@@ -19,21 +19,21 @@ namespace MakePlacePlugin
         public static GetInventoryContainerDelegate GetInventoryContainer;
         public delegate InventoryContainer* GetInventoryContainerDelegate(IntPtr inventoryManager, InventoryType inventoryType);
 
-        private Memory(SigScanner scanner)
+        private Memory()
         {
             try
             {
-                HousingModulePtr = scanner.GetStaticAddressFromSig("40 53 48 83 EC 20 33 DB 48 39 1D ?? ?? ?? ?? 75 2C 45 33 C0 33 D2 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 11 48 8B C8 E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? EB 07");
-                LayoutWorldPtr = scanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 49 40 E9 ?? ?? ?? ??");
+                HousingModulePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("40 53 48 83 EC 20 33 DB 48 39 1D ?? ?? ?? ?? 75 2C 45 33 C0 33 D2 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 11 48 8B C8 E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? EB 07");
+                LayoutWorldPtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 49 40 E9 ?? ?? ?? ??");
 
 
-                var getInventoryContainerPtr = scanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
+                var getInventoryContainerPtr = DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
                 GetInventoryContainer = Marshal.GetDelegateForFunctionPointer<GetInventoryContainerDelegate>(getInventoryContainerPtr);
 
             }
             catch (Exception e)
             {
-                PluginLog.Log(e, "Could not load housing memory!!");
+                DalamudApi.PluginLog.Error(e, "Could not load housing memory!!");
             }
         }
 
@@ -49,9 +49,9 @@ namespace MakePlacePlugin
 
 
 
-        public static void Init(SigScanner scanner)
+        public static void Init()
         {
-            Instance = new Memory(scanner);
+            Instance = new Memory();
         }
 
         public static InventoryContainer* GetContainer(InventoryType inventoryType)
@@ -255,7 +255,7 @@ namespace MakePlacePlugin
 
         public unsafe HousingArea GetCurrentTerritory()
         {
-            var territoryRow = Data.GetExcelSheet<TerritoryType>().GetRow(GetTerritoryTypeId());
+            var territoryRow = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(GetTerritoryTypeId());
             if (territoryRow == null)
             {
                 LogError("Cannot identify territory");
@@ -319,7 +319,7 @@ namespace MakePlacePlugin
             }
             catch (Exception ex)
             {
-                PluginLog.LogError(ex, "Error occured while writing position!");
+                DalamudApi.PluginLog.Error(ex, "Error occured while writing position!");
             }
         }
 
@@ -340,7 +340,7 @@ namespace MakePlacePlugin
             }
             catch (Exception ex)
             {
-                PluginLog.LogError(ex, "Error occured while writing rotation!");
+                DalamudApi.PluginLog.Error(ex, "Error occured while writing rotation!");
             }
         }
     }

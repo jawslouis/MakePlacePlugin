@@ -12,12 +12,7 @@ namespace MakePlacePlugin
     public class HookManager
     {
         public static List<IHookWrapper> HookList = new();
-        public static SigScanner Scanner;
-
-        public static void Init(SigScanner s)
-        {
-            Scanner = s;
-        }
+        
 
         public static void Dispose()
         {
@@ -35,16 +30,16 @@ namespace MakePlacePlugin
         public static HookWrapper<T> Hook<T>(string signature, T detour, bool enable = true, int addressOffset = 0)
     where T : Delegate
         {
-            var addr = Scanner.ScanText(signature);
+            var addr = DalamudApi.SigScanner.ScanText(signature);
 
             return HookAddress(addr, detour, enable, addressOffset);
         }
 
         public static HookWrapper<T> HookAddress<T>(IntPtr addr, T detour, bool enable = true, int addressOffset = 0) where T : Delegate
         {
-            PluginLog.Information($"Hooking {detour.Method.Name} at {addr.ToString("X")}");
+            DalamudApi.PluginLog.Info($"Hooking {detour.Method.Name} at {addr.ToString("X")}");
 
-            var h = Dalamud.Hooking.Hook<T>.FromAddress(addr + addressOffset, detour);
+            var h = DalamudApi.Hooks.HookFromAddress(addr + addressOffset, detour);
             var wh = new HookWrapper<T>(h);
             if (enable) wh.Enable();
             HookList.Add(wh);

@@ -29,18 +29,9 @@ namespace MakePlacePlugin
 
         public string SaveLocation = null;
 
-        #region Init and Save
-
-        [NonSerialized] private DalamudPluginInterface _pluginInterface;
-
-        public void Initialize(DalamudPluginInterface pluginInterface)
-        {
-            _pluginInterface = pluginInterface;
-        }
-
         public void Save()
         {
-            _pluginInterface.SavePluginConfig(this);
+            DalamudApi.PluginInterface.SavePluginConfig(this);
         }
 
         public void ResetRecord()
@@ -50,6 +41,5 @@ namespace MakePlacePlugin
             Save();
         }
 
-        #endregion
     }
 }

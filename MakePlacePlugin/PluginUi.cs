@@ -13,8 +13,8 @@ namespace MakePlacePlugin
             ConfigWindow = new ConfigurationWindow(plugin);
 
             _plugin = plugin;
-            MakePlacePlugin.Interface.UiBuilder.Draw += Draw;
-            MakePlacePlugin.Interface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+            DalamudApi.PluginInterface.UiBuilder.Draw += Draw;
+            DalamudApi.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
         }
 
         private void Draw()
@@ -30,8 +30,8 @@ namespace MakePlacePlugin
 
         public void Dispose()
         {
-            MakePlacePlugin.Interface.UiBuilder.Draw -= Draw;
-            MakePlacePlugin.Interface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+            DalamudApi.PluginInterface.UiBuilder.Draw -= Draw;
+            DalamudApi.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         }
     }
 }

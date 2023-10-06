@@ -178,15 +178,13 @@ namespace MakePlacePlugin
 
     public class SaveLayoutManager
     {
-        public ChatGui chat;
         public static Configuration Config;
         public static MakePlacePlugin Plugin;
 
         public static List<(Color, uint)> ColorList;
 
-        public SaveLayoutManager(MakePlacePlugin plugin, ChatGui chatGui, Configuration config)
+        public SaveLayoutManager(MakePlacePlugin plugin, Configuration config)
         {
-            chat = chatGui;
             Config = config;
             Plugin = plugin;
         }
@@ -227,7 +225,7 @@ namespace MakePlacePlugin
 
         static HousingItem ConvertToHousingItem(Furniture furniture)
         {
-            var ItemSheet = Data.GetExcelSheet<Item>();
+            var ItemSheet = DalamudApi.DataManager.GetExcelSheet<Item>();
             var itemRow = ItemSheet.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
 
             if (itemRow == null) itemRow = ItemSheet.FirstOrDefault(row => row.RowId == furniture.itemId);
@@ -291,7 +289,7 @@ namespace MakePlacePlugin
             Layout layout = JsonSerializer.Deserialize<Layout>(jsonString, options);
 
 
-            var StainList = Data.GetExcelSheet<Stain>();
+            var StainList = DalamudApi.DataManager.GetExcelSheet<Stain>();
 
             ColorList = new List<(Color, uint)>();
 
@@ -408,7 +406,7 @@ namespace MakePlacePlugin
                 }
             }
 
-            var BuildingSheet = Data.GetExcelSheet<MJIBuilding>();
+            var BuildingSheet = DalamudApi.DataManager.GetExcelSheet<MJIBuilding>();
 
             var workshop = state.Workshops;
             for (int i = 0; i < 4; i++)
@@ -431,7 +429,7 @@ namespace MakePlacePlugin
                 exterior.Add(fixture);
             }
 
-            var LandmarkSheet = Data.GetExcelSheet<MJILandmark>();
+            var LandmarkSheet = DalamudApi.DataManager.GetExcelSheet<MJILandmark>();
             for (int i = 0; i < 5; i++)
             {
                 var id = state.LandmarkIds[i];
@@ -470,7 +468,7 @@ namespace MakePlacePlugin
             }
 
             var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
+            var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
             if (row != null)
             {
@@ -554,7 +552,7 @@ namespace MakePlacePlugin
                 }
                 else if (gameObject.MaterialItemKey != 0)
                 {
-                    var item = MakePlacePlugin.Data.GetExcelSheet<Item>().GetRow(gameObject.MaterialItemKey);
+                    var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(gameObject.MaterialItemKey);
                     if (item != null)
                     {
                         var basicItem = new BasicItem();

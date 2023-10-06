@@ -223,20 +223,6 @@ namespace MakePlacePlugin
             return indoorTerritory != null;
         }
 
-        // Remaps game floors to our floor enum
-        public InteriorFloor CurrentFloor()
-        {
-            if (indoorTerritory == null) return InteriorFloor.None;
-            var gameFloor = *(int*)((byte*)indoorTerritory + 0x9704);
-
-            return gameFloor switch
-            {
-                0 => InteriorFloor.Ground,
-                1 => InteriorFloor.Upstairs,
-                10 => InteriorFloor.Basement,
-                _ => InteriorFloor.None
-            };
-        }
     }
 
     [StructLayout(LayoutKind.Explicit)]

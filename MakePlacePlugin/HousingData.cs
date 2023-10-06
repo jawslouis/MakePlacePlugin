@@ -18,10 +18,9 @@ namespace MakePlacePlugin
 
         private static MakePlacePlugin Plugin;
 
-        private HousingData(DataManager dataMgr)
+        private HousingData()
         {
-
-            var sheet = dataMgr.GetExcelSheet<HousingLandSet>();
+            var sheet = DalamudApi.DataManager.GetExcelSheet<HousingLandSet>();
             uint[] terriKeys = { 339, 340, 341, 641 };
 
             _territoryToLandSetDict = new Dictionary<uint, Dictionary<uint, CommonLandSet>>();
@@ -40,34 +39,34 @@ namespace MakePlacePlugin
                 _territoryToLandSetDict[terriKeys[i]] = rowDict;
             }
 
-            var unitedExteriorSheet = dataMgr.GetExcelSheet<HousingUnitedExterior>();
+            var unitedExteriorSheet = DalamudApi.DataManager.GetExcelSheet<HousingUnitedExterior>();
             _unitedDict = new Dictionary<uint, uint>();
             foreach (var row in unitedExteriorSheet)
                 foreach (var item in row.Item)
                     _unitedDict[item.Row] = row.RowId;
 
-            _itemDict = dataMgr.GetExcelSheet<Item>()
+            _itemDict = DalamudApi.DataManager.GetExcelSheet<Item>()
                 .Where(item => item.AdditionalData != 0 && (item.ItemSearchCategory.Row == 65 || item.ItemSearchCategory.Row == 66))
                 .ToDictionary(row => row.AdditionalData, row => row);
 
-            _stainDict = dataMgr.GetExcelSheet<Stain>().ToDictionary(row => row.RowId, row => row);
-            _furnitureDict = dataMgr.GetExcelSheet<HousingFurniture>().ToDictionary(row => row.RowId, row => row);
-            _yardObjectDict = dataMgr.GetExcelSheet<HousingYardObject>().ToDictionary(row => row.RowId, row => row);
+            _stainDict = DalamudApi.DataManager.GetExcelSheet<Stain>().ToDictionary(row => row.RowId, row => row);
+            _furnitureDict = DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().ToDictionary(row => row.RowId, row => row);
+            _yardObjectDict = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().ToDictionary(row => row.RowId, row => row);
 
-            PluginLog.Log($"Loaded {_territoryToLandSetDict.Keys.Count} landset rows");
-            PluginLog.Log($"Loaded {_furnitureDict.Keys.Count} furniture");
-            PluginLog.Log($"Loaded {_yardObjectDict.Keys.Count} yard objects");
-            PluginLog.Log($"Loaded {_unitedDict.Keys.Count} united parts");
-            PluginLog.Log($"Loaded {_stainDict.Keys.Count} dyes");
-            PluginLog.Log($"Loaded {_itemDict.Keys.Count} items with AdditionalData");
+            DalamudApi.PluginLog.Info($"Loaded {_territoryToLandSetDict.Keys.Count} landset rows");
+            DalamudApi.PluginLog.Info($"Loaded {_furnitureDict.Keys.Count} furniture");
+            DalamudApi.PluginLog.Error($"Loaded {_yardObjectDict.Keys.Count} yard objects");
+            DalamudApi.PluginLog.Error($"Loaded {_unitedDict.Keys.Count} united parts");
+            DalamudApi.PluginLog.Error($"Loaded {_stainDict.Keys.Count} dyes");
+            DalamudApi.PluginLog.Error($"Loaded {_itemDict.Keys.Count} items with AdditionalData");
         }
 
         public static HousingData Instance { get; private set; }
 
-        public static void Init(DataManager dataMgr, MakePlacePlugin plugin)
+        public static void Init(MakePlacePlugin plugin)
         {
             Plugin = plugin;
-            Instance = new HousingData(dataMgr);
+            Instance = new HousingData();
         }
 
         public bool TryGetYardObject(uint id, out HousingYardObject yardObject)

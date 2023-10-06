@@ -41,7 +41,7 @@ namespace MakePlacePlugin
 
         public void Dispose()
         {
-            PluginLog.Information("Disposing of {cdelegate}", typeof(T).Name);
+            DalamudApi.PluginLog.Info("Disposing of {cdelegate}", typeof(T).Name);
             Disable();
             disposed = true;
             wrappedHook?.Dispose();
