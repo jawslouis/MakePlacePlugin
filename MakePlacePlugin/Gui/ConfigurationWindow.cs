@@ -119,6 +119,21 @@ namespace MakePlacePlugin.Gui
 
 
         #region Basic UI
+
+        private void LogLayoutModeError()
+        {
+            LogError("Unable to load layouts outside of Layout mode");
+
+            if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Island)
+            {
+                LogError("(Manage Furnishings -> Place Furnishing Glamours)");
+            }
+            else
+            {
+                LogError("(Housing -> Indoor/Outdoor Furnishings)");
+            }
+        }
+
         unsafe private void DrawGeneralSettings()
         {
 
@@ -193,9 +208,7 @@ namespace MakePlacePlugin.Gui
             {
                 if (!Memory.Instance.IsHousingMode())
                 {
-                    LogError("Unable to load layouts outside of Layout mode");
-                    LogError("(Housing -> Indoor/Outdoor Furnishings)");
-
+                    LogLayoutModeError();
                 }
                 else
                 {
@@ -299,9 +312,7 @@ namespace MakePlacePlugin.Gui
                 }
                 else
                 {
-                    LogError("Unable to load layouts outside of Layout mode");
-                    LogError("(Housing -> Indoor/Outdoor Furnishings)");
-
+                    LogLayoutModeError();
                 }
             }
             ImGui.SameLine();

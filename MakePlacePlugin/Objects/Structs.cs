@@ -392,7 +392,7 @@ namespace MakePlacePlugin
     [StructLayout(LayoutKind.Explicit)]
     public unsafe struct MjiManagerExtended
     {
-        [FieldOffset(0x148)] public IslandObjectManager* ObjectManager;
+        [FieldOffset(0x160)] public IslandObjectManager* ObjectManager;
     }
 
     [StructLayout(LayoutKind.Explicit)]
