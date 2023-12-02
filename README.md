@@ -29,28 +29,26 @@ Type `/makeplace` to open the plugin screen. Most functions are only available w
 
 ### Saving a layout from the game
 * Make sure you are in furniture mode
-* Click on `Get Interior/Exterior Layout`
 * Click on `Save As`, and specify the file name. Done!
 
 ### Loading a layout into the game
 * Make sure you are in *rotate* furniture mode
-* Click on `Load` and select the .json design file. Your layout should show up in the plugin
 * Make sure the relevant floors are checked.
-  * If in an apartment, you want to check all floors
 * Make sure all the required furniture are placed in the house
   * The plugin will not touch furniture that are in your inventory or storage
-  * If you re-load the design, all the furniture in the list should be white and not grayed out  
-* Click on `Apply Interior Layout`. Sit back and wait for the placement to finish!
+  * The plugin will not dye furniture for you.
+  * If you re-load the design, all the furniture in the list should be white and not grayed out
+* Click on `Load From` and select the .json design file. Sit back and wait for the placement to finish!
+  * Your layout should also show up in the plugin
   * If there are crashes, check [this section of the FAQ](#why-does-the-plugin-crash-sometimes-when-applying-a-layout):    
 
 ### Interface
 ![Settings](screenshot.png?raw=true)  
-* **Save As**: Saves the *currently loaded* interior and exterior layout to the specified file. You will need to load the interior/exterior layout before you can save it. 
-* **Save**: Saves the layout to the current file. When first starting the plugin, this is not available since no file is specified.
-* **Load**: Loads the layout from the specified file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
-* **Get Interior/Exterior Layout**: Loads the current furniture layout in the house/yard. Interior and exterior layouts are loaded separately.
-* **Apply Interior/Exterior Layout**: Applies the layout position to all applicable furniture in the house/yard (those that are not grayed out). **Furniture needs to be placed before it can be used in the layout** - items in the inventory or storeroom will not be used. Make sure that no furniture is selected before using this.
-* **Time Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed. 
+* **Save**: Saves the layout to the current file. When first starting the plugin, this is not available since no file is specified. To save both the exterior and interior to the same file, simply save once while inside, then save to the same file again while outside.
+* **Save As**: Saves the layout to the specified file.
+* **Load**: Loads and applies the layout from the current file. The plugin will check the currently placed furniture in the house to see if there is a match with the layout. It also checks if there is a match for the dye color. All layout furniture with no match will be grayed out.
+* **Load From**: Same as Load, but loads the layout from the specified file.
+* **Placement Interval**: The time period between each furniture placement when applying the entire layout. Setting this too low (e.g. 200ms) may cause some furniture placements to be missed.
 * **Label Furniture**: Shows a small tooltip over each furniture, with a button to apply the layout position to the furniture
 
 ###
@@ -88,9 +86,6 @@ Make sure of the following:
 - No more than 10 items attached to another (e.g. table-top items on tables, wall-mounted items on partition walls)
 
 There is unfortunately no solution to the above issues, since this is tied to how the game operates.
-
-### The plugin says it's placing items but nothing is moving
-You probably pressed `Get Interior Layout`, which loads the current layout in the game, instead of `Load`, which loads the layout from the file. Since the plugin is placing furniture that is already in position, it will look like nothing is moving.
 
 ## Credits
 This plugin builds upon the foundation laid by 3 other great plugins: [HousingPos](https://github.com/Bluefissure/HousingPos), [BDTH](https://github.com/LeonBlade/BDTHPlugin) and [HouseMate](https://github.com/lmcintyre/Housemate). The UI in particular borrows heavily from HousingPos.
