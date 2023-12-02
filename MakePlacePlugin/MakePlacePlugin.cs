@@ -24,6 +24,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using static MakePlacePlugin.Memory;
+using HousingFurniture = Lumina.Excel.GeneratedSheets.HousingFurniture;
 
 namespace MakePlacePlugin
 {
@@ -92,7 +93,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.2.0 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.3.0 initialized");
         }
         public void Initialize()
         {
@@ -674,7 +675,7 @@ namespace MakePlacePlugin
             Config.Save();
         }
 
-        public void LoadLayout()
+        public void GetGameLayout()
         {
 
             Memory Mem = Memory.Instance;

@@ -122,7 +122,7 @@ namespace MakePlacePlugin.Gui
 
         private void LogLayoutModeError()
         {
-            LogError("Unable to load layouts outside of Layout mode");
+            LogError("Unable to save layouts outside of Layout mode");
 
             if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Island)
             {
@@ -131,6 +131,51 @@ namespace MakePlacePlugin.Gui
             else
             {
                 LogError("(Housing -> Indoor/Outdoor Furnishings)");
+            }
+        }
+
+
+        private void SaveLayoutToFile()
+        {
+            if (!Memory.Instance.IsHousingMode())
+            {
+                LogLayoutModeError();
+                return;
+            }
+
+            try
+            {
+                Plugin.GetGameLayout();
+                MakePlacePlugin.LayoutManager.ExportLayout();
+            }
+            catch (Exception e)
+            {
+                LogError($"Save Error: {e.Message}", e.StackTrace);
+            }
+        }
+
+        private void LoadLayoutFromFile()
+        {
+            if (!Memory.Instance.CanEditItem())
+            {
+                LogError("Unable to load and apply layouts outside of Rotate Layout mode");
+                return;
+            }
+
+            try
+            {
+                SaveLayoutManager.ImportLayout(Config.SaveLocation);
+                Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
+
+                Plugin.MatchLayout();
+                Plugin.ApplyLayout();
+
+                Config.ResetRecord();
+
+            }
+            catch (Exception e)
+            {
+                LogError($"Load Error: {e.Message}", e.StackTrace);
             }
         }
 
@@ -159,24 +204,21 @@ namespace MakePlacePlugin.Gui
 
                 if (ImGui.Button("Save"))
                 {
-                    try
-                    {
-                        MakePlacePlugin.LayoutManager.ExportLayout();
-                    }
-                    catch (Exception e)
-                    {
-                        LogError($"Save Error: {e.Message}", e.StackTrace);
-                    }
+                    SaveLayoutToFile();
                 }
-
+                if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Save layout to current file location");
                 ImGui.SameLine();
 
             }
 
-
             if (ImGui.Button("Save As"))
             {
-                try
+                if (!Memory.Instance.IsHousingMode())
+                {
+                    LogLayoutModeError();
+
+                }
+                else
                 {
                     string saveName = "save";
                     if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
@@ -190,62 +232,66 @@ namespace MakePlacePlugin.Gui
 
                         Config.SaveLocation = res;
                         Config.Save();
-                        MakePlacePlugin.LayoutManager.ExportLayout();
+                        SaveLayoutToFile();
 
                     }, Path.GetDirectoryName(Config.SaveLocation));
                 }
-                catch (Exception e)
-                {
-                    LogError($"Save Error: {e.Message}", e.StackTrace);
-                }
             }
-            ImGui.SameLine();
-            ImGui.Text("Plugin → File           ");
+            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Save layout to file");
+
+            ImGui.SameLine(); ImGui.Dummy(new Vector2(20, 0)); ImGui.SameLine();
 
 
-            ImGui.SameLine();
-            if (ImGui.Button("Load"))
+            if (!Config.SaveLocation.IsNullOrEmpty())
             {
-                if (!Memory.Instance.IsHousingMode())
+                if (ImGui.Button("Load"))
                 {
-                    LogLayoutModeError();
+                    LoadLayoutFromFile();
+                }
+                if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from current file location");
+                ImGui.SameLine();
+            }
+
+            if (ImGui.Button("Load From"))
+            {
+
+                if (!Memory.Instance.CanEditItem())
+                {
+                    LogError("Unable to load and apply layouts outside of Rotate Layout mode");
+
                 }
                 else
                 {
+                    string saveName = "save";
+                    if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
 
-                    try
+                    FileDialogManager.OpenFileDialog("Select a Layout File", ".json", (bool ok, List<string> res) =>
                     {
-                        string saveName = "save";
-                        if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
-
-                        FileDialogManager.OpenFileDialog("Select a Layout File", ".json", (bool ok, List<string> res) =>
+                        if (!ok)
                         {
-                            if (!ok)
-                            {
-                                return;
-                            }
+                            return;
+                        }
 
-                            Config.SaveLocation = res.FirstOrDefault("");
-                            Config.Save();
+                        Config.SaveLocation = res.FirstOrDefault("");
+                        Config.Save();
 
-                            SaveLayoutManager.ImportLayout(Config.SaveLocation);
+                        LoadLayoutFromFile();
 
-                            Plugin.MatchLayout();
-                            Config.ResetRecord();
-                            Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
-
-                        }, 1, Path.GetDirectoryName(Config.SaveLocation));
-                    }
-                    catch (Exception e)
-                    {
-                        LogError($"Load Error: {e.Message}", e.StackTrace);
-                    }
-
+                    }, 1, Path.GetDirectoryName(Config.SaveLocation));
                 }
             }
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Load layout from file");
-            ImGui.SameLine();
-            ImGui.Text("File → Plugin");
+
+            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+
+            ImGui.PushItemWidth(100);
+
+            if (ImGui.InputInt("Placement Interval (ms)", ref Config.LoadInterval))
+            {
+                Config.Save();
+            }
+            ImGui.PopItemWidth();
+            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Time interval between furniture placements when applying a layout. If this is too low (e.g. 200 ms), some placements may be skipped over.");
 
 
             ImGui.Dummy(new Vector2(0, 15));
@@ -280,75 +326,6 @@ namespace MakePlacePlugin.Gui
                 ImGui.Dummy(new Vector2(0, 15));
 
             }
-
-            ImGui.Text("Layout Actions");
-
-            string inOut = "";
-            switch (Memory.Instance.GetCurrentTerritory())
-            {
-                case Memory.HousingArea.Indoors:
-                    inOut = "Interior";
-                    break;
-                case Memory.HousingArea.Outdoors:
-                    inOut = "Exterior";
-                    break;
-                case Memory.HousingArea.Island:
-                    inOut = "Island";
-                    break;
-            }
-
-            if (ImGui.Button($"Get {inOut} Layout"))
-            {
-                if (Memory.Instance.IsHousingMode())
-                {
-                    try
-                    {
-                        Plugin.LoadLayout();
-                    }
-                    catch (Exception e)
-                    {
-                        LogError($"Error: {e.Message}", e.StackTrace);
-                    }
-                }
-                else
-                {
-                    LogLayoutModeError();
-                }
-            }
-            ImGui.SameLine();
-            ImGui.Text("Game → Plugin           ");
-            ImGui.SameLine();
-
-            if (ImGui.Button($"Apply {inOut} Layout"))
-            {
-                if (Memory.Instance.CanEditItem())
-                {
-                    try
-                    {
-                        Plugin.MatchLayout();
-                        Plugin.ApplyLayout();
-                    }
-                    catch (Exception e)
-                    {
-                        LogError($"Error: {e.Message}", e.StackTrace);
-                    }
-                }
-                else
-                {
-                    LogError("Unable to apply layouts outside of Rotate Layout mode");
-                }
-            }
-            ImGui.SameLine();
-            ImGui.Text("Plugin → Game           ");
-            ImGui.SameLine();
-
-            ImGui.PushItemWidth(100);
-            if (ImGui.InputInt("Placement Interval (ms)", ref Config.LoadInterval))
-            {
-                Config.Save();
-            }
-            ImGui.PopItemWidth();
-            if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Time interval between furniture placements when applying a layout. If this is too low (e.g. 200 ms), some placements may be skipped over.");
 
             ImGui.Dummy(new Vector2(0, 15));
             Config.Save();

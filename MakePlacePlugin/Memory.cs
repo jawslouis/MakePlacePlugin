@@ -312,8 +312,7 @@ namespace MakePlacePlugin
         {
             if (HousingStructure == null)
                 return false;
-
-            // Rotate mode only.
+            
             return HousingStructure->Mode != HousingLayoutMode.None;
         }
 

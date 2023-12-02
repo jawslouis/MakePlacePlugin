@@ -365,6 +365,8 @@ namespace MakePlacePlugin
                         return "Dirt";
                     case 2:
                         return "Stone";
+                    case 3:
+                        return "Tiled Brick";
                     default:
                         return "";
                 }
