@@ -16,16 +16,13 @@ namespace MakePlacePlugin
         public float DrawDistance = 0;
         public List<int> HiddenScreenItemHistory = new List<int>();
         public List<int> GroupingList = new List<int>();
-        public bool PlaceAnywhere = false;
-
+        
         public bool Basement = true;
         public bool GroundFloor = true;
         public bool UpperFloor = true;
 
-
-        public List<string> Tags = new List<string>();
-        public List<bool> TagsSelectList = new List<bool>();
         public int LoadInterval = 400;
+        public bool ApplyLayout = true;
 
         public string SaveLocation = null;
 

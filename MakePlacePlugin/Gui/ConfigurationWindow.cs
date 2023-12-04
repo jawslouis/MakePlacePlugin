@@ -1,15 +1,13 @@
-﻿using Dalamud.Utility;
-using Dalamud.Interface.ImGuiFileDialog;
+﻿using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Utility;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using MakePlacePlugin.Objects;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin.Gui
@@ -120,10 +118,8 @@ namespace MakePlacePlugin.Gui
 
         #region Basic UI
 
-        private void LogLayoutModeError()
+        private void LogLayoutMode()
         {
-            LogError("Unable to save layouts outside of Layout mode");
-
             if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Island)
             {
                 LogError("(Manage Furnishings -> Place Furnishing Glamours)");
@@ -134,12 +130,37 @@ namespace MakePlacePlugin.Gui
             }
         }
 
+        private bool CheckModeForSave()
+        {
+            if (Memory.Instance.IsHousingMode()) return true;
+
+            LogError("Unable to save layouts outside of Layout mode");
+            LogLayoutMode();
+            return false;
+        }
+
+        private bool CheckModeForLoad()
+        {
+            if (Config.ApplyLayout && !Memory.Instance.CanEditItem())
+            {
+                LogError("Unable to load and apply layouts outside of Rotate Layout mode");
+                return false;
+            }
+
+            if (!Config.ApplyLayout && !Memory.Instance.IsHousingMode())
+            {
+                LogError("Unable to load layouts outside of Layout mode");
+                LogLayoutMode();
+                return false;
+            }
+
+            return true;
+        }
 
         private void SaveLayoutToFile()
         {
-            if (!Memory.Instance.IsHousingMode())
+            if (!CheckModeForSave())
             {
-                LogLayoutModeError();
                 return;
             }
 
@@ -156,11 +177,8 @@ namespace MakePlacePlugin.Gui
 
         private void LoadLayoutFromFile()
         {
-            if (!Memory.Instance.CanEditItem())
-            {
-                LogError("Unable to load and apply layouts outside of Rotate Layout mode");
-                return;
-            }
+
+            if (!CheckModeForLoad()) return;
 
             try
             {
@@ -168,9 +186,12 @@ namespace MakePlacePlugin.Gui
                 Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
 
                 Plugin.MatchLayout();
-                Plugin.ApplyLayout();
-
                 Config.ResetRecord();
+
+                if (Config.ApplyLayout)
+                {
+                    Plugin.ApplyLayout();
+                }
 
             }
             catch (Exception e)
@@ -213,12 +234,7 @@ namespace MakePlacePlugin.Gui
 
             if (ImGui.Button("Save As"))
             {
-                if (!Memory.Instance.IsHousingMode())
-                {
-                    LogLayoutModeError();
-
-                }
-                else
+                if (CheckModeForSave())
                 {
                     string saveName = "save";
                     if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
@@ -241,7 +257,6 @@ namespace MakePlacePlugin.Gui
 
             ImGui.SameLine(); ImGui.Dummy(new Vector2(20, 0)); ImGui.SameLine();
 
-
             if (!Config.SaveLocation.IsNullOrEmpty())
             {
                 if (ImGui.Button("Load"))
@@ -254,13 +269,7 @@ namespace MakePlacePlugin.Gui
 
             if (ImGui.Button("Load From"))
             {
-
-                if (!Memory.Instance.CanEditItem())
-                {
-                    LogError("Unable to load and apply layouts outside of Rotate Layout mode");
-
-                }
-                else
+                if (CheckModeForLoad())
                 {
                     string saveName = "save";
                     if (!Config.SaveLocation.IsNullOrEmpty()) saveName = Path.GetFileNameWithoutExtension(Config.SaveLocation);
@@ -284,15 +293,20 @@ namespace MakePlacePlugin.Gui
 
             ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
-            ImGui.PushItemWidth(100);
+            if (ImGui.Checkbox("Apply Layout", ref Config.ApplyLayout))
+            {
+                Config.Save();
+            }
 
+            ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
+
+            ImGui.PushItemWidth(100);
             if (ImGui.InputInt("Placement Interval (ms)", ref Config.LoadInterval))
             {
                 Config.Save();
             }
             ImGui.PopItemWidth();
             if (Config.ShowTooltips && ImGui.IsItemHovered()) ImGui.SetTooltip("Time interval between furniture placements when applying a layout. If this is too low (e.g. 200 ms), some placements may be skipped over.");
-
 
             ImGui.Dummy(new Vector2(0, 15));
 

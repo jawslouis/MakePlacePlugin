@@ -62,10 +62,9 @@ namespace MakePlacePlugin
 
         public void Dispose()
         {
-            
+
             HookManager.Dispose();
 
-            Config.PlaceAnywhere = false;
             DalamudApi.ClientState.TerritoryChanged -= TerritoryChanged;
             DalamudApi.CommandManager.RemoveHandler("/makeplace");
             Gui?.Dispose();
@@ -76,7 +75,7 @@ namespace MakePlacePlugin
         {
             DalamudApi.Initialize(pi);
 
-            Config = DalamudApi.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();            
+            Config = DalamudApi.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             Config.Save();
 
             Initialize();
@@ -93,7 +92,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.3.0 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.4.0 initialized");
         }
         public void Initialize()
         {
