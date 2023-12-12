@@ -1,55 +1,48 @@
-﻿using Dalamud.Game;
-using Dalamud.Hooking;
-using Dalamud.Logging;
+﻿// Decompiled with JetBrains decompiler
+// Type: MakePlacePlugin.HookManager
+// Assembly: MakePlacePlugin, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: 33141E60-60A1-49AF-9070-B7E7DF8090BB
+// Assembly location: C:\Users\Julian\Downloads\MakePlace\MakePlacePlugin.dll
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MakePlacePlugin
-{
-    public class HookManager
-    {
-        public static List<IHookWrapper> HookList = new();
-        public static SigScanner Scanner;
+namespace MakePlacePlugin; 
 
-        public static void Init(SigScanner s)
-        {
-            Scanner = s;
+public class HookManager {
+    public static List<IHookWrapper> HookList = new();
+
+    public static void Dispose() {
+        foreach (var hookWrapper in HookList.Where((Func<IHookWrapper, bool>)(hook => !hook.IsDisposed))) {
+            if (hookWrapper.IsEnabled)
+                hookWrapper.Disable();
+            hookWrapper.Dispose();
         }
 
-        public static void Dispose()
-        {
-            foreach (var hook in HookList.Where(hook => !hook.IsDisposed))
-            {
-                if (hook.IsEnabled)
-                    hook.Disable();
-                hook.Dispose();
-            }
+        HookList.Clear();
+    }
 
-            HookList.Clear();
+    public static HookWrapper<T> Hook<T>(
+        string signature,
+        T detour,
+        bool enable = true,
+        int addressOffset = 0)
+        where T : Delegate {
+        return HookAddress(DalamudApi.SigScanner.ScanText(signature), detour, enable, addressOffset);
+    }
 
-        }
-
-        public static HookWrapper<T> Hook<T>(string signature, T detour, bool enable = true, int addressOffset = 0)
-    where T : Delegate
-        {
-            var addr = Scanner.ScanText(signature);
-
-            return HookAddress(addr, detour, enable, addressOffset);
-        }
-
-        public static HookWrapper<T> HookAddress<T>(IntPtr addr, T detour, bool enable = true, int addressOffset = 0) where T : Delegate
-        {
-            PluginLog.Information($"Hooking {detour.Method.Name} at {addr.ToString("X")}");
-
-            var h = Dalamud.Hooking.Hook<T>.FromAddress(addr + addressOffset, detour);
-            var wh = new HookWrapper<T>(h);
-            if (enable) wh.Enable();
-            HookList.Add(wh);
-            return wh;
-        }
-
+    public static HookWrapper<T> HookAddress<T>(
+        IntPtr addr,
+        T detour,
+        bool enable = true,
+        int addressOffset = 0)
+        where T : Delegate {
+        DalamudApi.PluginLog.Info("Hooking " + detour.Method.Name + " at " + addr.ToString("X"), Array.Empty<object>());
+        var hookWrapper = new HookWrapper<T>(DalamudApi.Hooks.HookFromAddress(addr + addressOffset, detour));
+        if (enable)
+            hookWrapper.Enable();
+        HookList.Add(hookWrapper);
+        return hookWrapper;
     }
 }

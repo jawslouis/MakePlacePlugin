@@ -1,56 +1,40 @@
-﻿using System;
+﻿// Decompiled with JetBrains decompiler
+// Type: MakePlacePlugin.Configuration
+// Assembly: MakePlacePlugin, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: 33141E60-60A1-49AF-9070-B7E7DF8090BB
+// Assembly location: C:\Users\Julian\Downloads\MakePlace\MakePlacePlugin.dll
+
+using System;
 using System.Collections.Generic;
 using Dalamud.Configuration;
-using Dalamud.Plugin;
-using MakePlacePlugin.Objects;
 
-namespace MakePlacePlugin
-{
-    [Serializable]
-    public class Configuration : IPluginConfiguration
-    {
-        public int Version { get; set; } = 0;
+namespace MakePlacePlugin; 
 
-        public bool ShowTooltips = true;
-        public bool DrawScreen = false;
-        public float DrawDistance = 0;
-        public List<int> HiddenScreenItemHistory = new List<int>();
-        public List<int> GroupingList = new List<int>();
-        public bool PlaceAnywhere = false;
+[Serializable]
+public class Configuration : IPluginConfiguration {
+    public bool Basement = true;
+    public float DrawDistance;
+    public bool DrawScreen;
+    public bool GroundFloor = true;
+    public List<int> GroupingList = new();
+    public List<int> HiddenScreenItemHistory = new();
+    public int LoadInterval = 400;
+    public bool PlaceAnywhere;
+    public string SaveLocation;
+    public bool ShowTooltips = true;
+    public List<string> Tags = new();
+    public List<bool> TagsSelectList = new();
+    public bool UpperFloor = true;
 
-        public bool Basement = true;
-        public bool GroundFloor = true;
-        public bool UpperFloor = true;
+    public int Version { get; set; }
 
+    public void Save() {
+        DalamudApi.PluginInterface.SavePluginConfig(this);
+    }
 
-        public List<string> Tags = new List<string>();
-        public List<bool> TagsSelectList = new List<bool>();
-        public int LocationId = 0;
-        public int LoadInterval = 400;
-
-        public string SaveLocation = null;
-
-        #region Init and Save
-
-        [NonSerialized] private DalamudPluginInterface _pluginInterface;
-
-        public void Initialize(DalamudPluginInterface pluginInterface)
-        {
-            _pluginInterface = pluginInterface;
-        }
-
-        public void Save()
-        {
-            _pluginInterface.SavePluginConfig(this);
-        }
-
-        public void ResetRecord()
-        {
-            HiddenScreenItemHistory.Clear();
-            GroupingList.Clear();
-            Save();
-        }
-
-        #endregion
+    public void ResetRecord() {
+        this.HiddenScreenItemHistory.Clear();
+        this.GroupingList.Clear();
+        this.Save();
     }
 }

@@ -1,114 +1,60 @@
-﻿using System;
+﻿// Decompiled with JetBrains decompiler
+// Type: MakePlacePlugin.MoveUtil
+// Assembly: MakePlacePlugin, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: 33141E60-60A1-49AF-9070-B7E7DF8090BB
+// Assembly location: C:\Users\Julian\Downloads\MakePlace\MakePlacePlugin.dll
+
+using System;
 using System.Numerics;
 
-namespace MakePlacePlugin
-{
-	class MoveUtil
-	{
-		private const float Deg2Rad = (float)(Math.PI * 2) / 360;
-		private const float Rad2Deg = (float)(360 / (Math.PI * 2));
+namespace MakePlacePlugin; 
 
-		public static Quaternion ToQ(Vector3 euler)
-		{
-			float xOver2 = euler.X * Deg2Rad * 0.5f;
-			float yOver2 = euler.Y * Deg2Rad * 0.5f;
-			float zOver2 = euler.Z * Deg2Rad * 0.5f;
+internal class MoveUtil {
+    private const float Deg2Rad = 0.0174532924f;
+    private const float Rad2Deg = 57.29578f;
 
-			float sinXOver2 = (float)Math.Sin(xOver2);
-			float cosXOver2 = (float)Math.Cos(xOver2);
-			float sinYOver2 = (float)Math.Sin(yOver2);
-			float cosYOver2 = (float)Math.Cos(yOver2);
-			float sinZOver2 = (float)Math.Sin(zOver2);
-			float cosZOver2 = (float)Math.Cos(zOver2);
+    public static Quaternion ToQ(Vector3 euler) {
+        var num1 = euler.X * (Math.PI / 180.0) * 0.5;
+        var num2 = (float)(euler.Y * (Math.PI / 180.0) * 0.5);
+        var num3 = (float)(euler.Z * (Math.PI / 180.0) * 0.5);
+        var num4 = (float)Math.Sin(num1);
+        var num5 = (float)Math.Cos(num1);
+        var num6 = (float)Math.Sin(num2);
+        var num7 = (float)Math.Cos(num2);
+        var num8 = (float)Math.Sin(num3);
+        var num9 = (float)Math.Cos(num3);
+        Quaternion q;
+        q.X = (float)(num7 * (double)num4 * num9 + num6 * (double)num5 * num8);
+        q.Y = (float)(num6 * (double)num5 * num9 - num7 * (double)num4 * num8);
+        q.Z = (float)(num7 * (double)num5 * num8 - num6 * (double)num4 * num9);
+        q.W = (float)(num7 * (double)num5 * num9 + num6 * (double)num4 * num8);
+        return q;
+    }
 
-			Quaternion result;
-			result.X = cosYOver2 * sinXOver2 * cosZOver2 + sinYOver2 * cosXOver2 * sinZOver2;
-			result.Y = sinYOver2 * cosXOver2 * cosZOver2 - cosYOver2 * sinXOver2 * sinZOver2;
-			result.Z = cosYOver2 * cosXOver2 * sinZOver2 - sinYOver2 * sinXOver2 * cosZOver2;
-			result.W = cosYOver2 * cosXOver2 * cosZOver2 + sinYOver2 * sinXOver2 * sinZOver2;
-			return result;
-		}
+    public static Vector3 FromQ(Quaternion q2) {
+        var quaternion = new Quaternion(q2.W, q2.Z, q2.X, q2.Y);
+        var vector3 = new Vector3 {
+            Y = (float)Math.Atan2(2.0 * quaternion.X * quaternion.W + 2.0 * quaternion.Y * quaternion.Z,
+                1.0 - 2.0 * (quaternion.Z * (double)quaternion.Z + quaternion.W * (double)quaternion.W)),
+            X = (float)Math.Asin(2.0 * (quaternion.X * (double)quaternion.Z - quaternion.W * (double)quaternion.Y)),
+            Z = (float)Math.Atan2(2.0 * quaternion.X * quaternion.Y + 2.0 * quaternion.Z * quaternion.W,
+                1.0 - 2.0 * (quaternion.Y * (double)quaternion.Y + quaternion.Z * (double)quaternion.Z))
+        };
+        vector3.X *= 57.29578f;
+        vector3.Y *= 57.29578f;
+        vector3.Z *= 57.29578f;
+        return vector3;
+    }
 
-		public static Vector3 FromQ(Quaternion q2)
-		{
-			Quaternion q = new Quaternion(q2.W, q2.Z, q2.X, q2.Y);
-			Vector3 pitchYawRoll = new Vector3
-			{
-				Y = (float)Math.Atan2(2f * q.X * q.W + 2f * q.Y * q.Z, 1 - 2f * (q.Z * q.Z + q.W * q.W)),
-				X = (float)Math.Asin(2f * (q.X * q.Z - q.W * q.Y)),
-				Z = (float)Math.Atan2(2f * q.X * q.Y + 2f * q.Z * q.W, 1 - 2f * (q.Y * q.Y + q.Z * q.Z))
-			};
+    public static float DistanceFromPlayer(HousingGameObject obj, Vector3 playerPos) {
+        return Distance(new Vector3(playerPos.X, playerPos.Z, playerPos.Y), new Vector3(obj.X, obj.Y, obj.Z));
+    }
 
-			pitchYawRoll.X *= Rad2Deg;
-			pitchYawRoll.Y *= Rad2Deg;
-			pitchYawRoll.Z *= Rad2Deg;
-
-			return pitchYawRoll;
-		}
-
-		public static float DistanceFromPlayer(HousingGameObject obj, Vector3 playerPos) 
-			=> Distance(new Vector3(playerPos.X, playerPos.Z, playerPos.Y), new Vector3(obj.X, obj.Y, obj.Z));
-
-		public static float Distance(Vector3 v1, Vector3 v2)
-		{
-			var x1 = Math.Pow(v2.X - v1.X, 2);
-			var y1 = Math.Pow(v2.Y - v1.Y, 2);
-			var z1 = Math.Pow(v2.Z - v1.Z, 2);
-
-			return (float)Math.Sqrt(x1 + y1 + z1);
-		}
-	}
-
-	public static class QuaternionExtensions
-	{
-		public static float ComputeXAngle(this Quaternion q)
-		{
-			float sinr_cosp = 2 * (q.W * q.X + q.Y * q.Z);
-			float cosr_cosp = 1 - 2 * (q.X * q.X + q.Y * q.Y);
-			return (float)Math.Atan2(sinr_cosp, cosr_cosp);
-		}
-
-		public static float ComputeYAngle(this Quaternion q)
-		{
-			float sinp = 2 * (q.W * q.Y - q.Z * q.X);
-			if (Math.Abs(sinp) >= 1)
-				return (float)Math.PI / 2 * Math.Sign(sinp); // use 90 degrees if out of range
-			else
-				return (float)Math.Asin(sinp);
-		}
-
-		public static float ComputeZAngle(this Quaternion q)
-		{
-			float siny_cosp = 2 * (q.W * q.Z + q.X * q.Y);
-			float cosy_cosp = 1 - 2 * (q.Y * q.Y + q.Z * q.Z);
-			return (float)Math.Atan2(siny_cosp, cosy_cosp);
-		}
-
-		public static Vector3 ComputeAngles(this Quaternion q)
-		{
-			return new Vector3(ComputeXAngle(q), ComputeYAngle(q), ComputeZAngle(q));
-		}
-
-		public static Quaternion FromAngles(Vector3 angles)
-		{
-
-			float cy = (float)Math.Cos(angles.Z * 0.5f);
-			float sy = (float)Math.Sin(angles.Z * 0.5f);
-			float cp = (float)Math.Cos(angles.Y * 0.5f);
-			float sp = (float)Math.Sin(angles.Y * 0.5f);
-			float cr = (float)Math.Cos(angles.X * 0.5f);
-			float sr = (float)Math.Sin(angles.X * 0.5f);
-
-			Quaternion q = new Quaternion
-			{
-				W = cr * cp * cy + sr * sp * sy,
-				X = sr * cp * cy - cr * sp * sy,
-				Y = cr * sp * cy + sr * cp * sy,
-				Z = cr * cp * sy - sr * sp * cy
-			};
-
-			return q;
-
-		}
-	}
+    public static float Distance(Vector3 v1, Vector3 v2) {
+        var num1 = Math.Pow(v2.X - (double)v1.X, 2.0);
+        var num2 = Math.Pow(v2.Y - (double)v1.Y, 2.0);
+        var num3 = Math.Pow(v2.Z - (double)v1.Z, 2.0);
+        var num4 = num2;
+        return (float)Math.Sqrt(num1 + num4 + num3);
+    }
 }

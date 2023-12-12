@@ -1,474 +1,331 @@
-﻿using Dalamud.Game.Gui;
-using Dalamud.Logging;
-using Lumina.Excel.GeneratedSheets;
-using MakePlacePlugin.Objects;
+﻿// Decompiled with JetBrains decompiler
+// Type: MakePlacePlugin.SaveLayoutManager
+// Assembly: MakePlacePlugin, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: 33141E60-60A1-49AF-9070-B7E7DF8090BB
+// Assembly location: C:\Users\Julian\Downloads\MakePlace\MakePlacePlugin.dll
+
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-
-using System.Text.RegularExpressions;
-using System.Text.Unicode;
-using System.Linq;
-using static MakePlacePlugin.MakePlacePlugin;
 using System.Drawing;
 using System.Globalization;
-using System.Text.Json.Serialization;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Text.Unicode;
+using FFXIVClientStructs.FFXIV.Client.Game.MJI;
+using Lumina.Excel.GeneratedSheets;
+using MakePlacePlugin.Objects;
 
-namespace MakePlacePlugin
-{
+namespace MakePlacePlugin; 
 
-    public class Transform
-    {
-        public List<float> location { get; set; } = new List<float> { 0, 0, 0 };
-        public List<float> rotation { get; set; } = new List<float> { 0, 0, 0, 1 };
-        public List<float> scale { get; set; } = new List<float> { 1, 1, 1 };
+public class SaveLayoutManager {
+    public static Configuration Config;
+    public static MakePlacePlugin Plugin;
+    public static List<(Color, uint)> ColorList;
+    public static float layoutScale = 1f;
 
+    public SaveLayoutManager(MakePlacePlugin plugin, Configuration config) {
+        Config = config;
+        Plugin = plugin;
     }
 
-
-    public class Fixture
-    {
-        public string level { get; set; } = "";
-        public string type { get; set; } = "";
-        public string name { get; set; } = "";
-        public uint itemId { get; set; } = 0;
+    private static float ParseFloat(string floatString) {
+        return float.Parse(floatString.Replace(",", CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator),
+            NumberStyles.Any, CultureInfo.InvariantCulture);
     }
 
-    public class Furniture
-    {
-        public string name { get; set; }
+    private float scale(float i) {
+        return this.checkZero(i);
+    }
 
-        public uint itemId { get; set; }
+    private static float descale(float i) {
+        return i / layoutScale;
+    }
 
-        public Transform transform { get; set; } = new Transform();
+    private float checkZero(float i) {
+        return Math.Abs(i) < 0.001 ? 0.0f : i;
+    }
 
-        public Dictionary<string, object> properties { get; set; } = new Dictionary<string, object>();
+    private List<float> RotationToQuat(float rotation) {
+        var fromYawPitchRoll = Quaternion.CreateFromYawPitchRoll(0.0f, 0.0f, rotation);
+        return new List<float> {
+            this.checkZero(fromYawPitchRoll.X),
+            this.checkZero(fromYawPitchRoll.Y),
+            this.checkZero(fromYawPitchRoll.Z),
+            this.checkZero(fromYawPitchRoll.W)
+        };
+    }
 
-        public List<Furniture> attachments { get; set; } = new List<Furniture>();
+    private static HousingItem ConvertToHousingItem(Furniture furniture) {
+        var excelSheet = DalamudApi.DataManager.GetExcelSheet<Item>();
+        var obj =
+            ((IEnumerable<Item>)excelSheet).FirstOrDefault((Func<Item, bool>)(row =>
+                row.Name.ToString().Equals(furniture.name))) ??
+            excelSheet.FirstOrDefault(row => (int)row.RowId == (int)furniture.itemId);
+        if (obj == null)
+            return null;
+        var rotation = furniture.transform.rotation;
+        var q = new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
+        var housingItem = new HousingItem(obj, (byte)furniture.GetClosestStain(ColorList),
+            descale(furniture.transform.location[0]), descale(furniture.transform.location[2]),
+            descale(furniture.transform.location[1]), -q.ComputeZAngle());
+        if (furniture.properties.ContainsKey("material")) {
+            var material = furniture.GetMaterial();
+            housingItem.MaterialItemKey = material.itemId;
+        }
 
-        public Color GetColor()
-        {
+        return housingItem;
+    }
 
-            if (properties.TryGetValue("color", out object colorObj))
-            {
-                var color = (string)colorObj;
-                return System.Drawing.ColorTranslator.FromHtml("#" + color.Substring(0, 6));
+    private static void ImportFurniture(List<HousingItem> itemList, List<Furniture> furnitureList) {
+        foreach (var furniture in furnitureList) {
+            var housingItem1 = ConvertToHousingItem(furniture);
+            if (housingItem1 != null)
+                itemList.Add(housingItem1);
+            foreach (var attachment in furniture.attachments) {
+                var housingItem2 = ConvertToHousingItem(attachment);
+                if (housingItem2 != null)
+                    itemList.Add(housingItem2);
             }
-
-            return Color.Empty;
         }
+    }
 
-        int ColorDiff(Color c1, Color c2)
-        {
-            return (int)Math.Sqrt((c1.R - c2.R) * (c1.R - c2.R)
-                                   + (c1.G - c2.G) * (c1.G - c2.G)
-                                   + (c1.B - c2.B) * (c1.B - c2.B));
-        }
+    public static void ImportLayout(string path) {
+        var json = File.ReadAllText(path);
+        var serializerOptions = new JsonSerializerOptions();
+        serializerOptions.Converters.Add(new ObjectToInferredTypesConverter());
+        var options = serializerOptions;
+        var layout = JsonSerializer.Deserialize<Layout>(json, options);
+        var excelSheet = DalamudApi.DataManager.GetExcelSheet<Stain>();
+        ColorList = new List<(Color, uint)>();
+        foreach (var stain in excelSheet)
+            if (stain.Unknown6)
+                ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
+        Plugin.InteriorItemList.Clear();
+        layoutScale = layout.interiorScale;
+        ImportFurniture(Plugin.InteriorItemList, layout.interiorFurniture);
+        Plugin.ExteriorItemList.Clear();
+        layoutScale = layout.exteriorScale;
+        ImportFurniture(Plugin.ExteriorItemList, layout.exteriorFurniture);
+        Plugin.Layout = layout;
+    }
 
-        public uint GetClosestStain(List<(Color, uint)> colorList)
-        {
-            var color = GetColor();
-            var minDist = 2000;
-            uint closestStain = 0;
-
-            foreach (var testTuple in colorList)
-            {
-                var currentDist = ColorDiff(testTuple.Item1, color);
-                if (currentDist < minDist)
-                {
-                    minDist = currentDist;
-                    closestStain = testTuple.Item2;
+    public static unsafe void LoadExteriorFixtures() {
+        var exteriorFixture = Plugin.Layout.exteriorFixture;
+        exteriorFixture.Clear();
+        HousingController controller;
+        if (!Memory.Instance.GetHousingController(out controller))
+            return;
+        var currentManager = Memory.Instance.HousingModule->GetCurrentManager();
+        var houseCustomize = controller.Houses(currentManager->Plot);
+        var instance = HousingData.Instance;
+        var part1 = houseCustomize.GetPart(ExteriorPartsType.Roof);
+        Item obj1;
+        if (part1.FixtureKey != 0 && instance.IsUnitedExteriorPart(part1.FixtureKey, out obj1)) {
+            var fixture = new Fixture();
+            fixture.type = Utils.GetExteriorPartDescriptor(ExteriorPartsType.Walls);
+            fixture.name = obj1.Name.ToString();
+            fixture.itemId = obj1.RowId;
+            exteriorFixture.Add(fixture);
+        } else {
+            for (var index = 0; index < 8; ++index) {
+                var exteriorPartsType = (ExteriorPartsType)index;
+                var part2 = houseCustomize.GetPart(exteriorPartsType);
+                Item obj2;
+                if (instance.TryGetItem(part2.FixtureKey, out obj2)) {
+                    var fixture = new Fixture();
+                    fixture.type = Utils.GetExteriorPartDescriptor(exteriorPartsType);
+                    fixture.name = obj2.Name.ToString();
+                    fixture.itemId = obj2.RowId;
+                    exteriorFixture.Add(fixture);
                 }
             }
-            return closestStain;
         }
     }
 
-    public class Layout
-    {
-        public Transform playerTransform { get; set; } = new Transform();
+    public static unsafe void LoadIslandFixtures() {
+        Plugin.Layout.houseSize = "Island";
+        var exteriorFixture = Plugin.Layout.exteriorFixture;
+        exteriorFixture.Clear();
+        var islandState = MJIManager.Instance()->IslandState;
+        exteriorFixture.Add(new Fixture("Grounds", TerrainMatName(islandState.GroundsGlamourId)));
+        exteriorFixture.Add(new Fixture("Paths", TerrainMatName(islandState.PathsGlamourId)));
+        exteriorFixture.Add(new Fixture("Slopes", TerrainMatName(islandState.SlopesGlamourId)));
+        var excelSheet1 = DalamudApi.DataManager.GetExcelSheet<MJIBuilding>();
+        var workshops = islandState.Workshops;
+        for (var index = 0; index < 4; ++index)
+            if (workshops.PlaceId[index] != 0) {
+                var fixture = new Fixture("Facility");
+                fixture.level = "Facility " + ToRoman(workshops.PlaceId[index]);
+                fixture.name = excelSheet1.GetRow(1U, workshops.GlamourLevel[index])?.Name.Value.Text.ToString();
+                exteriorFixture.Add(fixture);
+            }
 
-        public string houseSize { get; set; } = "";
+        var granaries = islandState.Granaries;
+        for (var index = 0; index < 4; ++index)
+            if (granaries.PlaceId[index] != 0) {
+                var fixture = new Fixture("Facility");
+                fixture.level = "Facility " + ToRoman(granaries.PlaceId[index]);
+                fixture.name = excelSheet1.GetRow(2U, fixture.itemId)?.Name.Value.Text.ToString();
+                exteriorFixture.Add(fixture);
+            }
 
-        public float interiorScale { get; set; } = 1;
-
-        public List<Fixture> interiorFixture { get; set; } = new List<Fixture>();
-
-        public List<Furniture> interiorFurniture { get; set; } = new List<Furniture>();
-
-        public float exteriorScale { get; set; } = 1;
-
-        public List<Fixture> exteriorFixture { get; set; } = new List<Fixture>();
-
-        public List<Furniture> exteriorFurniture { get; set; } = new List<Furniture>();
-
-        public Dictionary<string, dynamic> properties { get; set; } = new Dictionary<string, dynamic>();
-
-        public bool hasBasement()
-        {
-            return houseSize.Equals("Small") || houseSize.Equals("Medium") || houseSize.Equals("Large");
+        var excelSheet2 = DalamudApi.DataManager.GetExcelSheet<MJILandmark>();
+        for (var index = 0; index < 5; ++index) {
+            var num = islandState.LandmarkIds[index];
+            if (num != 0) {
+                var fixture = new Fixture("Landmark");
+                fixture.level = "Landmark " + ToRoman((byte)(index + 1));
+                fixture.name = excelSheet2.GetRow(num)?.Name.Value.Text.ToString();
+                exteriorFixture.Add(fixture);
+            }
         }
 
-        public bool hasUpperFloor()
-        {
-            return houseSize.Equals("Medium") || houseSize.Equals("Large");
+        static string TerrainMatName(byte id) {
+            switch (id) {
+                case 0:
+                    return "Overgrown";
+                case 1:
+                    return "Dirt";
+                case 2:
+                    return "Stone";
+                default:
+                    return "";
+            }
+        }
+
+        static string ToRoman(byte id) {
+            switch (id) {
+                case 1:
+                    return "I";
+                case 2:
+                    return "II";
+                case 3:
+                    return "III";
+                case 4:
+                    return "IV";
+                case 5:
+                    return "V";
+                case 6:
+                    return "VI";
+                default:
+                    return "";
+            }
         }
     }
 
-    public class ObjectToInferredTypesConverter : JsonConverter<object>
-    {
-        public override object Read(
-            ref Utf8JsonReader reader,
-            Type typeToConvert,
-            JsonSerializerOptions options) => reader.TokenType switch
-            {
-                JsonTokenType.True => true,
-                JsonTokenType.False => false,
-                JsonTokenType.Number when reader.TryGetInt64(out long l) => l,
-                JsonTokenType.Number => reader.GetDouble(),
-                JsonTokenType.String when reader.TryGetDateTime(out DateTime datetime) => datetime,
-                JsonTokenType.String => reader.GetString()!,
-                _ => JsonDocument.ParseValue(ref reader).RootElement.Clone()
-            };
-
-        public override void Write(
-            Utf8JsonWriter writer,
-            object objectToWrite,
-            JsonSerializerOptions options) =>
-            JsonSerializer.Serialize(writer, objectToWrite, objectToWrite.GetType(), options);
-    }
-
-
-
-    public class SaveLayoutManager
-    {
-        public ChatGui chat;
-        public static Configuration Config;
-        public static MakePlacePlugin Plugin;
-
-        public static List<(Color, uint)> ColorList;
-
-        public SaveLayoutManager(MakePlacePlugin plugin, ChatGui chatGui, Configuration config)
-        {
-            chat = chatGui;
-            Config = config;
-            Plugin = plugin;
-        }
-
-        public static float layoutScale = 1;
-
-
-        private static float ParseFloat(string floatString)
-        {
-            var updatedString = floatString.Replace(",", CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator);
-
-            return float.Parse(updatedString, NumberStyles.Any, CultureInfo.InvariantCulture);
-        }
-
-        private float scale(float i)
-        {
-
-            return checkZero(i);
-        }
-
-        private static float descale(float i)
-        {
-            return i / layoutScale;
-        }
-
-        private float checkZero(float i)
-        {
-            if (Math.Abs(i) < 0.001) return 0;
-            return i;
-        }
-
-        List<float> RotationToQuat(float rotation)
-        {
-            Quaternion q = Quaternion.CreateFromYawPitchRoll(0, 0, rotation);
-
-            return new List<float> { checkZero(q.X), checkZero(q.Y), checkZero(q.Z), checkZero(q.W) };
-        }
-
-        static HousingItem ConvertToHousingItem(Furniture furniture)
-        {
-            var ItemSheet = Data.GetExcelSheet<Item>();
-            var itemRow = ItemSheet.FirstOrDefault(row => row.Name.ToString().Equals(furniture.name));
-
-            if (itemRow == null) itemRow = ItemSheet.FirstOrDefault(row => row.RowId == furniture.itemId);
-
-            if (itemRow == null) return null;
-
-            var r = furniture.transform.rotation;
-            var quat = new Quaternion(r[0], r[1], r[2], r[3]);
-
-            var houseItem = new HousingItem(
-                itemRow,
-                (byte)furniture.GetClosestStain(ColorList),
-                descale(furniture.transform.location[0]),
-                descale(furniture.transform.location[2]), // switch Y & Z axis
-                descale(furniture.transform.location[1]),
-                -QuaternionExtensions.ComputeZAngle(quat));
-
-            return houseItem;
-        }
-
-
-        static void ImportFurniture(List<HousingItem> itemList, List<Furniture> furnitureList)
-        {
-
-
-            foreach (Furniture furniture in furnitureList)
-            {
-
-                var houseItem = ConvertToHousingItem(furniture);
-                if (houseItem != null)
-                {
-                    itemList.Add(houseItem);
-                }
-
-                foreach (Furniture child in furniture.attachments)
-                {
-                    var childItem = ConvertToHousingItem(child);
-                    if (childItem != null)
-                    {
-                        itemList.Add(childItem);
+    public static void LoadInteriorFixtures() {
+        var layout = Plugin.Layout;
+        layout.interiorFixture.Clear();
+        for (var index = 0; index < 4; ++index) {
+            var interiorCommonFixtures = Memory.Instance.GetInteriorCommonFixtures(index);
+            if (interiorCommonFixtures.Length != 0)
+                for (var partsType = 0; partsType < 5; ++partsType)
+                    if (interiorCommonFixtures[partsType].FixtureKey != -1 &&
+                        interiorCommonFixtures[partsType].FixtureKey != 0 &&
+                        interiorCommonFixtures[partsType].Item != null) {
+                        var fixture = new Fixture();
+                        fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)partsType);
+                        fixture.level = Utils.GetFloorDescriptor((InteriorFloor)index);
+                        fixture.name = interiorCommonFixtures[partsType].Item.Name.ToString();
+                        fixture.itemId = interiorCommonFixtures[partsType].Item.RowId;
+                        layout.interiorFixture.Add(fixture);
                     }
-                }
-
-            }
         }
 
-        public static void ImportLayout(string path)
-        {
-
-            string jsonString = File.ReadAllText(path);
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new ObjectToInferredTypesConverter());
-
-            Layout layout = JsonSerializer.Deserialize<Layout>(jsonString, options);
-
-
-            var StainList = Data.GetExcelSheet<Stain>();
-
-            ColorList = new List<(Color, uint)>();
-
-            foreach (var stain in StainList)
-            {
-                if (stain.Unknown6) // bool for whether the dye can be used for housing
-                {
-                    ColorList.Add((Color.FromArgb((int)stain.Color), stain.RowId));
-                }
-            }
-
-
-            Plugin.InteriorItemList.Clear();
-            layoutScale = layout.interiorScale;
-            ImportFurniture(Plugin.InteriorItemList, layout.interiorFurniture);
-
-            Plugin.ExteriorItemList.Clear();
-            layoutScale = layout.exteriorScale;
-            ImportFurniture(Plugin.ExteriorItemList, layout.exteriorFurniture);
-
-            Plugin.Layout = layout;
+        layout.houseSize = Memory.Instance.GetIndoorHouseSize();
+        var territoryTypeId = Memory.Instance.GetTerritoryTypeId();
+        var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryTypeId);
+        if (row == null)
+            return;
+        var str = row.Name.ToString();
+        var fixture1 = new Fixture();
+        fixture1.type = "District";
+        switch (str.Substring(0, 2)) {
+            case "s1":
+                fixture1.name = "Mist";
+                break;
+            case "f1":
+                fixture1.name = "Lavender Beds";
+                break;
+            case "w1":
+                fixture1.name = "Goblet";
+                break;
+            case "e1":
+                fixture1.name = "Shirogane";
+                break;
+            case "r1":
+                fixture1.name = "Empyreum";
+                break;
         }
 
-        public unsafe static void LoadExteriorFixtures()
-        {
-            var exterior = Plugin.Layout.exteriorFixture;
-            exterior.Clear();
+        layout.interiorFixture.Add(fixture1);
+    }
 
-            if (!Memory.Instance.GetHousingController(out var controller)) return;
-
-            var mgr = Memory.Instance.HousingModule->GetCurrentManager();
-
-            var customize = controller.Houses(mgr->Plot);
-
-            var housingData = HousingData.Instance;
-
-            var roof = customize.GetPart(ExteriorPartsType.Roof);
-            if (roof.FixtureKey != 0 && housingData.IsUnitedExteriorPart(roof.FixtureKey, out var roofItem))
-            {
-                var fixture = new Fixture();
-                fixture.type = Utils.GetExteriorPartDescriptor(ExteriorPartsType.Walls);
-                fixture.name = roofItem.Name.ToString();
-                fixture.itemId = roofItem.RowId;
-                exterior.Add(fixture);
-
-            }
-            else
-            {
-                for (var i = 0; i < HouseCustomize.PartsMax; i++)
-                {
-                    var type = (ExteriorPartsType)i;
-                    var part = customize.GetPart(type);
-                    if (!housingData.TryGetItem(part.FixtureKey, out var item)) continue;
-
-                    var fixture = new Fixture();
-                    fixture.type = Utils.GetExteriorPartDescriptor(type);
-                    fixture.name = item.Name.ToString();
-                    fixture.itemId = item.RowId;
-                    exterior.Add(fixture);
-
-                }
-            }
-        }
-
-        public static void LoadInteriorFixtures()
-        {
-            var layout = Plugin.Layout;
-
-            layout.interiorFixture.Clear();
-
-            for (var i = 0; i < IndoorAreaData.FloorMax; i++)
-            {
-                var fixtures = Memory.Instance.GetInteriorCommonFixtures(i);
-                if (fixtures.Length == 0) continue;
-
-                for (var j = 0; j < IndoorFloorData.PartsMax; j++)
-                {
-                    if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
-                    if (fixtures[j].Item == null) continue;
-
-                    var fixture = new Fixture();
-                    fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
-                    fixture.level = Utils.GetFloorDescriptor((InteriorFloor)i);
-                    fixture.name = fixtures[j].Item.Name.ToString();
-                    fixture.itemId = fixtures[j].Item.RowId;
-
-                    layout.interiorFixture.Add(fixture);
-                }
-            }
-
-            var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = Data.GetExcelSheet<TerritoryType>().GetRow(territoryId);
-
-            if (row != null)
-            {
-                var placeName = row.Name.ToString();
-
-                var sizeName = placeName.Substring(1, 3);
-
-                switch (sizeName)
-                {
-                    case "1i1":
-                        layout.houseSize = "Small";
-                        break;
-                    case "1i2":
-                        layout.houseSize = "Medium";
-                        break;
-                    case "1i3":
-                        layout.houseSize = "Large";
-                        break;
-                    case "1i4":
-                        layout.houseSize = "Apartment";
-                        break;
-                    default:
-                        break;
-                }
-
-                var district = new Fixture();
-                district.type = "District";
-
-                var districtName = placeName.Substring(0, 2);
-
-                switch (districtName)
-                {
-                    case "s1":
-                        district.name = "Mist";
-                        break;
-                    case "f1":
-                        district.name = "Lavender Beds";
-                        break;
-                    case "w1":
-                        district.name = "Goblet";
-                        break;
-                    case "e1":
-                        district.name = "Shirogane";
-                        break;
-                    case "r1":
-                        district.name = "Empyreum";
-                        break;
-                    default:
-                        break;
-                }
-                layout.interiorFixture.Add(district);
-            }
-
-        }
-
-        void RecordFurniture(List<Furniture> furnitureList, List<HousingItem> itemList)
-        {
-            HousingData Data = HousingData.Instance;
-            furnitureList.Clear();
-            foreach (HousingItem gameObject in itemList)
-            {
-
-                var furniture = new Furniture();
-
-                furniture.name = gameObject.Name;
-                furniture.itemId = gameObject.ItemKey;
-                furniture.transform.location = new List<float> { scale(gameObject.X), scale(gameObject.Z), scale(gameObject.Y) };
-                furniture.transform.rotation = RotationToQuat(-gameObject.Rotate);
-
-                if (gameObject.Stain != 0 && Data.TryGetStain(gameObject.Stain, out var stainColor))
-                {
-
-                    var color = Utils.StainToVector4(stainColor.Color);
-                    var cr = (int)(color.X * 255);
-                    var cg = (int)(color.Y * 255);
-                    var cb = (int)(color.Z * 255);
-                    var ca = (int)(color.W * 255);
-
-                    furniture.properties.Add("color", $"{cr:X2}{cg:X2}{cb:X2}{ca:X2}");
-
-                }
-
-                furnitureList.Add(furniture);
-            }
-
-        }
-
-        public void ExportLayout()
-        {
-
-            if (Directory.Exists(Config.SaveLocation))
-            {
-                throw new Exception("Save file not specified");
-            }
-
-            Layout save = Plugin.Layout;
-            save.playerTransform = new Transform();
-
-            save.interiorScale = 1;
-
-            RecordFurniture(save.interiorFurniture, Plugin.InteriorItemList);
-            RecordFurniture(save.exteriorFurniture, Plugin.ExteriorItemList);
-
-
-            var encoderSettings = new TextEncoderSettings();
-            encoderSettings.AllowCharacters('\'');
-            encoderSettings.AllowRange(UnicodeRanges.BasicLatin);
-
-            var options = new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                WriteIndented = true,
-                Converters = { new ObjectToInferredTypesConverter() }
-
+    private void RecordFurniture(List<Furniture> furnitureList, List<HousingItem> itemList) {
+        var instance = HousingData.Instance;
+        furnitureList.Clear();
+        foreach (var housingItem in itemList) {
+            var furniture = new Furniture();
+            furniture.name = housingItem.Name;
+            furniture.itemId = housingItem.ItemKey;
+            furniture.transform.location = new List<float> {
+                this.scale(housingItem.X),
+                this.scale(housingItem.Z),
+                this.scale(housingItem.Y)
             };
-            string jsonString = JsonSerializer.Serialize(save, options);
+            furniture.transform.rotation = this.RotationToQuat(-housingItem.Rotate);
+            Stain stain;
+            if (housingItem.Stain != 0 && instance.TryGetStain(housingItem.Stain, out stain)) {
+                var vector4 = Utils.StainToVector4(stain.Color);
+                var num1 = (int)(vector4.X * (double)byte.MaxValue);
+                var num2 = (int)(vector4.Y * (double)byte.MaxValue);
+                var num3 = (int)(vector4.Z * (double)byte.MaxValue);
+                var num4 = (int)(vector4.W * (double)byte.MaxValue);
+                var properties = furniture.properties;
+                var interpolatedStringHandler = new DefaultInterpolatedStringHandler(0, 4);
+                interpolatedStringHandler.AppendFormatted(num1, "X2");
+                interpolatedStringHandler.AppendFormatted(num2, "X2");
+                interpolatedStringHandler.AppendFormatted(num3, "X2");
+                interpolatedStringHandler.AppendFormatted(num4, "X2");
+                var stringAndClear = interpolatedStringHandler.ToStringAndClear();
+                properties.Add("color", stringAndClear);
+            } else if (housingItem.MaterialItemKey != 0U) {
+                var row = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(housingItem.MaterialItemKey);
+                if (row != null)
+                    furniture.properties.Add("material", new BasicItem {
+                        name = row.Name.ToString(),
+                        itemId = housingItem.MaterialItemKey
+                    });
+            }
 
-            string pattern = @"\s+(-?(?:[0-9]*[.])?[0-9]+(?:E-[0-9]+)?,?)\s*(?=\s[-\d\]])";
-            string result = Regex.Replace(jsonString, pattern, " $1");
-
-            File.WriteAllText(Config.SaveLocation, result);
-
-
-            Log("Finished exporting layout");
+            furnitureList.Add(furniture);
         }
+    }
 
+    public void ExportLayout() {
+        if (Directory.Exists(Config.SaveLocation))
+            throw new Exception("Save file not specified");
+        var layout = Plugin.Layout;
+        layout.playerTransform = new Transform();
+        layout.interiorScale = 1f;
+        this.RecordFurniture(layout.interiorFurniture, Plugin.InteriorItemList);
+        this.RecordFurniture(layout.exteriorFurniture, Plugin.ExteriorItemList);
+        var textEncoderSettings = new TextEncoderSettings();
+        textEncoderSettings.AllowCharacters('\'');
+        textEncoderSettings.AllowRange(UnicodeRanges.BasicLatin);
+        var serializerOptions = new JsonSerializerOptions();
+        serializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+        serializerOptions.WriteIndented = true;
+        serializerOptions.Converters.Add(new ObjectToInferredTypesConverter());
+        var options = serializerOptions;
+        var contents = Regex.Replace(JsonSerializer.Serialize(layout, options),
+            "\\s+(-?(?:[0-9]*[.])?[0-9]+(?:E-[0-9]+)?,?)\\s*(?=\\s[-\\d\\]])", " $1");
+        File.WriteAllText(Config.SaveLocation, contents);
+        MakePlacePlugin.Log("Finished exporting layout");
     }
 }
