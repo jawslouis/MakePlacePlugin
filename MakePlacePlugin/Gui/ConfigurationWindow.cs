@@ -319,21 +319,18 @@ namespace MakePlacePlugin.Gui
 
                 if (ImGui.Checkbox("Basement", ref Config.Basement))
                 {
-                    Plugin.MatchLayout();
                     Config.Save();
                 }
                 ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
                 if (ImGui.Checkbox("Ground Floor", ref Config.GroundFloor))
                 {
-                    Plugin.MatchLayout();
                     Config.Save();
                 }
                 ImGui.SameLine(); ImGui.Dummy(new Vector2(10, 0)); ImGui.SameLine();
 
                 if (Memory.Instance.HasUpperFloor() && ImGui.Checkbox("Upper Floor", ref Config.UpperFloor))
                 {
-                    Plugin.MatchLayout();
                     Config.Save();
                 }
 
