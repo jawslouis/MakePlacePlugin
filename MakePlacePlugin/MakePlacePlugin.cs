@@ -92,7 +92,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.4.1 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.4.2 initialized");
         }
         public void Initialize()
         {

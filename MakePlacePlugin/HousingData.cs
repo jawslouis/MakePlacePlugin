@@ -55,10 +55,10 @@ namespace MakePlacePlugin
 
             DalamudApi.PluginLog.Info($"Loaded {_territoryToLandSetDict.Keys.Count} landset rows");
             DalamudApi.PluginLog.Info($"Loaded {_furnitureDict.Keys.Count} furniture");
-            DalamudApi.PluginLog.Error($"Loaded {_yardObjectDict.Keys.Count} yard objects");
-            DalamudApi.PluginLog.Error($"Loaded {_unitedDict.Keys.Count} united parts");
-            DalamudApi.PluginLog.Error($"Loaded {_stainDict.Keys.Count} dyes");
-            DalamudApi.PluginLog.Error($"Loaded {_itemDict.Keys.Count} items with AdditionalData");
+            DalamudApi.PluginLog.Info($"Loaded {_yardObjectDict.Keys.Count} yard objects");
+            DalamudApi.PluginLog.Info($"Loaded {_unitedDict.Keys.Count} united parts");
+            DalamudApi.PluginLog.Info($"Loaded {_stainDict.Keys.Count} dyes");
+            DalamudApi.PluginLog.Info($"Loaded {_itemDict.Keys.Count} items with AdditionalData");
         }
 
         public static HousingData Instance { get; private set; }

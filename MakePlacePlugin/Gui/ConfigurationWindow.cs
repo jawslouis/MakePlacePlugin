@@ -339,7 +339,6 @@ namespace MakePlacePlugin.Gui
             }
 
             ImGui.Dummy(new Vector2(0, 15));
-            Config.Save();
 
         }
 
