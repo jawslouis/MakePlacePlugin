@@ -92,7 +92,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.4.2 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.5.0 initialized");
         }
         public void Initialize()
         {
@@ -319,7 +319,8 @@ namespace MakePlacePlugin
             if (item.MaterialItemKey == 0 && matNumber == 0) return true;
             else if (item.MaterialItemKey != 0 && matNumber == 0) return false;
 
-            if (!Util.Wallpaper.Map.TryGetValue(matNumber, out var matItemKey)) return true;
+            var matItemKey = HousingData.Instance.GetMaterialItemKey(item.ItemKey, matNumber);
+            if (matItemKey == 0) return true;
 
             return matItemKey == item.MaterialItemKey;
 
@@ -408,7 +409,7 @@ namespace MakePlacePlugin
 
                 // check if it's already correctly placed & rotated
                 var locationError = houseItem.GetLocation() - localPosition;
-                houseItem.CorrectLocation = locationError.LengthSquared() < 0.0001;
+                houseItem.CorrectLocation = locationError.Length() < 0.00001;
                 houseItem.CorrectRotation = localRotation - houseItem.Rotate < 0.001;
 
                 houseItem.ItemStruct = (IntPtr)gameObject.Item;
@@ -607,6 +608,7 @@ namespace MakePlacePlugin
             return false;
         }
 
+
         public unsafe void LoadInterior()
         {
             SaveLayoutManager.LoadInteriorFixtures();
@@ -634,10 +636,7 @@ namespace MakePlacePlugin
                 if (gameObject.Item != null && gameObject.Item->MaterialManager != null)
                 {
                     ushort material = gameObject.Item->MaterialManager->MaterialSlot1;
-                    if (material != 0 && Util.Wallpaper.Map.TryGetValue(material, out var matItemKey))
-                    {
-                        housingItem.MaterialItemKey = matItemKey;
-                    }
+                    housingItem.MaterialItemKey = HousingData.Instance.GetMaterialItemKey(item.RowId, material);
                 }
 
                 InteriorItemList.Add(housingItem);
