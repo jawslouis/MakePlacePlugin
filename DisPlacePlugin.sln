@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakePlacePlugin", "MakePlacePlugin\MakePlacePlugin.csproj", "{479ADEA9-780A-4A8E-98A1-82C0399176E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisPlacePlugin", "DisPlacePlugin\DisPlacePlugin.csproj", "{479ADEA9-780A-4A8E-98A1-82C0399176E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

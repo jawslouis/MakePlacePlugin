@@ -3,7 +3,7 @@ using Dalamud.Hooking;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 
-namespace MakePlacePlugin
+namespace DisPlacePlugin
 {
     // based on https://github.com/Caraxi/SimpleTweaksPlugin/blob/main/Helper/HookWrapper.cs
     public interface IHookWrapper : IDisposable

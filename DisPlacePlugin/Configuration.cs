@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using Dalamud.Configuration;
 using Dalamud.Plugin;
-using MakePlacePlugin.Objects;
+using DisPlacePlugin.Objects;
 
-namespace MakePlacePlugin
+namespace DisPlacePlugin
 {
     [Serializable]
     public class Configuration : IPluginConfiguration

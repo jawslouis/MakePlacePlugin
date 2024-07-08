@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MakePlacePlugin.Util
+namespace DisPlacePlugin.Util
 {
     struct Location
     {

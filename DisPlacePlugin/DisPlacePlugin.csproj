@@ -2,14 +2,14 @@
 
 	<PropertyGroup>
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<PluginVersion>3.5.0</PluginVersion>
+		<PluginVersion>3.5.1</PluginVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<AssemblyTitle>MakePlacePlugin</AssemblyTitle>
-		<Product>MakePlacePlugin</Product>
+		<AssemblyTitle>DisPlacePlugin</AssemblyTitle>
+		<Product>DisPlacePlugin</Product>
 		<Version>$(PluginVersion)</Version>
 		<FileVersion>$(PluginVersion)</FileVersion>
 		<AssemblyVersion>$(PluginVersion)</AssemblyVersion>
@@ -31,7 +31,7 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="DalamudPackager" Version="2.1.12" />
+		<PackageReference Include="DalamudPackager" Version="2.1.13" />
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 			<Private>False</Private>

@@ -1,6 +1,6 @@
 ﻿using Dalamud.Plugin;
 
-namespace MakePlacePlugin.Gui
+namespace DisPlacePlugin.Gui
 {
     public abstract class Window<T> where T : IDalamudPlugin
     {

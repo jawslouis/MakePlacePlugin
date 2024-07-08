@@ -3,7 +3,7 @@ using Lumina;
 using Lumina.Data;
 using Lumina.Excel;
 
-namespace MakePlacePlugin
+namespace DisPlacePlugin
 {
     [Sheet("HousingLandSet")]
     public class HousingLandSet : ExcelRow

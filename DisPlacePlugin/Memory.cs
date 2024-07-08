@@ -9,9 +9,9 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using Lumina.Excel.GeneratedSheets;
-using static MakePlacePlugin.MakePlacePlugin;
+using static DisPlacePlugin.DisPlacePlugin;
 
-namespace MakePlacePlugin
+namespace DisPlacePlugin
 {
     public unsafe class Memory
     {
@@ -23,11 +23,11 @@ namespace MakePlacePlugin
         {
             try
             {
-                HousingModulePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("40 53 48 83 EC 20 33 DB 48 39 1D ?? ?? ?? ?? 75 2C 45 33 C0 33 D2 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 11 48 8B C8 E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? EB 07");
-                LayoutWorldPtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 49 40 E9 ?? ?? ?? ??");
+                housingModulePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
+                LayoutWorldPtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B D1 48 8B 0D ?? ?? ?? ?? 48 85 C9 74 0A", 3);
 
 
-                var getInventoryContainerPtr = DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
+                var getInventoryContainerPtr = DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 40 38 78 10");
                 GetInventoryContainer = Marshal.GetDelegateForFunctionPointer<GetInventoryContainerDelegate>(getInventoryContainerPtr);
 
             }
@@ -39,14 +39,14 @@ namespace MakePlacePlugin
 
         public static Memory Instance { get; private set; }
 
-        private IntPtr HousingModulePtr { get; }
-        private IntPtr LayoutWorldPtr { get; }
+        public IntPtr housingModulePtr { get; }
+        public IntPtr LayoutWorldPtr { get; }
 
-        public unsafe HousingModule* HousingModule => HousingModulePtr != IntPtr.Zero ? (HousingModule*)Marshal.ReadIntPtr(HousingModulePtr) : null;
+        public unsafe HousingModule* HousingModule => housingModulePtr != IntPtr.Zero ? (HousingModule*) Marshal.ReadIntPtr(housingModulePtr) : null;
         public unsafe LayoutWorld* LayoutWorld => LayoutWorldPtr != IntPtr.Zero ? (LayoutWorld*)Marshal.ReadIntPtr(LayoutWorldPtr) : null;
+
         public unsafe HousingObjectManager* CurrentManager => HousingModule->currentTerritory;
         public unsafe HousingStructure* HousingStructure => LayoutWorld->HousingStruct;
-
 
 
         public static void Init()
@@ -180,7 +180,7 @@ namespace MakePlacePlugin
             for (int i = 0; i < exteriorItems->Size; i++)
             {
                 var item = exteriorItems->GetInventorySlot(i);
-                if (item == null || item->ItemID == 0) continue;
+                if (item == null || item->ItemId == 0) continue;
 
                 var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
                 var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
@@ -293,7 +293,7 @@ namespace MakePlacePlugin
             var territoryRow = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(GetTerritoryTypeId());
             if (territoryRow == null)
             {
-                LogError("Cannot identify territory");
+                LogError("Mem Cannot identify territory");
                 return HousingArea.None;
             }
 

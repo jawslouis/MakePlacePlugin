@@ -5,9 +5,9 @@ using System.Numerics;
 using Dalamud.Logging;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
-using MakePlacePlugin.Objects;
+using DisPlacePlugin.Objects;
 
-namespace MakePlacePlugin
+namespace DisPlacePlugin
 {
     public static class Utils
     {

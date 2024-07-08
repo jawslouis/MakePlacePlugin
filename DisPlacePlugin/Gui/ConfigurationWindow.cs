@@ -2,17 +2,18 @@
 using Dalamud.Utility;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
-using MakePlacePlugin.Objects;
+using DisPlacePlugin.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using static MakePlacePlugin.MakePlacePlugin;
+using static DisPlacePlugin.DisPlacePlugin;
+using Dalamud.Interface.Textures;
 
-namespace MakePlacePlugin.Gui
+namespace DisPlacePlugin.Gui
 {
-    public class ConfigurationWindow : Window<MakePlacePlugin>
+    public class ConfigurationWindow : Window<DisPlacePlugin>
     {
 
         public Configuration Config => Plugin.Config;
@@ -25,7 +26,7 @@ namespace MakePlacePlugin.Gui
 
         private FileDialogManager FileDialogManager { get; }
 
-        public ConfigurationWindow(MakePlacePlugin plugin) : base(plugin)
+        public ConfigurationWindow(DisPlacePlugin plugin) : base(plugin)
         {
             this.FileDialogManager = new FileDialogManager
             {
@@ -105,16 +106,15 @@ namespace MakePlacePlugin.Gui
         }
 
         #region Helper Functions
-        public void DrawIcon(ushort icon, Vector2 size)
+        public static void DrawIcon(ushort icon, Vector2 size)
         {
             if (icon < 65000)
             {
-                var tex = DalamudApi.TextureProvider.GetIcon(icon);
-                ImGui.Image(tex.ImGuiHandle, size);
+                var iconTexture = DalamudApi.TextureProvider.GetFromGameIcon(new GameIconLookup(icon));
+                ImGui.Image(iconTexture.GetWrapOrEmpty().ImGuiHandle, size);
             }
         }
         #endregion
-
 
         #region Basic UI
 
@@ -167,7 +167,7 @@ namespace MakePlacePlugin.Gui
             try
             {
                 Plugin.GetGameLayout();
-                MakePlacePlugin.LayoutManager.ExportLayout();
+                DisPlacePlugin.LayoutManager.ExportLayout();
             }
             catch (Exception e)
             {
@@ -310,9 +310,10 @@ namespace MakePlacePlugin.Gui
 
             ImGui.Dummy(new Vector2(0, 15));
 
-            bool noFloors = Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Memory.Instance.GetIndoorHouseSize().Equals("Apartment");
+            //bool noFloors = Memory.Instance.GetCurrentTerritory() != Memory.HousingArea.Indoors || Memory.Instance.GetIndoorHouseSize().Equals("Apartment");
 
-            if (!noFloors)
+            //if (!noFloors)
+            if(false)
             {
 
                 ImGui.Text("Selected Floors");

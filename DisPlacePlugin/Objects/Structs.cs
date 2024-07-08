@@ -6,9 +6,9 @@ using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
 using static FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
-using static MakePlacePlugin.Utils;
+using static DisPlacePlugin.Utils;
 
-namespace MakePlacePlugin
+namespace DisPlacePlugin
 {
     public enum SortType
     {
@@ -206,6 +206,7 @@ namespace MakePlacePlugin
         [FieldOffset(0x0)] public HousingObjectManager* currentTerritory;
         [FieldOffset(0x8)] public HousingObjectManager* outdoorTerritory;
         [FieldOffset(0x10)] public HousingObjectManager* indoorTerritory;
+        [FieldOffset(0x18)] public void* workshopTerritory;
         // [FieldOffset(0x9704)] public uint CurrentIndoorFloor;
 
         public HousingObjectManager* GetCurrentManager()
@@ -221,6 +222,10 @@ namespace MakePlacePlugin
         public bool IsIndoors()
         {
             return indoorTerritory != null;
+        }
+        public bool IsWorkshop()
+        {
+	        return workshopTerritory != null;
         }
 
     }
@@ -248,7 +253,7 @@ namespace MakePlacePlugin
                 // return Marshal.PtrToStructure<HousingController>(_housingController);
                 // return *(HousingController*) _housingController;
 
-                return global::MakePlacePlugin.HousingController.Get(_housingController);
+                return global::DisPlacePlugin.HousingController.Get(_housingController);
             }
         }
 
@@ -257,7 +262,7 @@ namespace MakePlacePlugin
             get
             {
                 if (_indoorAreaData == IntPtr.Zero) return null;
-                return global::MakePlacePlugin.IndoorAreaData.Get(_indoorAreaData);
+                return global::DisPlacePlugin.IndoorAreaData.Get(_indoorAreaData);
             }
         }
     }
