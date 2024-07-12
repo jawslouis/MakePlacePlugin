@@ -5,7 +5,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
-using static FFXIVClientStructs.FFXIV.Client.Game.InventoryItem;
 using static MakePlacePlugin.Utils;
 
 namespace MakePlacePlugin

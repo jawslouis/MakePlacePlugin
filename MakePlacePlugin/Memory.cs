@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Game;
-using Dalamud.Logging;
-using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using Lumina.Excel.GeneratedSheets;
@@ -23,11 +19,11 @@ namespace MakePlacePlugin
         {
             try
             {
-                HousingModulePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("40 53 48 83 EC 20 33 DB 48 39 1D ?? ?? ?? ?? 75 2C 45 33 C0 33 D2 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 85 C0 74 11 48 8B C8 E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? EB 07");
-                LayoutWorldPtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 49 40 E9 ?? ?? ?? ??");
+                HousingModulePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
+                LayoutWorldPtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B D1 48 8B 0D ?? ?? ?? ?? 48 85 C9 74 0A", 3);
 
 
-                var getInventoryContainerPtr = DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 8B 55 BB");
+                var getInventoryContainerPtr = DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 40 38 78 10");
                 GetInventoryContainer = Marshal.GetDelegateForFunctionPointer<GetInventoryContainerDelegate>(getInventoryContainerPtr);
 
             }
@@ -180,7 +176,7 @@ namespace MakePlacePlugin
             for (int i = 0; i < exteriorItems->Size; i++)
             {
                 var item = exteriorItems->GetInventorySlot(i);
-                if (item == null || item->ItemID == 0) continue;
+                if (item == null || item->ItemId == 0) continue;
 
                 var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
                 var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
@@ -293,7 +289,7 @@ namespace MakePlacePlugin
             var territoryRow = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(GetTerritoryTypeId());
             if (territoryRow == null)
             {
-                LogError("Cannot identify territory");
+                LogError($"Invalid territory row: {GetTerritoryTypeId()}");
                 return HousingArea.None;
             }
 

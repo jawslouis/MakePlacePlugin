@@ -1,4 +1,5 @@
 ﻿using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Textures;
 using Dalamud.Utility;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
@@ -109,8 +110,8 @@ namespace MakePlacePlugin.Gui
         {
             if (icon < 65000)
             {
-                var tex = DalamudApi.TextureProvider.GetIcon(icon);
-                ImGui.Image(tex.ImGuiHandle, size);
+                var iconTexture = DalamudApi.TextureProvider.GetFromGameIcon(new GameIconLookup(icon));
+                ImGui.Image(iconTexture.GetWrapOrEmpty().ImGuiHandle, size);
             }
         }
         #endregion

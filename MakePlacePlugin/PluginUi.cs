@@ -15,6 +15,7 @@ namespace MakePlacePlugin
             _plugin = plugin;
             DalamudApi.PluginInterface.UiBuilder.Draw += Draw;
             DalamudApi.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
+            DalamudApi.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
         }
 
         private void Draw()
@@ -32,6 +33,7 @@ namespace MakePlacePlugin
         {
             DalamudApi.PluginInterface.UiBuilder.Draw -= Draw;
             DalamudApi.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+            DalamudApi.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
         }
     }
 }
