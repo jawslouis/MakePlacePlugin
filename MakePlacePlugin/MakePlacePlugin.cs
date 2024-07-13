@@ -64,6 +64,8 @@ namespace MakePlacePlugin
 
             HookManager.Dispose();
 
+            Memory.Instance.SetPlaceAnywhere(false);
+
             DalamudApi.ClientState.TerritoryChanged -= TerritoryChanged;
             DalamudApi.CommandManager.RemoveHandler("/makeplace");
             Gui?.Dispose();
@@ -91,7 +93,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.6.0 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.6.1 initialized");
         }
         public void Initialize()
         {
@@ -99,6 +101,8 @@ namespace MakePlacePlugin
             IsSaveLayoutHook = HookManager.Hook<UpdateLayoutDelegate>("40 53 48 83 ec 20 48 8b d9 48 8b 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 33 d2 48 8b c8 e8 ?? ?? ?? ?? 84 c0 75 ?? 38 83 ?? 01 00 00", IsSaveLayoutDetour);
 
             SelectItemHook = HookManager.Hook<SelectItemDelegate>("48 85 D2 0F 84 49 09 00 00 53 41 56 48 83 EC 48 48 89 6C 24 60 48 8B DA 48 89 74 24 70 4C 8B F1", SelectItemDetour);
+
+            PlaceItemHook = HookManager.Hook<PlaceItemDelegate>("48 89 5C 24 10 48 89 74  24 18 57 48 83 EC 20 4c 8B 41 18 33 FF 0F B6 F2", PlaceItemDetour);
 
             UpdateYardObjHook = HookManager.Hook<UpdateYardDelegate>("48 89 74 24 18 57 48 83 ec 20 b8 dc 02 00 00 0f b7 f2 ??", UpdateYardObj);
 
@@ -109,6 +113,25 @@ namespace MakePlacePlugin
             GetYardIndexHook = HookManager.Hook<GetIndexDelegate>("48 89 6c 24 18 56 48 83 ec 20 0f b6 ?? 0f b6 ?? ?? ?? ?? ?? ?? ?? ??", GetYardIndex);
 
         }
+
+        public delegate void PlaceItemDelegate(IntPtr housingStruct, IntPtr item);
+        private static HookWrapper<PlaceItemDelegate> PlaceItemHook;
+        unsafe static public void PlaceItemDetour(IntPtr housing, IntPtr item)
+        {
+            /*
+            The call made by the XIV client has some strange behaviour.
+            It can either place the item pointer passed to it or it retrieves the activeItem from the housing object.
+            Passing the active item probably led to more crashes. 
+            Defaulted to the easier path of just passing in a zero pointer so that the call populates itself form the housing object.
+            */
+            DalamudApi.PluginLog.Debug(string.Format("placing item {0}", (housing + 24).ToString()));
+            PlaceItemHook.Original(housing, item);
+        }
+        unsafe static public void PlaceItem(IntPtr item)
+        {
+            PlaceItemDetour((IntPtr)Memory.Instance.HousingStructure, item);
+        }
+
 
         internal delegate ushort GetIndexDelegate(byte type, byte objStruct);
         internal static HookWrapper<GetIndexDelegate> GetYardIndexHook;
@@ -242,6 +265,8 @@ namespace MakePlacePlugin
             }
             MemInstance.WritePosition(position);
             MemInstance.WriteRotation(rotation);
+
+            PlaceItem(nint.Zero);
 
             rowItem.CorrectLocation = true;
             rowItem.CorrectRotation = true;
