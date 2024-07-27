@@ -408,17 +408,17 @@ namespace MakePlacePlugin
 
                 var fixture = new Fixture("Facility");
                 fixture.level = "Facility " + ToRoman(workshop.PlaceId[i]);
-                fixture.name = BuildingSheet.GetRow(1, workshop.GlamourLevel[i])?.Name.Value.Text.ToString();
+                fixture.name = BuildingSheet.GetRow(1, workshop.BuildingLevel[i])?.Name.Value.Text.ToString();
                 exterior.Add(fixture);
             }
 
             var granary = state.Granaries;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 2; i++)
             {
                 if (granary.PlaceId[i] == 0) continue;
                 var fixture = new Fixture("Facility");
                 fixture.level = "Facility " + ToRoman(granary.PlaceId[i]);
-                fixture.name = BuildingSheet.GetRow(2, fixture.itemId)?.Name.Value.Text.ToString();
+                fixture.name = BuildingSheet.GetRow(2, granary.BuildingLevel[i])?.Name.Value.Text.ToString();
                 exterior.Add(fixture);
             }
 
