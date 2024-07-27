@@ -61,10 +61,7 @@ namespace MakePlacePlugin
 
         public void Dispose()
         {
-
             HookManager.Dispose();
-
-            Memory.Instance.SetPlaceAnywhere(false);
 
             DalamudApi.ClientState.TerritoryChanged -= TerritoryChanged;
             DalamudApi.CommandManager.RemoveHandler("/makeplace");
@@ -195,6 +192,8 @@ namespace MakePlacePlugin
                     GetPlotLocation();
                 }
 
+                Memory.Instance.SetPlaceAnywhere(true);
+
                 while (ItemsToPlace.Count > 0)
                 {
                     var item = ItemsToPlace.First();
@@ -228,6 +227,7 @@ namespace MakePlacePlugin
                 LogError($"Error: {e.Message}", e.StackTrace);
             }
 
+            Memory.Instance.SetPlaceAnywhere(false);
             CurrentlyPlacingItems = false;
         }
 

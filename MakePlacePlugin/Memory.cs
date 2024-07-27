@@ -55,7 +55,6 @@ namespace MakePlacePlugin
         public static void Init()
         {
             Instance = new Memory();
-            Instance.SetPlaceAnywhere(true);
         }
 
         public static InventoryContainer* GetContainer(InventoryType inventoryType)
