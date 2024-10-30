@@ -181,6 +181,7 @@ namespace MakePlacePlugin
 
             if (!Memory.Instance.CanEditItem() || ItemsToPlace.Count == 0)
             {
+                Cleanup();
                 return;
             }
 
@@ -225,8 +226,12 @@ namespace MakePlacePlugin
                 LogError($"Error: {e.Message}", e.StackTrace);
             }
 
-            Memory.Instance.SetPlaceAnywhere(false);
-            CurrentlyPlacingItems = false;
+            Cleanup();
+            void Cleanup()
+            {
+                Memory.Instance.SetPlaceAnywhere(false);
+                CurrentlyPlacingItems = false;
+            }
         }
 
         unsafe public static void SetItemPosition(HousingItem rowItem)
