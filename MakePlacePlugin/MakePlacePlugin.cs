@@ -176,7 +176,7 @@ namespace MakePlacePlugin
         }
 
 
-        public unsafe void PlaceItems()
+        public unsafe void RecursivelyPlaceItems()
         {
 
             if (!Memory.Instance.CanEditItem() || ItemsToPlace.Count == 0)
@@ -209,11 +209,9 @@ namespace MakePlacePlugin
 
                     SetItemPosition(item);
 
-                    if (Config.LoadInterval > 0)
-                    {
-                        Thread.Sleep(Config.LoadInterval);
-                    }
-
+                    Log($"Scheduling next item placement, {ItemsToPlace.Count} remains");
+                    DalamudApi.Framework.RunOnTick(RecursivelyPlaceItems, TimeSpan.FromMilliseconds(Config.LoadInterval));
+                    return;
                 }
 
                 if (ItemsToPlace.Count == 0)
@@ -321,8 +319,7 @@ namespace MakePlacePlugin
             ItemsToPlace.AddRange(placedLast);
 
 
-            var thread = new Thread(PlaceItems);
-            thread.Start();
+            RecursivelyPlaceItems();
         }
 
         public bool MatchItem(HousingItem item, uint itemKey)
