@@ -392,6 +392,32 @@ namespace MakePlacePlugin
             WriteProtectedBytes(addr, [b]);
         }
 
+        private static byte ReadProtectedByte(IntPtr addr)
+        {
+            byte value = 0;
+
+            if (addr == IntPtr.Zero) return value;
+
+            VirtualProtect(addr, 1, Protection.PAGE_EXECUTE_READWRITE, out var oldProtection);
+            value = Marshal.ReadByte(addr);
+            VirtualProtect(addr, 1, oldProtection, out _);
+
+            return value;
+        }
+
+        public bool GetPlaceAnywhere()
+        {
+            if (placeAnywhere == IntPtr.Zero)
+            {
+                LogError("Could not setup memory for placing anywhere");
+                return false;
+            }
+
+            var value = ReadProtectedByte(placeAnywhere);
+            return value != 0;
+
+        }
+
         /// <summary>
         /// Sets the flag for place anywhere in memory.
         /// </summary>

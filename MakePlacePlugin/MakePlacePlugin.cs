@@ -46,6 +46,8 @@ namespace MakePlacePlugin
 
         public static bool CurrentlyPlacingItems = false;
 
+        public static bool OriginalPlaceAnywhere = false;
+
         public static bool ApplyChange = false;
 
         public static SaveLayoutManager LayoutManager;
@@ -187,14 +189,6 @@ namespace MakePlacePlugin
 
             try
             {
-
-                if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Outdoors)
-                {
-                    GetPlotLocation();
-                }
-
-                Memory.Instance.SetPlaceAnywhere(true);
-
                 while (ItemsToPlace.Count > 0)
                 {
                     var item = ItemsToPlace.First();
@@ -215,11 +209,6 @@ namespace MakePlacePlugin
                     return;
                 }
 
-                if (ItemsToPlace.Count == 0)
-                {
-                    Log("Finished applying layout");
-                }
-
             }
             catch (Exception e)
             {
@@ -227,10 +216,12 @@ namespace MakePlacePlugin
             }
 
             Cleanup();
+
             void Cleanup()
             {
-                Memory.Instance.SetPlaceAnywhere(false);
+                Memory.Instance.SetPlaceAnywhere(OriginalPlaceAnywhere);
                 CurrentlyPlacingItems = false;
+                Log("Finished applying layout");
             }
         }
 
@@ -323,6 +314,14 @@ namespace MakePlacePlugin
 
             ItemsToPlace.AddRange(placedLast);
 
+
+            if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Outdoors)
+            {
+                GetPlotLocation();
+            }
+
+            OriginalPlaceAnywhere = Memory.Instance.GetPlaceAnywhere();
+            Memory.Instance.SetPlaceAnywhere(true);
 
             RecursivelyPlaceItems();
         }
