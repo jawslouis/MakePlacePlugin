@@ -92,7 +92,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.6.2 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.6.3 initialized");
         }
         public void Initialize()
         {
@@ -204,7 +204,6 @@ namespace MakePlacePlugin
 
                     SetItemPosition(item);
 
-                    Log($"Scheduling next item placement, {ItemsToPlace.Count} remains");
                     DalamudApi.Framework.RunOnTick(RecursivelyPlaceItems, TimeSpan.FromMilliseconds(Config.LoadInterval));
                     return;
                 }
