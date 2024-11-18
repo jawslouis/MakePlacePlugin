@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using Dalamud.Logging;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using MakePlacePlugin.Objects;
 
 namespace MakePlacePlugin

@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin
@@ -77,9 +77,8 @@ namespace MakePlacePlugin
         public string GetIndoorHouseSize()
         {
             var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
-            if (row == null) return null;
+            if (!DalamudApi.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var row)) return null;
 
             var placeName = row.Name.ToString();
             var sizeName = placeName.Substring(1, 3);
@@ -293,8 +292,8 @@ namespace MakePlacePlugin
 
         public unsafe HousingArea GetCurrentTerritory()
         {
-            var territoryRow = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(GetTerritoryTypeId());
-            if (territoryRow == null)
+
+            if (!DalamudApi.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(GetTerritoryTypeId(), out var territoryRow))
             {
                 LogError($"Invalid territory row: {GetTerritoryTypeId()}");
                 return HousingArea.None;

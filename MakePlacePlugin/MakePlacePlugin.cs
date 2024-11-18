@@ -1,29 +1,15 @@
-﻿using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.Game.Network;
-using Dalamud.IoC;
-using Dalamud.Logging;
+﻿using Dalamud.Game.Command;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using ImGuiScene;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using MakePlacePlugin.Objects;
 using MakePlacePlugin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
 using static MakePlacePlugin.Memory;
-using HousingFurniture = Lumina.Excel.GeneratedSheets.HousingFurniture;
+using HousingFurniture = Lumina.Excel.Sheets.HousingFurniture;
 
 namespace MakePlacePlugin
 {
@@ -92,7 +78,7 @@ namespace MakePlacePlugin
             Memory.Init();
             LayoutManager = new SaveLayoutManager(this, Config);
 
-            DalamudApi.PluginLog.Info("MakePlace Plugin v3.6.3 initialized");
+            DalamudApi.PluginLog.Info("MakePlace Plugin v3.7.0 initialized");
         }
         public void Initialize()
         {
@@ -505,9 +491,8 @@ namespace MakePlacePlugin
         {
             var mgr = Memory.Instance.HousingModule->outdoorTerritory;
             var territoryId = Memory.Instance.GetTerritoryTypeId();
-            var row = DalamudApi.DataManager.GetExcelSheet<TerritoryType>().GetRow(territoryId);
 
-            if (row == null)
+            if (!DalamudApi.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var row))
             {
                 LogError($"Cannot identify territory: {territoryId}");
                 return;
@@ -560,8 +545,7 @@ namespace MakePlacePlugin
                 var item = exteriorItems->GetInventorySlot(i);
                 if (item == null || item->ItemId == 0) continue;
 
-                var itemRow = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(item->ItemId);
-                if (itemRow == null) continue;
+                if (!DalamudApi.DataManager.GetExcelSheet<Item>().TryGetRow(item->ItemId, out var itemRow)) continue;
 
                 var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
 
@@ -645,10 +629,12 @@ namespace MakePlacePlugin
             {
                 uint furnitureKey = gameObject.housingRowId;
 
-                var furniture = DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().GetRow(furnitureKey);
-                Item item = furniture?.Item?.Value;
+                if (!DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().TryGetRow(furnitureKey, out var furniture)) continue;
 
-                if (item == null) continue;
+                if (!furniture.Item.IsValid) continue;
+
+                Item item = furniture.Item.Value;
+
                 if (item.RowId == 0) continue;
 
                 if (!IsSelectedFloor(gameObject.Y)) continue;
@@ -681,10 +667,12 @@ namespace MakePlacePlugin
             foreach (var gameObject in objects)
             {
                 uint furnitureKey = gameObject.housingRowId;
-                var furniture = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
-                Item item = furniture?.Item?.Value;
 
-                if (item == null) continue;
+                if (!DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().TryGetRow(furnitureKey, out var furniture)) continue;
+                if (!furniture.Item.IsValid) continue;
+
+                Item item = furniture.Item.Value;
+
                 if (item.RowId == 0) continue;
 
                 var housingItem = new HousingItem(item, gameObject);

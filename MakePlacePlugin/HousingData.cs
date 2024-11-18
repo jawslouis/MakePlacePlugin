@@ -2,7 +2,7 @@
 using System.Linq;
 using Dalamud.Data;
 using Dalamud.Logging;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace MakePlacePlugin
 {
@@ -12,7 +12,6 @@ namespace MakePlacePlugin
         private readonly Dictionary<uint, Item> _itemDict;
         private readonly Dictionary<uint, Stain> _stainDict;
 
-        private readonly Dictionary<uint, Dictionary<uint, CommonLandSet>> _territoryToLandSetDict;
         private readonly Dictionary<uint, uint> _unitedDict;
         private readonly Dictionary<uint, HousingYardObject> _yardObjectDict;
 
@@ -31,37 +30,29 @@ namespace MakePlacePlugin
             var sheet = DalamudApi.DataManager.GetExcelSheet<HousingLandSet>();
             uint[] terriKeys = { 339, 340, 341, 641 };
 
-            _territoryToLandSetDict = new Dictionary<uint, Dictionary<uint, CommonLandSet>>();
-
-            for (uint i = 0; i < sheet.RowCount && i < terriKeys.Length; i++)
-            {
-
-                var row = sheet.GetRow(i);
-                var rowDict = new Dictionary<uint, CommonLandSet>();
-                for (var j = 0; j < row.LandSets.Length; j++)
-                {
-                    var cset = CommonLandSet.FromExd(row.LandSets[j], j);
-                    rowDict[cset.PlacardId] = cset;
-                }
-
-                _territoryToLandSetDict[terriKeys[i]] = rowDict;
-            }
-
             var unitedExteriorSheet = DalamudApi.DataManager.GetExcelSheet<HousingUnitedExterior>();
             _unitedDict = new Dictionary<uint, uint>();
+
             foreach (var row in unitedExteriorSheet)
-                foreach (var item in row.Item)
-                    _unitedDict[item.Row] = row.RowId;
+            {
+                _unitedDict[row.Roof.RowId] = row.RowId;
+                _unitedDict[row.Walls.RowId] = row.RowId;
+                _unitedDict[row.Windows.RowId] = row.RowId;
+                _unitedDict[row.Door.RowId] = row.RowId;
+                _unitedDict[row.OptionalRoof.RowId] = row.RowId;
+                _unitedDict[row.OptionalWall.RowId] = row.RowId;
+                _unitedDict[row.OptionalSignboard.RowId] = row.RowId;
+                _unitedDict[row.Fence.RowId] = row.RowId;
+            }
 
             _itemDict = DalamudApi.DataManager.GetExcelSheet<Item>()
-                .Where(item => item.AdditionalData != 0 && (item.ItemSearchCategory.Row == 65 || item.ItemSearchCategory.Row == 66))
-                .ToDictionary(row => row.AdditionalData, row => row);
+                .Where(item => item.AdditionalData.RowId != 0 && (item.ItemSearchCategory.RowId == 65 || item.ItemSearchCategory.RowId == 66))
+                .ToDictionary(row => row.AdditionalData.RowId, row => row);
 
             _stainDict = DalamudApi.DataManager.GetExcelSheet<Stain>().ToDictionary(row => row.RowId, row => row);
             _furnitureDict = DalamudApi.DataManager.GetExcelSheet<HousingFurniture>().ToDictionary(row => row.RowId, row => row);
             _yardObjectDict = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().ToDictionary(row => row.RowId, row => row);
 
-            DalamudApi.PluginLog.Info($"Loaded {_territoryToLandSetDict.Keys.Count} landset rows");
             DalamudApi.PluginLog.Info($"Loaded {_furnitureDict.Keys.Count} furniture");
             DalamudApi.PluginLog.Info($"Loaded {_yardObjectDict.Keys.Count} yard objects");
             DalamudApi.PluginLog.Info($"Loaded {_unitedDict.Keys.Count} united parts");
@@ -82,12 +73,12 @@ namespace MakePlacePlugin
                 var id = row.RowId;
 
                 if (id < 1000) continue;
-                else if (id > 1000 && id < 2000) _painting.TryAdd(row.Unknown0, row.Item.Row);
-                else if (id > 2000 && id < 3000) _wallpaper.TryAdd(row.Unknown0, row.Item.Row);
-                else if (id > 3000 && id < 4000) _smallFishprint.TryAdd(row.Unknown0, row.Item.Row);
-                else if (id > 4000 && id < 5000) _mediumFishprint.TryAdd(row.Unknown0, row.Item.Row);
-                else if (id > 5000 && id < 6000) _largeFishprint.TryAdd(row.Unknown0, row.Item.Row);
-                else if (id > 6000 && id < 7000) _extraLargeFishprint.TryAdd(row.Unknown0, row.Item.Row);
+                else if (id > 1000 && id < 2000) _painting.TryAdd(row.Unknown0, row.RowId);
+                else if (id > 2000 && id < 3000) _wallpaper.TryAdd(row.Unknown0, row.RowId);
+                else if (id > 3000 && id < 4000) _smallFishprint.TryAdd(row.Unknown0, row.RowId);
+                else if (id > 4000 && id < 5000) _mediumFishprint.TryAdd(row.Unknown0, row.RowId);
+                else if (id > 5000 && id < 6000) _largeFishprint.TryAdd(row.Unknown0, row.RowId);
+                else if (id > 6000 && id < 7000) _extraLargeFishprint.TryAdd(row.Unknown0, row.RowId);
 
             }
         }
@@ -112,18 +103,15 @@ namespace MakePlacePlugin
 
         public bool IsUnitedExteriorPart(uint id, out Item item)
         {
-            item = null;
+            item = new Item();
+
             if (!_unitedDict.TryGetValue(id, out var unitedId))
                 return false;
 
             if (!_itemDict.TryGetValue(unitedId, out item))
                 return false;
-            return true;
-        }
 
-        public bool TryGetLandSetDict(uint id, out Dictionary<uint, CommonLandSet> dict)
-        {
-            return _territoryToLandSetDict.TryGetValue(id, out dict);
+            return true;
         }
 
         public bool TryGetItem(uint id, out Item item)

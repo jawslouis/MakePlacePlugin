@@ -4,7 +4,8 @@ using System.Runtime.InteropServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
+using static Lumina.Excel.Sheets.HousingLandSet;
 using static MakePlacePlugin.Utils;
 
 namespace MakePlacePlugin
@@ -47,51 +48,15 @@ namespace MakePlacePlugin
         Light
     }
 
-    // Just easier to move around and can have methods
-    public struct CommonLandSet
-    {
-        public uint LandRange;
-        public uint PlacardId;
-
-        public uint UnknownRange1;
-
-        public uint InitialPrice;
-        public byte Size;
-        public int PlotIndex;
-
-        public static CommonLandSet FromExd(HousingLandSet.LandSet lset, int index)
-        {
-            var ret = new CommonLandSet();
-            ret.LandRange = lset.LandRange;
-            ret.PlacardId = lset.PlacardId;
-            ret.UnknownRange1 = lset.UnknownRange1;
-            ret.InitialPrice = lset.InitialPrice;
-            ret.Size = lset.Size;
-            ret.PlotIndex = index;
-            return ret;
-        }
-
-        public string SizeString()
-        {
-            return Size switch
-            {
-                0 => "Small",
-                1 => "Medium",
-                2 => "Large",
-                _ => "Apartment"
-            };
-        }
-    }
-
     public struct CommonFixture
     {
         public bool IsExterior;
         public int FixtureType;
         public int FixtureKey;
-        public Stain Stain;
-        public Item Item;
+        public Stain? Stain;
+        public Item? Item;
 
-        public CommonFixture(bool isExterior, int fixtureType, int fixtureKey, Stain stain, Item item)
+        public CommonFixture(bool isExterior, int fixtureType, int fixtureKey, Stain? stain, Item item)
         {
             IsExterior = isExterior;
             FixtureType = fixtureType;
