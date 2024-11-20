@@ -490,6 +490,9 @@ namespace MakePlacePlugin
                     case "r1":
                         district.name = "Empyreum";
                         break;
+                    case "h1":
+                        district.name = "Minimalist";
+                        break;
                     default:
                         break;
                 }

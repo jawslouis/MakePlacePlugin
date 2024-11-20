@@ -110,9 +110,9 @@ namespace MakePlacePlugin
 
         public CommonFixture[] GetInteriorCommonFixtures(int floorId)
         {
-            if (GetCurrentTerritory() != HousingArea.Indoors) return new CommonFixture[0];
-            if (!GetActiveLayout(out var manager)) return new CommonFixture[0];
-            if (!manager.IndoorAreaData.HasValue) return new CommonFixture[0];
+            if (GetCurrentTerritory() != HousingArea.Indoors) return [];
+            if (!GetActiveLayout(out var manager)) return [];
+            if (!manager.IndoorAreaData.HasValue) return [];
             var floor = manager.IndoorAreaData.Value.GetFloor(floorId);
 
             var ret = new CommonFixture[IndoorFloorData.PartsMax];
