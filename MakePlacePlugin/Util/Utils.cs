@@ -1,11 +1,10 @@
-﻿using System;
+﻿using ImGuiNET;
+using Lumina.Excel.Sheets;
+using MakePlacePlugin.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Logging;
-using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
-using MakePlacePlugin.Objects;
 
 namespace MakePlacePlugin
 {

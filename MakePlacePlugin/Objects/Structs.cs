@@ -1,11 +1,7 @@
-﻿using System;
+﻿using Lumina.Excel.Sheets;
+using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using Lumina.Excel.GeneratedSheets;
-using static MakePlacePlugin.Utils;
 
 namespace MakePlacePlugin
 {
@@ -59,14 +55,14 @@ namespace MakePlacePlugin
         public byte Size;
         public int PlotIndex;
 
-        public static CommonLandSet FromExd(HousingLandSet.LandSet lset, int index)
+        public static CommonLandSet FromExd(HousingLandSet.LandSetStruct lset, int index)
         {
             var ret = new CommonLandSet();
-            ret.LandRange = lset.LandRange;
+            ret.LandRange = lset.UnknownRange2;
             ret.PlacardId = lset.PlacardId;
             ret.UnknownRange1 = lset.UnknownRange1;
             ret.InitialPrice = lset.InitialPrice;
-            ret.Size = lset.Size;
+            ret.Size = lset.PlotSize;
             ret.PlotIndex = index;
             return ret;
         }
@@ -88,10 +84,10 @@ namespace MakePlacePlugin
         public bool IsExterior;
         public int FixtureType;
         public int FixtureKey;
-        public Stain Stain;
-        public Item Item;
+        public Stain? Stain;
+        public Item? Item;
 
-        public CommonFixture(bool isExterior, int fixtureType, int fixtureKey, Stain stain, Item item)
+        public CommonFixture(bool isExterior, int fixtureType, int fixtureKey, Stain? stain, Item item)
         {
             IsExterior = isExterior;
             FixtureType = fixtureType;
