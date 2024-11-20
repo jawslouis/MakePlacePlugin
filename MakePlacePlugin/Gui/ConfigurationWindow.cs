@@ -2,7 +2,7 @@
 using Dalamud.Interface.Textures;
 using Dalamud.Utility;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using MakePlacePlugin.Objects;
 using System;
 using System.Collections.Generic;
@@ -359,7 +359,7 @@ namespace MakePlacePlugin.Gui
 
 
             var stain = DalamudApi.DataManager.GetExcelSheet<Stain>().GetRow(housingItem.Stain);
-            var colorName = stain?.Name;
+            var colorName = stain.Name;
 
             if (housingItem.Stain != 0)
             {
@@ -375,14 +375,14 @@ namespace MakePlacePlugin.Gui
             }
             else if (housingItem.MaterialItemKey != 0)
             {
-                var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(housingItem.MaterialItemKey);
-                if (item != null)
+                var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRowOrDefault(housingItem.MaterialItemKey);
+                if (item.HasValue)
                 {
                     if (!housingItem.DyeMatch) ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1));
 
-                    DrawIcon(item.Icon, new Vector2(20, 20));
+                    DrawIcon(item.Value.Icon, new Vector2(20, 20));
                     ImGui.SameLine();
-                    ImGui.Text(item.Name.ToString());
+                    ImGui.Text(item.Value.Name.ToString());
 
                     if (!housingItem.DyeMatch) ImGui.PopStyleColor();
                 }
@@ -444,10 +444,10 @@ namespace MakePlacePlugin.Gui
                     ImGui.Text(fixture.type); ImGui.NextColumn();
 
 
-                    var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(fixture.itemId);
-                    if (item != null)
+                    var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRowOrDefault(fixture.itemId);
+                    if (item.HasValue)
                     {
-                        DrawIcon(item.Icon, new Vector2(20, 20));
+                        DrawIcon(item.Value.Icon, new Vector2(20, 20));
                         ImGui.SameLine();
                     }
                     ImGui.Text(fixture.name); ImGui.NextColumn();
@@ -523,10 +523,10 @@ namespace MakePlacePlugin.Gui
                 var housingItem = itemList[i];
                 var displayName = housingItem.Name;
 
-                var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRow(housingItem.ItemKey);
+                var item = DalamudApi.DataManager.GetExcelSheet<Item>().GetRowOrDefault(housingItem.ItemKey);
                 if (item != null)
                 {
-                    DrawIcon(item.Icon, new Vector2(20, 20));
+                    DrawIcon(item.Value.Icon, new Vector2(20, 20));
                     ImGui.SameLine();
                 }
 
