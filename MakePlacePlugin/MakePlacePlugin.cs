@@ -95,7 +95,7 @@ namespace MakePlacePlugin
 
             GetObjectFromIndexHook = HookManager.Hook<GetActiveObjectDelegate>("81 fa 90 01 00 00 75 08 48 8b 81 88 0c 00 00 c3 0f b7 81 90 0c 00 00 3b d0 72 03 33 c0 c3", GetObjectFromIndex);
 
-            GetYardIndexHook = HookManager.Hook<GetIndexDelegate>("48 89 6c 24 18 56 48 83 ec 20 0f b6 ?? 0f b6 ?? ?? ?? ?? ?? ?? ?? ??", GetYardIndex);
+            GetYardIndexHook = HookManager.Hook<GetIndexDelegate>("48 89 5c 24 10 57 48 83 ec 20 0f b6 d9", GetYardIndex);
 
         }
 
@@ -580,7 +580,6 @@ namespace MakePlacePlugin
                         location = new Vector3(gameObj->X, gameObj->Y, gameObj->Z);
 
                         newLocation = Vector3.Transform(location - PlotLocation.ToVector(), rotateVector);
-
 
                         housingItem.X = newLocation.X;
                         housingItem.Y = newLocation.Y;

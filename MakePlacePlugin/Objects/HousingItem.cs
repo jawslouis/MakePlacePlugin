@@ -23,7 +23,8 @@ namespace MakePlacePlugin.Objects
         public HousingItem(Item item, byte stain, float x, float y, float z, float rotate)
         {
             ItemKey = item.RowId;
-            Name = item.Name.ToString();
+            Name = item.Name.ExtractText();
+
             IsTableOrWallMounted = item.ItemUICategory.Value.RowId == 78 || item.ItemUICategory.Value.RowId == 79;
 
             Stain = stain;

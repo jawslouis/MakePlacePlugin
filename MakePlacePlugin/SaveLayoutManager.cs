@@ -1,25 +1,21 @@
-﻿using Dalamud.Game.Gui;
-using Dalamud.Logging;
-using Lumina.Excel.Sheets;
-using MakePlacePlugin.Objects;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
-using System.Linq;
-using static MakePlacePlugin.MakePlacePlugin;
-using System.Drawing;
-using System.Globalization;
-using System.Text.Json.Serialization;
-using ImGuiNET;
+
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using System.Xml.Linq;
+using Lumina.Excel.Sheets;
 using Lumina.Extensions;
+using MakePlacePlugin.Objects;
+using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin
 {
@@ -220,7 +216,7 @@ namespace MakePlacePlugin
             var ItemSheet = DalamudApi.DataManager.GetExcelSheet<Item>();
             var itemRow = ItemSheet.FirstOrNull(row => row.Name.ToString().Equals(furniture.name));
 
-            if (itemRow == null) itemRow = ItemSheet.FirstOrDefault(row => row.RowId == furniture.itemId);
+            if (itemRow == null) itemRow = ItemSheet.FirstOrNull(row => row.RowId == furniture.itemId);
 
             if (itemRow == null) return null;
 
@@ -410,6 +406,7 @@ namespace MakePlacePlugin
                 var fixture = new Fixture("Facility");
                 fixture.level = "Facility " + ToRoman(workshop.PlaceId[i]);
                 fixture.name = BuildingSheet.GetSubrowOrDefault(1, workshop.BuildingLevel[i])?.Name.Value.Text.ToString();
+
                 exterior.Add(fixture);
             }
 
@@ -420,6 +417,7 @@ namespace MakePlacePlugin
                 var fixture = new Fixture("Facility");
                 fixture.level = "Facility " + ToRoman(granary.PlaceId[i]);
                 fixture.name = BuildingSheet.GetSubrowOrDefault(2, granary.BuildingLevel[i])?.Name.Value.Text.ToString();
+
                 exterior.Add(fixture);
             }
 
@@ -449,12 +447,13 @@ namespace MakePlacePlugin
                 for (var j = 0; j < IndoorFloorData.PartsMax; j++)
                 {
                     if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
-                    if (fixtures[j].Item == null) continue;
+                    if (!fixtures[j].Item.HasValue) continue;
 
                     var fixture = new Fixture();
                     fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
                     fixture.level = Utils.GetFloorDescriptor((InteriorFloor)i);
-                    fixture.name = fixtures[j].Item.Value.Name.ToString();
+                    fixture.name = fixtures[j].Item.Value.Name.ExtractText();
+
                     fixture.itemId = fixtures[j].Item.Value.RowId;
 
                     layout.interiorFixture.Add(fixture);
@@ -527,13 +526,11 @@ namespace MakePlacePlugin
                 }
                 else if (gameObject.MaterialItemKey != 0)
                 {
-
                     if (DalamudApi.DataManager.GetExcelSheet<Item>().TryGetRow(gameObject.MaterialItemKey, out var item))
                     {
                         var basicItem = new BasicItem();
                         basicItem.name = item.Name.ToString();
                         basicItem.itemId = gameObject.MaterialItemKey;
-
                         furniture.properties.Add("material", basicItem);
                     }
 

@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Lumina.Excel.Sheets;
+using System.Collections.Generic;
 using System.Linq;
-using Dalamud.Data;
-using Dalamud.Logging;
-using Lumina.Excel.Sheets;
+
 
 namespace MakePlacePlugin
 {
@@ -31,19 +30,12 @@ namespace MakePlacePlugin
             uint[] terriKeys = { 339, 340, 341, 641 };
 
             var unitedExteriorSheet = DalamudApi.DataManager.GetExcelSheet<HousingUnitedExterior>();
-            _unitedDict = new Dictionary<uint, uint>();
 
+            _unitedDict = new Dictionary<uint, uint>();
             foreach (var row in unitedExteriorSheet)
-            {
-                _unitedDict[row.Roof.RowId] = row.RowId;
-                _unitedDict[row.Walls.RowId] = row.RowId;
-                _unitedDict[row.Windows.RowId] = row.RowId;
-                _unitedDict[row.Door.RowId] = row.RowId;
-                _unitedDict[row.OptionalRoof.RowId] = row.RowId;
-                _unitedDict[row.OptionalWall.RowId] = row.RowId;
-                _unitedDict[row.OptionalSignboard.RowId] = row.RowId;
-                _unitedDict[row.Fence.RowId] = row.RowId;
-            }
+                foreach (var type in unitedExteriorSheet.Columns)
+                    _unitedDict[type.Offset] = row.RowId;
+
 
             _itemDict = DalamudApi.DataManager.GetExcelSheet<Item>()
                 .Where(item => item.AdditionalData.RowId != 0 && (item.ItemSearchCategory.RowId == 65 || item.ItemSearchCategory.RowId == 66))

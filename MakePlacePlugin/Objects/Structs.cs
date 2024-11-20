@@ -1,12 +1,7 @@
-﻿using System;
+﻿using Lumina.Excel.Sheets;
+using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using Lumina.Excel.Sheets;
-using static Lumina.Excel.Sheets.HousingLandSet;
-using static MakePlacePlugin.Utils;
 
 namespace MakePlacePlugin
 {

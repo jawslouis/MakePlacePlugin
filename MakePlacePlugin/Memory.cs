@@ -1,10 +1,11 @@
-﻿using System;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.MJI;
+using Lumina.Excel.Sheets;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.MJI;
-using Lumina.Excel.Sheets;
+
 using static MakePlacePlugin.MakePlacePlugin;
 
 namespace MakePlacePlugin
@@ -16,7 +17,6 @@ namespace MakePlacePlugin
         public IntPtr wallAnywhere;
         public IntPtr wallmountAnywhere;
 
-        public static GetInventoryContainerDelegate GetInventoryContainer;
         public delegate InventoryContainer* GetInventoryContainerDelegate(IntPtr inventoryManager, InventoryType inventoryType);
 
         private Memory()
@@ -29,9 +29,6 @@ namespace MakePlacePlugin
 
                 HousingModulePtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
                 LayoutWorldPtr = DalamudApi.SigScanner.GetStaticAddressFromSig("48 8B D1 48 8B 0D ?? ?? ?? ?? 48 85 C9 74 0A", 3);
-
-                var getInventoryContainerPtr = DalamudApi.SigScanner.ScanText("E8 ?? ?? ?? ?? 40 38 78 10");
-                GetInventoryContainer = Marshal.GetDelegateForFunctionPointer<GetInventoryContainerDelegate>(getInventoryContainerPtr);
 
             }
             catch (Exception e)
@@ -165,46 +162,17 @@ namespace MakePlacePlugin
 
         public unsafe List<HousingGameObject> GetExteriorPlacedObjects()
         {
+            var objects = new List<HousingGameObject>();
 
-            var mgr = Memory.Instance.HousingModule->outdoorTerritory;
-
-            var outdoorMgrAddr = (IntPtr)mgr;
-            var objectListAddr = outdoorMgrAddr + 0x10;
-            var activeObjList = objectListAddr + 0x8968;
-
-
-            var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
-
-            if (exteriorItems == null) throw new Exception("Unable to get inventory for exterior");
-
-            var placedObjects = new List<HousingGameObject>();
-
-            for (int i = 0; i < exteriorItems->Size; i++)
+            for (var i = 0; i < 400; i++)
             {
-                var item = exteriorItems->GetInventorySlot(i);
-                if (item == null || item->ItemId == 0) continue;
 
-                var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
-                var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
+                var oPtr = HousingModule->GetCurrentManager()->Objects[i];
+                if (oPtr == 0) continue;
 
-                if (itemInfo == null) continue;
-
-                var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, itemInfo->ObjectIndex);
-
-                if (gameObj == null)
-                {
-                    gameObj = (HousingGameObject*)GetGameObject(objectListAddr, itemInfoIndex);
-                }
-
-                if (gameObj != null)
-                {
-                    placedObjects.Add(*gameObj);
-                }
+                objects.Add(*(HousingGameObject*)oPtr);
             }
-
-
-
-            return placedObjects;
+            return objects;
         }
 
         public unsafe bool TryGetIslandGameObjectList(out List<HousingGameObject> objects)
@@ -292,7 +260,6 @@ namespace MakePlacePlugin
 
         public unsafe HousingArea GetCurrentTerritory()
         {
-
             if (!DalamudApi.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(GetTerritoryTypeId(), out var territoryRow))
             {
                 LogError($"Invalid territory row: {GetTerritoryTypeId()}");

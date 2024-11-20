@@ -356,8 +356,6 @@ namespace MakePlacePlugin.Gui
             ImGui.Text($"{housingItem.Rotate:N3}"); ImGui.NextColumn();
             if (!housingItem.CorrectRotation) ImGui.PopStyleColor();
 
-
-
             var stain = DalamudApi.DataManager.GetExcelSheet<Stain>().GetRowOrDefault(housingItem.Stain);
             var colorName = stain?.Name;
 
