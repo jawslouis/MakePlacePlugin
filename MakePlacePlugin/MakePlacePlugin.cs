@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using static MakePlacePlugin.Memory;
 using HousingFurniture = Lumina.Excel.Sheets.HousingFurniture;
 
@@ -402,6 +403,7 @@ namespace MakePlacePlugin
                         localPosition = Vector3.Transform(localPosition - PlotLocation.ToVector(), rotateVector);
                         localRotation += PlotLocation.rotation;
                     }
+
                     var furniture = DalamudApi.DataManager.GetExcelSheet<HousingYardObject>().GetRow(furnitureKey);
                     var itemKey = furniture.Item.Value.RowId;
                     houseItem = Utils.GetNearestHousingItem(
@@ -513,9 +515,8 @@ namespace MakePlacePlugin
 
             var mgr = Memory.Instance.HousingModule->outdoorTerritory;
 
-            var outdoorMgrAddr = (IntPtr)mgr;
-            var objectListAddr = outdoorMgrAddr + 0x10;
-            var activeObjList = objectListAddr + 0x8968;
+            var objectListAddr = (IntPtr)(&mgr->ObjectList);
+            var activeObjList = (IntPtr)(mgr->Objects) - 0x08;
 
             var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
 
