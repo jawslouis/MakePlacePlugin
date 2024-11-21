@@ -65,12 +65,12 @@ namespace MakePlacePlugin
                 var id = row.RowId;
 
                 if (id < 1000) continue;
-                else if (id > 1000 && id < 2000) _painting.TryAdd(row.Unknown0, row.RowId);
-                else if (id > 2000 && id < 3000) _wallpaper.TryAdd(row.Unknown0, row.RowId);
-                else if (id > 3000 && id < 4000) _smallFishprint.TryAdd(row.Unknown0, row.RowId);
-                else if (id > 4000 && id < 5000) _mediumFishprint.TryAdd(row.Unknown0, row.RowId);
-                else if (id > 5000 && id < 6000) _largeFishprint.TryAdd(row.Unknown0, row.RowId);
-                else if (id > 6000 && id < 7000) _extraLargeFishprint.TryAdd(row.Unknown0, row.RowId);
+                else if (id > 1000 && id < 2000) _painting.TryAdd(row.Unknown0, row.Item.RowId);
+                else if (id > 2000 && id < 3000) _wallpaper.TryAdd(row.Unknown0, row.Item.RowId);
+                else if (id > 3000 && id < 4000) _smallFishprint.TryAdd(row.Unknown0, row.Item.RowId);
+                else if (id > 4000 && id < 5000) _mediumFishprint.TryAdd(row.Unknown0, row.Item.RowId);
+                else if (id > 5000 && id < 6000) _largeFishprint.TryAdd(row.Unknown0, row.Item.RowId);
+                else if (id > 6000 && id < 7000) _extraLargeFishprint.TryAdd(row.Unknown0, row.Item.RowId);
 
             }
         }
