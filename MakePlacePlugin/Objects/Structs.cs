@@ -94,18 +94,6 @@ namespace MakePlacePlugin
     }
 
 
-    [StructLayout(LayoutKind.Explicit, Size = 0x30)]
-    public unsafe struct HousingItemInfo
-    {
-        [FieldOffset(0x0)] public ushort modelId;
-        [FieldOffset(0x10)] public float X;
-        [FieldOffset(0x14)] public float Y;
-        [FieldOffset(0x18)] public float Z;
-        [FieldOffset(0x20)] public float Rotation;
-        [FieldOffset(0x24)] public uint ObjectIndex;
-    }
-
-
     [StructLayout(LayoutKind.Explicit)]
     public unsafe struct HousingStructure
     {
@@ -151,11 +139,11 @@ namespace MakePlacePlugin
         [FieldOffset(0x9AC0)] public HousingGameObject* OutdoorHoverObject;
         [FieldOffset(0x9AC8)] public HousingGameObject* OutdoorActiveObject;
 
-        public static HousingItemInfo* GetItemInfo(HousingObjectManager* mgr, int index)
+        public static FFXIVClientStructs.FFXIV.Client.Game.HousingFurniture* GetItemInfo(HousingObjectManager* mgr, int index)
         {
             var objectListAddr = (IntPtr)mgr + 0x10;
 
-            return (HousingItemInfo*)(objectListAddr + (0x30 * index));
+            return (FFXIVClientStructs.FFXIV.Client.Game.HousingFurniture*)(objectListAddr + (0x30 * index));
         }
     }
 

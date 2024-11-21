@@ -555,7 +555,7 @@ namespace MakePlacePlugin
                     continue;
                 }
 
-                var location = new Vector3(itemInfo->X, itemInfo->Y, itemInfo->Z);
+                var location = new Vector3(itemInfo->Position.X, itemInfo->Position.Y, itemInfo->Position.Z);
 
                 var newLocation = Vector3.Transform(location - PlotLocation.ToVector(), rotateVector);
 
@@ -568,7 +568,7 @@ namespace MakePlacePlugin
                     itemInfo->Rotation + PlotLocation.rotation
                 );
 
-                var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, itemInfo->ObjectIndex);
+                var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, (uint)itemInfo->Index);
 
                 if (gameObj == null)
                 {
