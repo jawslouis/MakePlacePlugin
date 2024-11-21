@@ -449,12 +449,15 @@ namespace MakePlacePlugin
                     if (fixtures[j].FixtureKey == -1 || fixtures[j].FixtureKey == 0) continue;
                     if (!fixtures[j].Item.HasValue) continue;
 
+                    var item = fixtures[j].Item.Value;
+                    if (item.RowId == 0) continue;
+
                     var fixture = new Fixture();
                     fixture.type = Utils.GetInteriorPartDescriptor((InteriorPartsType)j);
                     fixture.level = Utils.GetFloorDescriptor((InteriorFloor)i);
-                    fixture.name = fixtures[j].Item.Value.Name.ExtractText();
 
-                    fixture.itemId = fixtures[j].Item.Value.RowId;
+                    fixture.name = item.Name.ExtractText();
+                    fixture.itemId = item.RowId;
 
                     layout.interiorFixture.Add(fixture);
                 }
